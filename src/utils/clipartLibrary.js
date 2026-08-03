@@ -120,6 +120,12 @@ export const clipartCategories = [
     items: [
       e('1f383', 'Jack-o-lantern'),
       e('1f47b', 'Ghost'),
+      e('1f987', 'Bat'),
+      e('1f577', 'Spider'),
+      e('1f578', 'Spider Web'),
+      e('1f480', 'Skull'),
+      e('1f9d9', 'Witch'),
+      e('1f9df', 'Zombie'),
     ]
   },
   {
