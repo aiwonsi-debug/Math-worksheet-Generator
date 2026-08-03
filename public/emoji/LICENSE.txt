@@ -1,0 +1,11 @@
+Noto Emoji (Google)
+License: SIL Open Font License 1.1 (OFL-1.1)
+Source: https://github.com/googlefonts/noto-emoji
+
+✅ Commercial use allowed
+✅ No attribution required
+✅ Modifications allowed
+
+The emoji SVG files in this directory are from Google's Noto Emoji project,
+licensed under the SIL Open Font License, Version 1.1.
+Full license text: https://scripts.sil.org/OFL

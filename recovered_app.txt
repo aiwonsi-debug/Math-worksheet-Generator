@@ -1,0 +1,23 @@
+Created At: 2026-07-16T16:13:33Z
+Completed At: 2026-07-16T16:13:33Z
+The following changes were made by the replace_file_content tool to: d:\Math Worksheet\src\App.jsx. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -65,6 +65,15 @@
+ import IconBolt from '@tabler/icons-react/dist/esm/icons/IconBolt.mjs';
+ import IconCloud from '@tabler/icons-react/dist/esm/icons/IconCloud.mjs';
+ import IconRainbow from '@tabler/icons-react/dist/esm/icons/IconRainbow.mjs';
++
++const curatedTablerIcons = {
++  IconApple, IconBook, IconPencil, IconCar, IconTree, IconHome, IconMusic, IconSun, IconMoon, IconStar, IconHeart, IconFish, IconDog, IconCat, IconBug, IconBus, IconTrain, IconPlane, IconRocket, IconRobot, IconCrown, IconGhost, IconAlien, IconFlame, IconDroplet, IconLeaf, IconSnowflake, IconBolt, IconCloud, IconRainbow
++};
++
++import { jsPDF } from 'jspdf';
++import { generateWorksheet } from './utils/generatorEngine';
++import { clipartCategories } from './utils/clipartLibrary';
++import CanvasEditor from './components/CanvasEditor';
+ import './index.css';
+ 
+ function App() {
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.
