@@ -116,6 +116,13 @@ export const clipartCategories = [
     ]
   },
   {
+    name: '🎃 Halloween',
+    items: [
+      e('1f383', 'Jack-o-lantern'),
+      e('1f47b', 'Ghost'),
+    ]
+  },
+  {
     name: '➕ Math Symbols',
     items: [
       e('2795', 'Plus'),
