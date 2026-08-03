@@ -214,6 +214,42 @@ export const clipartCategories = [
       e('1f389', 'Party Popper'),
     ]
   },
+  {
+    name: '⚽ Sports',
+    items: [
+      e('26bd', 'Soccer Ball'),
+      e('26be', 'Baseball'),
+      e('1f3c8', 'Football'),
+      e('1f3c5', 'Medal'),
+    ]
+  },
+  {
+    name: '🚗 Vehicles',
+    items: [
+      e('1f697', 'Car'),
+      e('2708', 'Airplane'),
+      e('1f686', 'Train'),
+      e('1f6b2', 'Bicycle'),
+    ]
+  },
+  {
+    name: '☁️ Weather',
+    items: [
+      e('2601', 'Cloud'),
+      e('1f327', 'Rain Cloud'),
+      e('2602', 'Umbrella'),
+      e('1f32a', 'Tornado'),
+    ]
+  },
+  {
+    name: '🎓 Careers',
+    items: [
+      e('1fa7a', 'Stethoscope'),
+      e('1f692', 'Fire Engine'),
+      e('1f693', 'Police Car'),
+      e('1f393', 'Graduation Cap'),
+    ]
+  },
 ];
 
 export default clipartCategories;
