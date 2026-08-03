@@ -106,6 +106,7 @@ function App() {
   
   const [isCoverModalOpen, setIsCoverModalOpen] = useState(false);
   const [coverPageImages, setCoverPageImages] = useState([]);
+  const [coverDataUrl, setCoverDataUrl] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
   const [showElements, setShowElements] = useState(false);
   const [clipartSearch, setClipartSearch] = useState("");

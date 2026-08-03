@@ -9,7 +9,7 @@ const DEFAULT_ELEMENTS = {
   thumbnails: { x: 80, y: 380 },
   skillsPanel: { x: 830, y: 370 },
   badge: { x: 62, y: 1010 },
-  logo: { x: 1040, y: 160 },
+  logo: { x: 1040, y: 260 },
 };
 
 export default function CoverGeneratorModal({ isOpen, onClose, pageImages: capturedImages, onApplyCover }) {
@@ -23,6 +23,15 @@ export default function CoverGeneratorModal({ isOpen, onClose, pageImages: captu
   const [themeColor, setThemeColor] = useState('#1e3a8a');
   const [accentColor, setAccentColor] = useState('#fde047');
   const [selectedThemeId, setSelectedThemeId] = useState('');
+  const [showDecorations, setShowDecorations] = useState(true);
+
+  const [titleFontSize, setTitleFontSize] = useState(88);
+  const [titleColor, setTitleColor] = useState('#ffffff');
+  const [titleFontFamily, setTitleFontFamily] = useState('Arial Black');
+
+  const [subtitleFontSize, setSubtitleFontSize] = useState(50);
+  const [subtitleColor, setSubtitleColor] = useState('#fde047');
+  const [subtitleFontFamily, setSubtitleFontFamily] = useState('Arial Black');
 
   // เลือกธีมจาก dropdown แล้วเซ็ตสีให้ทันที ยังปรับสีเองภายหลังได้ตามปกติ
   const handleThemeSelect = (themeId) => {
@@ -31,6 +40,8 @@ export default function CoverGeneratorModal({ isOpen, onClose, pageImages: captu
     if (theme) {
       setThemeColor(theme.themeColor);
       setAccentColor(theme.accentColor);
+      setSubtitleColor(theme.accentColor);
+      setTitleColor(getContrastColor(theme.themeColor));
     }
   };
   const [logoSrc, setLogoSrc] = useState('/logo.png');
@@ -44,7 +55,7 @@ export default function CoverGeneratorModal({ isOpen, onClose, pageImages: captu
   const elementsRef = useRef(elements);
 
   // Keep refs in sync
-  configRef.current = { title, subtitle, badgeText, badge1, badge2, gradeLevel, skills, themeColor, accentColor, logoSrc };
+  configRef.current = { title, subtitle, badgeText, badge1, badge2, gradeLevel, skills, themeColor, accentColor, logoSrc, titleFontSize, titleColor, titleFontFamily, subtitleFontSize, subtitleColor, subtitleFontFamily, selectedThemeId, showDecorations };
   elementsRef.current = elements;
 
   // Sync captured images → worksheet srcs on open
@@ -96,41 +107,74 @@ export default function CoverGeneratorModal({ isOpen, onClose, pageImages: captu
     ctx.moveTo(0, 340); ctx.lineTo(SIZE, 340); ctx.lineTo(SIZE, 385); ctx.lineTo(0, 400);
     ctx.closePath(); ctx.fill();
 
+    // ── Theme Decorations (subtle watermark grid)
+    if (cfg.showDecorations && cfg.selectedThemeId) {
+      const theme = getThemeById(cfg.selectedThemeId);
+      if (theme && theme.counters && theme.counters.length > 0) {
+        ctx.save();
+        ctx.globalAlpha = 0.08; // Very subtle watermark
+        const spacing = 160;
+        let count = 0;
+        for (let y = 0; y < SIZE + spacing; y += spacing) {
+          for (let x = 0; x < SIZE + spacing; x += spacing) {
+            const counter = theme.counters[count % theme.counters.length];
+            if (counter.code) {
+              let emoji = '';
+              try { emoji = String.fromCodePoint(parseInt(counter.code, 16)); } catch(e){}
+              ctx.save();
+              // Staggered grid for a better pattern
+              const offsetX = (y / spacing) % 2 === 0 ? 0 : spacing / 2;
+              ctx.translate(x + offsetX, y);
+              ctx.rotate((-20 * Math.PI) / 180);
+              ctx.font = `65px Arial`;
+              ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+              ctx.fillText(emoji, 0, 0);
+              ctx.restore();
+              count++;
+            }
+          }
+        }
+        ctx.restore();
+      }
+    }
+
     // ── Title (left-aligned to leave room for logo)
     ctx.shadowColor = 'rgba(0,0,0,0.4)'; ctx.shadowBlur = 12;
     ctx.shadowOffsetX = 3; ctx.shadowOffsetY = 3;
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 88px "Arial Black", Arial, sans-serif';
+    ctx.fillStyle = cfg.titleColor;
+    ctx.font = `bold ${cfg.titleFontSize}px "${cfg.titleFontFamily}", sans-serif`;
     ctx.textAlign = 'left';
     ctx.fillText(cfg.title.toUpperCase(), 50, 118);
     ctx.shadowColor = 'transparent';
 
     // ── Subtitle
-    ctx.fillStyle = cfg.accentColor;
-    ctx.font = 'bold 50px "Arial Black", Arial, sans-serif';
+    ctx.fillStyle = cfg.subtitleColor;
+    ctx.font = `bold ${cfg.subtitleFontSize}px "${cfg.subtitleFontFamily}", sans-serif`;
     ctx.fillText(cfg.subtitle.toUpperCase(), 50, 198);
 
     // ── Change 5: "30+ PAGES" and "NO PREP" badges in banner
-    const badges = [{ label: cfg.badge1, filled: true }, { label: cfg.badge2, filled: false }].filter(b => b.label);
+    const badges = [{ label: cfg.badge1, primary: true }, { label: cfg.badge2, primary: false }].filter(b => b.label);
     let bxCursor = 50;
-    badges.forEach(({ label, filled }) => {
+    badges.forEach(({ label, primary }) => {
       ctx.font = 'bold 26px Arial';
       const bw = ctx.measureText(label).width + 40;
       const bh = 52;
       const by = 252;
       ctx.save();
       ctx.shadowColor = 'rgba(0,0,0,0.2)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 3;
-      if (filled) {
+      if (primary) {
         ctx.fillStyle = cfg.accentColor;
         rrect(ctx, bxCursor, by, bw, bh, 26); ctx.fill();
         ctx.shadowColor = 'transparent';
-        ctx.fillStyle = '#1a2a1a'; ctx.textAlign = 'center';
+        ctx.fillStyle = getContrastColor(cfg.accentColor); ctx.textAlign = 'center';
         ctx.fillText(label, bxCursor + bw / 2, by + 36);
       } else {
-        ctx.strokeStyle = 'rgba(255,255,255,0.8)'; ctx.lineWidth = 3;
-        rrect(ctx, bxCursor, by, bw, bh, 26); ctx.stroke();
+        const contrastTheme = getContrastColor(cfg.themeColor);
+        ctx.fillStyle = contrastTheme === '#ffffff' ? '#ffffff' : '#111827';
+        rrect(ctx, bxCursor, by, bw, bh, 26); ctx.fill();
         ctx.shadowColor = 'transparent';
-        ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
+        ctx.fillStyle = contrastTheme === '#ffffff' ? '#111827' : '#ffffff'; 
+        ctx.textAlign = 'center';
         ctx.fillText(label, bxCursor + bw / 2, by + 36);
       }
       ctx.restore();
@@ -198,7 +242,7 @@ export default function CoverGeneratorModal({ isOpen, onClose, pageImages: captu
     ctx.shadowColor = 'transparent'; ctx.restore();
     ctx.fillStyle = cfg.themeColor;
     ctx.save(); ctx.beginPath(); rrectTop(ctx, pX, pY, pW, 92, 18); ctx.fill(); ctx.restore();
-    ctx.fillStyle = '#fff'; ctx.font = 'bold 44px "Arial Black", Arial, sans-serif'; ctx.textAlign = 'center';
+    ctx.fillStyle = getContrastColor(cfg.themeColor); ctx.font = 'bold 44px "Arial Black", Arial, sans-serif'; ctx.textAlign = 'center';
     ctx.fillText(cfg.gradeLevel, pX + pW / 2, pY + 64);
     ctx.fillStyle = cfg.themeColor; ctx.font = 'bold 22px Arial'; ctx.textAlign = 'left';
     ctx.fillText('SKILLS INCLUDED:', pX + 22, pY + 130);
@@ -249,7 +293,7 @@ export default function CoverGeneratorModal({ isOpen, onClose, pageImages: captu
   useEffect(() => {
     if (!isOpen) return;
     drawCover();
-  }, [isOpen, drawCover, elements, title, subtitle, badgeText, badge1, badge2, gradeLevel, skills, themeColor, accentColor, logoSrc]);
+  }, [isOpen, drawCover, elements, title, subtitle, badgeText, badge1, badge2, gradeLevel, skills, themeColor, accentColor, logoSrc, titleFontSize, titleColor, titleFontFamily, subtitleFontSize, subtitleColor, subtitleFontFamily, selectedThemeId, showDecorations]);
 
   // ── Hit testing: which element did user click?
   const hitTest = (canvasX, canvasY, els) => {
@@ -373,7 +417,39 @@ export default function CoverGeneratorModal({ isOpen, onClose, pageImages: captu
             <button onClick={resetLayout} style={{ fontSize: '11px', padding: '4px 8px', border: '1px solid #cbd5e1', borderRadius: '6px', backgroundColor: '#f8fafc', cursor: 'pointer', color: '#64748b' }}>↺ Reset Layout</button>
           </div>
 
-          {[['Title', title, setTitle], ['Subtitle', subtitle, setSubtitle], ['Badge Text', badgeText, setBadgeText], ['Grade Level', gradeLevel, setGradeLevel]].map(([lbl, val, set]) => (
+          {/* Title with controls */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <label style={labelStyle}>Title</label>
+            <input type="text" style={inputStyle} value={title} onChange={e => setTitle(e.target.value)} />
+            <div style={{ display: 'flex', gap: '4px' }}>
+              <select style={{...inputStyle, flex: 1, padding: '4px 8px'}} value={titleFontFamily} onChange={e => setTitleFontFamily(e.target.value)} title="Font">
+                <option value="Arial Black">Arial Black</option>
+                <option value="Comic Sans MS">Comic</option>
+                <option value="Impact">Impact</option>
+                <option value="Verdana">Verdana</option>
+              </select>
+              <input type="number" style={{...inputStyle, width: '56px', padding: '4px'}} value={titleFontSize} onChange={e => setTitleFontSize(Number(e.target.value))} title="Size" />
+              <input type="color" style={{...inputStyle, padding: '1px', width: '36px', height: '28px', cursor: 'pointer'}} value={titleColor} onChange={e => setTitleColor(e.target.value)} title="Color" />
+            </div>
+          </div>
+
+          {/* Subtitle with controls */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <label style={labelStyle}>Subtitle</label>
+            <input type="text" style={inputStyle} value={subtitle} onChange={e => setSubtitle(e.target.value)} />
+            <div style={{ display: 'flex', gap: '4px' }}>
+              <select style={{...inputStyle, flex: 1, padding: '4px 8px'}} value={subtitleFontFamily} onChange={e => setSubtitleFontFamily(e.target.value)} title="Font">
+                <option value="Arial Black">Arial Black</option>
+                <option value="Comic Sans MS">Comic</option>
+                <option value="Impact">Impact</option>
+                <option value="Verdana">Verdana</option>
+              </select>
+              <input type="number" style={{...inputStyle, width: '56px', padding: '4px'}} value={subtitleFontSize} onChange={e => setSubtitleFontSize(Number(e.target.value))} title="Size" />
+              <input type="color" style={{...inputStyle, padding: '1px', width: '36px', height: '28px', cursor: 'pointer'}} value={subtitleColor} onChange={e => setSubtitleColor(e.target.value)} title="Color" />
+            </div>
+          </div>
+
+          {[['Badge Text', badgeText, setBadgeText], ['Grade Level', gradeLevel, setGradeLevel]].map(([lbl, val, set]) => (
             <div key={lbl}>
               <label style={labelStyle}>{lbl}</label>
               <input type="text" style={inputStyle} value={val} onChange={e => set(e.target.value)} />
@@ -396,16 +472,22 @@ export default function CoverGeneratorModal({ isOpen, onClose, pageImages: captu
 
           <div>
             <label style={labelStyle}>Seasonal Theme</label>
-            <select
-              style={{ ...inputStyle, cursor: 'pointer' }}
-              value={selectedThemeId}
-              onChange={e => handleThemeSelect(e.target.value)}
-            >
-              <option value="">— เลือกธีม (กำหนดสีเอง) —</option>
-              {themes.map(t => (
-                <option key={t.id} value={t.id}>{t.displayName}</option>
-              ))}
-            </select>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <select
+                style={{ ...inputStyle, cursor: 'pointer', flex: 1 }}
+                value={selectedThemeId}
+                onChange={e => handleThemeSelect(e.target.value)}
+              >
+                <option value="">— เลือกธีม (กำหนดสีเอง) —</option>
+                {themes.map(t => (
+                  <option key={t.id} value={t.id}>{t.displayName}</option>
+                ))}
+              </select>
+              <label style={{ fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }} title="Show theme emojis on cover">
+                <input type="checkbox" checked={showDecorations} onChange={e => setShowDecorations(e.target.checked)} />
+                Emojis
+              </label>
+            </div>
           </div>
 
           <div style={{ display: 'flex', gap: '8px' }}>
@@ -491,6 +573,17 @@ function rrectTop(ctx, x, y, w, h, r) {
   ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
   ctx.lineTo(x + w, y + h); ctx.lineTo(x, y + h); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y);
   ctx.closePath();
+}
+
+function getContrastColor(hex) {
+  if (!hex) return '#ffffff';
+  let color = hex.replace('#', '');
+  if (color.length === 3) color = color.split('').map(c => c + c).join('');
+  const r = parseInt(color.substr(0, 2), 16);
+  const g = parseInt(color.substr(2, 2), 16);
+  const b = parseInt(color.substr(4, 2), 16);
+  const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+  return (yiq >= 128) ? '#0f172a' : '#ffffff';
 }
 
 function shadeColor(hex, amount) {
