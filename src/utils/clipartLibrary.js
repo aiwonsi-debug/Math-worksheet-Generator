@@ -165,6 +165,55 @@ export const clipartCategories = [
       e('1f9d1', 'Person'),
     ]
   },
+  {
+    name: '🦃 Thanksgiving',
+    items: [
+      e('1f983', 'Turkey'),
+      e('1f33d', 'Corn'),
+      e('1f967', 'Pie'),
+      e('1f342', 'Fallen Leaf'),
+    ]
+  },
+  {
+    name: '❄️ Winter',
+    items: [
+      e('2603', 'Snowman'),
+      e('2744', 'Snowflake'),
+      e('1f384', 'Christmas Tree'),
+      e('1f385', 'Santa'),
+    ]
+  },
+  {
+    name: '💕 Valentine',
+    items: [
+      e('1f495', 'Two Hearts'),
+      e('1f48d', 'Ring'),
+      e('1f339', 'Rose'),
+    ]
+  },
+  {
+    name: '☘️ St. Patrick\'s',
+    items: [
+      e('2618', 'Shamrock'),
+    ]
+  },
+  {
+    name: '🐣 Easter',
+    items: [
+      e('1f425', 'Baby Chick'),
+      e('1f95a', 'Egg'),
+      e('1f337', 'Tulip'),
+    ]
+  },
+  {
+    name: '🚀 Summer / 100th Day',
+    items: [
+      e('1f680', 'Rocket'),
+      e('2600', 'Sun'),
+      e('1f4af', '100'),
+      e('1f389', 'Party Popper'),
+    ]
+  },
 ];
 
 export default clipartCategories;
