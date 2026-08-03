@@ -304,6 +304,155 @@ function App() {
     setSelectedIds([]);
   };
 
+  const handleBatchGenerate = () => {
+    const config = { topic, operator, min: minVal, max: maxVal, allowCarryBorrow, orientation, missingPart, sequenceLength };
+    
+    let cols = 2; let itemsPerPage = 10; let startX = 60; let spacingX = 360; let spacingY = 120; let startY = 250;
+    if (topic === 'basic_math') {
+      cols = orientation === 'horizontal' ? 2 : 3;
+      itemsPerPage = orientation === 'horizontal' ? 10 : 15;
+      startX = orientation === 'horizontal' ? 60 : 80;
+      spacingX = orientation === 'horizontal' ? 360 : 240;
+    } else if (topic === 'missing_number') {
+      cols = 1; itemsPerPage = 7; startX = 70; spacingY = 110;
+    } else if (topic === 'comparison') {
+      cols = 2; itemsPerPage = 12; spacingY = 100;
+    } else if (topic === 'number_bond') {
+      cols = 3; itemsPerPage = 9; startX = 70; spacingX = 240; spacingY = 260; startY = 200;
+    } else if (topic === 'number_line') {
+      cols = 1; itemsPerPage = 8; startX = 80; spacingY = 100; startY = 250;
+    } else if (topic === 'ten_frame') {
+      cols = 2; itemsPerPage = 4; startX = 80; spacingX = 350; spacingY = 320; startY = 250;
+    } else if (topic === 'ten_frame_comparison') {
+      cols = 1; itemsPerPage = 7; startX = 50; spacingY = 120; startY = 220;
+    } else if (topic === 'word_problem') {
+      cols = 1; itemsPerPage = 3; startX = 70; spacingY = 275; startY = 240;
+    } else if (topic === 'fact_family') {
+      cols = 1; itemsPerPage = 3; startX = 70; spacingX = 350; spacingY = 260; startY = 230;
+    } else if (topic === 'missing_addend') {
+      cols = 2; itemsPerPage = 10; startX = 60; spacingX = 360; spacingY = 120; startY = 250;
+    } else if (topic === 'decodable_word_problem') {
+      cols = 1; itemsPerPage = 3; startX = 70; spacingY = 275; startY = 240;
+    }
+    
+    const pagesPerVariation = Math.ceil(problemCount / itemsPerPage) || 1;
+    const totalVariations = 5;
+    const totalNewPages = pagesPerVariation * totalVariations;
+    
+    // If the document is currently empty (1 blank page with 0 problems), start at 0, otherwise append
+    const targetStartPage = (totalPages === 1 && problems.length === 0) ? 0 : totalPages;
+    setTotalPages(prev => Math.max(prev, targetStartPage + totalNewPages));
+
+    let allNewProblems = [];
+    let allNewTexts = [];
+    
+    let titleText = 'Math Worksheet';
+    if (topic === 'basic_math') {
+      titleText = operator === '+' ? `Addition Within ${maxVal}` : `Subtraction Within ${maxVal}`;
+    } else if (topic === 'number_bond') {
+      titleText = `Number Bonds Within ${maxVal}`;
+    } else if (topic === 'missing_number') {
+      titleText = 'Missing Numbers';
+    } else if (topic === 'comparison') {
+      titleText = 'Comparing Numbers';
+    } else if (topic === 'number_line') {
+      titleText = 'Number Line Addition';
+    } else if (topic === 'ten_frame') {
+      titleText = 'Ten Frames';
+    } else if (topic === 'ten_frame_comparison') {
+      titleText = 'COMPARING NUMBERS';
+    } else if (topic === 'word_problem') {
+      titleText = 'Math Word Problems';
+    } else if (topic === 'fact_family') {
+      titleText = 'Fact Families';
+    } else if (topic === 'missing_addend') {
+      titleText = `Missing Addends (Sum to ${maxVal})`;
+    } else if (topic === 'decodable_word_problem') {
+      titleText = 'Read & Solve Math Problems';
+    }
+
+    for(let v = 0; v < totalVariations; v++) {
+      const rawProblems = generateWorksheet(problemCount, config);
+      const varStartPage = targetStartPage + (v * pagesPerVariation);
+      
+      const problemsWithPositions = rawProblems.map((prob, index) => {
+        const pageOffset = Math.floor(index / itemsPerPage);
+        const targetPage = varStartPage + pageOffset;
+        const indexOnPage = index % itemsPerPage;
+        const col = indexOnPage % cols;
+        const row = Math.floor(indexOnPage / cols);
+        return { ...prob, pageIndex: targetPage, x: startX + (col * spacingX), y: startY + (row * spacingY) };
+      });
+      
+      allNewProblems.push(...problemsWithPositions);
+      
+      for(let p = 0; p < pagesPerVariation; p++) {
+        const pageIdx = varStartPage + p;
+        const nameId = `header_name_date_${pageIdx}`;
+        const titleId = `header_title_${pageIdx}`;
+        allNewTexts.push({ id: nameId, pageIndex: pageIdx, text: 'Name : ...........................................................Date : ...........................', x: 50, y: 50, fontSize: 24, fontFamily: 'Comic Sans MS', isBold: false, isItalic: false, isUnderline: false, align: 'left', fill: '#0f172a' });
+        allNewTexts.push({ id: titleId, pageIndex: pageIdx, text: titleText, x: 220, y: 150, fontSize: 42, fontFamily: 'Comic Sans MS', isBold: true, isItalic: false, isUnderline: false, align: 'left', fill: '#000000' });
+      }
+      
+      problemsWithPositions.forEach(prob => {
+         if (prob.type === 'word_problem' || prob.type === 'decodable_word_problem') {
+           const id = `text_wp_${prob.id}`;
+           allNewTexts.push({
+             id,
+             pageIndex: prob.pageIndex,
+             text: prob.options.question,
+             x: prob.x + 45,
+             y: prob.y + 5,
+             width: 600,
+             fontSize: 18,
+             fontFamily: 'Comic Sans MS',
+             isBold: false,
+             isItalic: false,
+             isUnderline: false,
+             align: 'left',
+             fill: '#0f172a'
+           });
+         }
+      });
+    }
+
+    setProblems(prev => [...prev, ...allNewProblems]);
+    setCustomTexts(prevTexts => {
+       const updated = [...prevTexts];
+       allNewTexts.forEach(newText => {
+         const existing = updated.find(t => t.id === newText.id);
+         if (existing) {
+           existing.text = newText.text;
+         } else {
+           updated.push(newText);
+         }
+       });
+       return updated;
+    });
+    
+    // Copy the cliparts and custom texts (excluding auto-generated headers) from page 0 to all new pages
+    setCustomImages(prevImages => {
+      const updated = [...prevImages];
+      const templateImages = updated.filter(img => img.pageIndex === 0 || img.pageIndex === undefined);
+      
+      for(let v = 0; v < totalVariations; v++) {
+        for(let p = 0; p < pagesPerVariation; p++) {
+          const pageIdx = targetStartPage + (v * pagesPerVariation) + p;
+          if (pageIdx === 0) continue; // Don't duplicate to page 0 if we started there
+          
+          templateImages.forEach(img => {
+            const newId = `${img.id}_var_${pageIdx}_${Math.random().toString(36).substr(2, 5)}`;
+            updated.push({ ...img, id: newId, pageIndex: pageIdx });
+          });
+        }
+      }
+      return updated;
+    });
+
+    setSelectedIds([]);
+    setCurrentPage(targetStartPage);
+  };
+
   useEffect(() => { handleGenerate(); }, []);
 
   const handleProblemDragEnd = (id, newX, newY) => setProblems(prev => prev.map(p => p.id === id ? { ...p, x: newX, y: newY } : p));
@@ -581,6 +730,11 @@ function App() {
       
       if (includeAnswerKey) setShowAnswers(false);
       
+      if (coverDataUrl) {
+        pdf.addImage(coverDataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+        if (totalPages > 0) pdf.addPage();
+      }
+      
       for (let i = 0; i < totalPages; i++) {
         setCurrentPage(i);
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -601,7 +755,38 @@ function App() {
         }
       }
       
-      pdf.save('math-worksheet.pdf');
+      // Auto-generate TOU & Credits page at the end of the PDF
+      pdf.addPage();
+      pdf.setFontSize(28);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Terms of Use & Credits', pdfWidth / 2, 40, { align: 'center' });
+      
+      pdf.setFontSize(14);
+      pdf.setFont('helvetica', 'normal');
+      
+      const touText = [
+        'Thank you for downloading this resource!',
+        '',
+        'Terms of Use:',
+        '© 2026 Math Worksheet Generator.',
+        'All rights reserved. Purchase or download of this item entitles the',
+        'purchaser the right to reproduce the pages in limited quantities for',
+        'single classroom use only. Duplication for an entire school, an entire',
+        'school system, or commercial purposes is strictly forbidden without',
+        'written permission from the author.',
+        '',
+        'Copying any part of this product and placing it on the internet in any',
+        'form (even a personal/classroom website) is strictly forbidden and is',
+        'a violation of the Digital Millennium Copyright Act (DMCA).',
+        '',
+        'Credits:',
+        'Clipart and icons provided by Google Noto Emoji.',
+        'Licensed under the SIL Open Font License 1.1.'
+      ];
+      
+      pdf.text(touText, 20, 70);
+
+      pdf.save('math-worksheet-bundle.pdf');
       
       setCurrentPage(originalPage);
       setShowAnswers(originalShowAnswers);
@@ -812,6 +997,9 @@ function App() {
 
           <button className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }} onClick={handleGenerate}>
             <Calculator size={18} /> Generate Worksheet
+          </button>
+          <button className="btn" style={{ width: '100%', marginTop: '0.5rem', background: '#f59e0b', color: 'white', border: 'none' }} onClick={handleBatchGenerate}>
+            <Copy size={18} /> Generate 5 Variations (Batch)
           </button>
 
           <div style={{ borderTop: '1px solid #e2e8f0', marginTop: '1rem', paddingTop: '1rem', display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -1119,6 +1307,7 @@ function App() {
         isOpen={isCoverModalOpen} 
         onClose={() => setIsCoverModalOpen(false)} 
         pageImages={coverPageImages} 
+        onApplyCover={setCoverDataUrl}
       />
     </div>
   );

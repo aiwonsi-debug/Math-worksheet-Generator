@@ -12,7 +12,7 @@ const DEFAULT_ELEMENTS = {
   logo: { x: 1040, y: 160 },
 };
 
-export default function CoverGeneratorModal({ isOpen, onClose, pageImages: capturedImages }) {
+export default function CoverGeneratorModal({ isOpen, onClose, pageImages: capturedImages, onApplyCover }) {
   const [title, setTitle] = useState('MATH WORKSHEETS');
   const [subtitle, setSubtitle] = useState('ADDITION & SUBTRACTION');
   const [badgeText, setBadgeText] = useState('PRINT & GO!');
@@ -442,9 +442,18 @@ export default function CoverGeneratorModal({ isOpen, onClose, pageImages: captu
             {logoSrc && <button onClick={() => setLogoSrc(null)} style={{ marginTop: '4px', fontSize: '11px', padding: '2px 8px', border: '1px solid #fca5a5', borderRadius: '5px', background: '#fff', color: '#ef4444', cursor: 'pointer' }}>Remove logo</button>}
           </div>
 
-          <div style={{ display: 'flex', gap: '8px', marginTop: 'auto', paddingTop: '10px' }}>
-            <button onClick={onClose} style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#f1f5f9', cursor: 'pointer', fontWeight: 600, fontSize: '13px' }}>Cancel</button>
-            <button onClick={downloadCover} style={{ flex: 2, padding: '10px', borderRadius: '8px', border: 'none', background: '#3b82f6', color: 'white', cursor: 'pointer', fontWeight: 700, fontSize: '13px' }}>⬇ Download PNG</button>
+          <div style={{ display: 'flex', gap: '8px', marginTop: 'auto', paddingTop: '10px', flexDirection: 'column' }}>
+            <button onClick={async () => {
+              await drawCover();
+              if (canvasRef.current && onApplyCover) {
+                onApplyCover(canvasRef.current.toDataURL('image/png'));
+                onClose();
+              }
+            }} style={{ padding: '10px', borderRadius: '8px', border: 'none', background: '#10b981', color: 'white', cursor: 'pointer', fontWeight: 700, fontSize: '13px' }}>Apply Cover to PDF Export</button>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button onClick={onClose} style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#f1f5f9', cursor: 'pointer', fontWeight: 600, fontSize: '13px' }}>Cancel</button>
+              <button onClick={downloadCover} style={{ flex: 1, padding: '10px', borderRadius: '8px', border: 'none', background: '#3b82f6', color: 'white', cursor: 'pointer', fontWeight: 700, fontSize: '13px' }}>⬇ Download PNG</button>
+            </div>
           </div>
         </div>
 
