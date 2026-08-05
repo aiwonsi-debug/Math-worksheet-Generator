@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Math Worksheet Generator
+Comment=Generate customizable math worksheets for elementary students
+Exec=bash -c "cd %k && ./run.sh"
+Terminal=true
+Categories=Education;Development;
+Keywords=math;worksheet;generator;react;
+Icon=utilities-terminal

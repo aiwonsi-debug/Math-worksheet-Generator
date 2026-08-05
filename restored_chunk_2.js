@@ -124,17 +124,17 @@
     const newTexts = []; const newImages = []; const newProblems = []; const newSelectedIds = [];
     
     clipboardRef.current.forEach(item => {
-      const idSuffix = ${Date.now()}_;
+      const idSuffix = `${Date.now()}_`;
       if (item.type === 'text') {
-        const newId = 	ext_;
+        const newId = `text_${idSuffix}`;
         newTexts.push({ ...item.data, id: newId, x: item.data.x + 20, y: item.data.y + 20 });
         newSelectedIds.push(newId);
       } else if (item.type === 'image') {
-        const newId = img_;
+        const newId = `img_${idSuffix}`;
         newImages.push({ ...item.data, id: newId, x: item.data.x + 20, y: item.data.y + 20 });
         newSelectedIds.push(newId);
       } else if (item.type === 'problem') {
-        const newId = prob_;
+        const newId = `prob_${idSuffix}`;
         newProblems.push({ ...item.data, id: newId, x: item.data.x + 20, y: item.data.y + 20 });
         newSelectedIds.push(newId);
       }

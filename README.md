@@ -1,16 +1,59 @@
-# React + Vite
+# Math Worksheet Generator
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A customizable React + Vite application for generating, previewing, and exporting math worksheets for elementary students to PDF.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🐧 Debian / Linux Quick Start
 
-## React Compiler
+### 1. Setup Dependencies
+Run the automated Debian setup script to install system dependencies (`nodejs`, `npm`, `xdg-utils`) and npm packages:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+./setup-debian.sh
+# or using Makefile
+make setup
+```
 
-## Expanding the Oxlint configuration
+### 2. Run Application
+To start the application and automatically open your default browser (`http://localhost:5173`):
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+```bash
+./run.sh
+# or using Makefile / npm
+make dev
+# or
+npm run dev
+```
+
+### 3. Desktop Integration (Optional)
+To add a launcher to your Debian desktop environment application menu:
+
+```bash
+./install-desktop.sh
+# or using Makefile
+make install-desktop
+```
+
+---
+
+## 🪟 Windows Quick Start
+
+Double-click `run.bat` or run:
+
+```cmd
+npm run dev
+```
+
+---
+
+## 🛠️ Available Commands
+
+| Command | Description |
+| :--- | :--- |
+| `./setup-debian.sh` / `make setup` | Installs Debian system packages, npm dependencies & desktop shortcut |
+| `./install-desktop.sh` / `make install-desktop` | Creates desktop application menu launcher |
+| `./run.sh` / `make dev` | Starts dev server & opens default browser |
+| `npm run build` / `make build` | Builds production dist bundle |
+| `npm run preview` | Previews production build |
+| `npm run lint` | Runs oxlint linter |

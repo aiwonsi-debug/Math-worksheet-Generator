@@ -3,12 +3,19 @@ import React, { useState, useEffect, useMemo } from 'react';
 // ── TPT Subject Areas (matches TPT's actual dropdown)
 const SUBJECT_AREAS = ['Basic Operations', 'Numbers', 'Algebra', 'Geometry', 'Measurement', 'Math Test Prep', 'Other (Math)'];
 
-// ── TPT Theme tags relevant to math worksheets
+// ── TPT Theme tags & High-Converting Best-Seller Keywords
 const SUGGESTED_TAGS = [
   'Print & Go', 'No Prep', 'Printable', 'Worksheet', 'Math Center',
   'Homeschool', 'Early Finishers', 'Morning Work', 'Homework', 'Common Core',
-  'Distance Learning', 'Independent Practice', 'Differentiated',
+  'Distance Learning', 'Independent Practice', 'Differentiated', 'Math Fact Fluency',
+  'Answer Key Included', 'Sub Plans', 'Spiral Review', 'Timed Tests'
 ];
+
+const BEST_SELLER_KEYWORD_PACKS = {
+  utility: ['No Prep', 'Print & Go', 'Math Centers', 'Morning Work', 'Math Fact Fluency', 'Sub Plans', 'Answer Key Included', 'Differentiated', 'Spiral Review', 'Independent Practice', 'Timed Tests', 'Homework'],
+  seasonal: ['Back to School Math', 'Fall Math Worksheets', 'Halloween Math', 'Winter Math Centers', '100th Day of School', 'Spring Math Review', 'Summer Math Packet'],
+  skills: ['Addition & Subtraction', 'Fact Fluency', 'Missing Addends', 'Ten Frames', 'Number Bonds', 'Regrouping', 'Place Value', 'Word Problems', 'Telling Time', 'Multiplication Drills', 'Fractions & Decimals']
+};
 
 // ── Topic → keyword mapping
 const TOPIC_KEYWORDS = {
@@ -177,6 +184,31 @@ export default function TPTListingHelper({ topic, operator, maxVal, totalPages, 
           </div>
           <CopyButton text={title} />
         </div>
+
+        {/* 🚀 Best-Selling Title Formulas */}
+        <div style={{ marginTop: '14px', background: '#f0f9ff', borderRadius: '8px', padding: '12px 14px', border: '1px solid #bae6fd' }}>
+          <div style={{ fontSize: '12px', fontWeight: 700, color: '#0369a1', marginBottom: '8px' }}>🔥 1-Click Best-Selling Title Formulas:</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {[
+              `${operatorLabel || topicName}${maxVal ? ' Within ' + maxVal : ''} Worksheets | ${suggestedGrades[0] || '1st Grade'} | No Prep Fact Fluency`,
+              `${suggestedGrades[0] || '1st Grade'} ${operatorLabel || topicName} | Print & Go Math Centers`,
+              `${operatorLabel || topicName}${maxVal ? ' 1-' + maxVal : ''} Practice | Morning Work & Homework | Answer Key`,
+              `No Prep ${operatorLabel || topicName} Worksheets | ${suggestedGrades.join(' & ') || 'K-2'} Sub Plans`,
+            ].map((tmpl, idx) => (
+              <button
+                key={idx}
+                onClick={() => setTitle(tmpl.slice(0, 80))}
+                style={{
+                  textAlign: 'left', padding: '6px 10px', background: 'white', borderRadius: '6px',
+                  border: '1px solid #7dd3fc', fontSize: '12px', color: '#0284c7', cursor: 'pointer',
+                  fontWeight: 600, transition: 'all 0.15s'
+                }}
+              >
+                ⚡ Use: "{tmpl.slice(0, 80)}"
+              </button>
+            ))}
+          </div>
+        </div>
       </Section>
 
       {/* ── 2. Description */}
@@ -243,9 +275,45 @@ export default function TPTListingHelper({ topic, operator, maxVal, totalPages, 
       </Section>
 
       {/* ── 5. Tags */}
-      <Section title="5. Tags (Theme, Audience, Language)" hint="Select up to 6 tags — be specific, not broad">
+      <Section title="5. Tags & Best-Seller Keywords" hint="Select up to 6 tags — click any keyword pack item below to toggle">
+        <div style={{ marginBottom: '12px' }}>
+          <div style={{ fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>🔥 High-Converting Utility Keywords:</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '10px' }}>
+            {BEST_SELLER_KEYWORD_PACKS.utility.map(t => {
+              const active = selectedTags.includes(t);
+              return (
+                <button key={t} onClick={() => toggleTag(t)} style={{
+                  ...chipBase,
+                  borderColor: active ? '#10b981' : '#e2e8f0',
+                  background: active ? '#10b981' : '#f8fafc',
+                  color: active ? 'white' : '#475569',
+                }}>
+                  {t}
+                </button>
+              );
+            })}
+          </div>
+
+          <div style={{ fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>🍂 Seasonal & Holiday Keyword Spikes:</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '10px' }}>
+            {BEST_SELLER_KEYWORD_PACKS.seasonal.map(t => {
+              const active = selectedTags.includes(t);
+              return (
+                <button key={t} onClick={() => toggleTag(t)} style={{
+                  ...chipBase,
+                  borderColor: active ? '#f59e0b' : '#e2e8f0',
+                  background: active ? '#f59e0b' : '#f8fafc',
+                  color: active ? 'white' : '#475569',
+                }}>
+                  {t}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
-          {SUGGESTED_TAGS.map(t => {
+          {SUGGESTED_TAGS.filter(t => !BEST_SELLER_KEYWORD_PACKS.utility.includes(t) && !BEST_SELLER_KEYWORD_PACKS.seasonal.includes(t)).map(t => {
             const active = selectedTags.includes(t);
             return (
               <button key={t} onClick={() => toggleTag(t)} style={{
