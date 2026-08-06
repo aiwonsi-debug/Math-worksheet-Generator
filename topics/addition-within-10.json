@@ -1,0 +1,48 @@
+{
+  "id": "addition-within-10",
+  "title": "Addition Within 10",
+  "subtitle": "Grade 1 Math Practice",
+  "author": "Attapol.k",
+  "footer": "Created by Attapol.k · For classroom or home use",
+  "grade": "Grade 1",
+  "operation": "+",
+  "operand_min": 0,
+  "operand_max": 10,
+  "max_sum": 10,
+  "items_per_page": 12,
+  "num_versions": 5,
+  "theme": {
+    "primary_color": "#4C4592",
+    "secondary_color": "#666666",
+    "font_family": "'Mali', sans-serif",
+    "dot_colors": ["#F5A623", "#E53935"],
+    "card_border": "#C4C0E5",
+    "answer_key_bg": "#EBF7ED",
+    "answer_key_border": "#A3E0B2",
+    "answer_key_text": "#2E7D32"
+  },
+  "cover": {
+    "dots": ["#F5B000", "#E53935", "#E53935", "#E59400"],
+    "pill_text": "Addition within 10 • Number sense • Basic facts fluency"
+  },
+  "tpt_listing": {
+    "title": "Addition Within 10 Worksheets & Answer Keys - Grade 1 Math Fluency",
+    "bullet_points": [
+      "5 unique randomized worksheet versions with 5 matching answer keys",
+      "Visual dot counting manipulatives to build early number sense",
+      "Clean 3x4 grid layout with 12 problems per page",
+      "Print-ready high-resolution PDFs + merged complete bundle PDF",
+      "Includes square preview cover image for instant TPT listing upload"
+    ],
+    "description": "Help early learners master addition facts up to 10 with these beautifully designed visual math worksheets! Features clean 3x4 layouts, clear dot manipulatives, and complete answer keys for quick grading.",
+    "keywords": [
+      "Addition within 10",
+      "Grade 1 Math",
+      "Kindergarten Addition",
+      "Visual Math Worksheets",
+      "Dot Manipulatives",
+      "Math Facts Fluency",
+      "Elementary Worksheet Bundle"
+    ]
+  }
+}
