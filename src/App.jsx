@@ -339,11 +339,11 @@ function App() {
           const nameId = `header_name_date_${pageIdx}`;
           const titleId = `header_title_${pageIdx}`;
           if (!updated.find(t => t.id === nameId)) {
-             updated.push({ id: nameId, pageIndex: pageIdx, text: 'Name : ...........................................................Date : ...........................', x: 50, y: 50, fontSize: 24, fontFamily: 'Comic Sans MS', isBold: false, isItalic: false, isUnderline: false, align: 'left', fill: '#0f172a' });
+             updated.push({ id: nameId, pageIndex: pageIdx, text: 'Name : ...........................................................Date : ...........................', x: 50, y: 50, fontSize: 24, fontFamily: 'Comic Neue', isBold: false, isItalic: false, isUnderline: false, align: 'left', fill: '#0f172a' });
           }
           const existingTitle = updated.find(t => t.id === titleId);
           if (existingTitle) existingTitle.text = titleText;
-          else updated.push({ id: titleId, pageIndex: pageIdx, text: titleText, x: 220, y: 150, fontSize: 42, fontFamily: 'Comic Sans MS', isBold: true, isItalic: false, isUnderline: false, align: 'left', fill: '#000000' });
+          else updated.push({ id: titleId, pageIndex: pageIdx, text: titleText, x: 220, y: 150, fontSize: 42, fontFamily: 'Comic Neue', isBold: true, isItalic: false, isUnderline: false, align: 'left', fill: '#000000' });
        });
        
        problemsWithPositions.forEach(prob => {
@@ -358,7 +358,7 @@ function App() {
                y: prob.y + 5,
                width: 600,
                fontSize: 18,
-               fontFamily: 'Comic Sans MS',
+               fontFamily: 'Comic Neue',
                isBold: false,
                isItalic: false,
                isUnderline: false,
@@ -460,8 +460,8 @@ function App() {
         const pageIdx = varStartPage + p;
         const nameId = `header_name_date_${pageIdx}`;
         const titleId = `header_title_${pageIdx}`;
-        allNewTexts.push({ id: nameId, pageIndex: pageIdx, text: 'Name : ...........................................................Date : ...........................', x: 50, y: 50, fontSize: 24, fontFamily: 'Comic Sans MS', isBold: false, isItalic: false, isUnderline: false, align: 'left', fill: '#0f172a' });
-        allNewTexts.push({ id: titleId, pageIndex: pageIdx, text: titleText, x: 220, y: 150, fontSize: 42, fontFamily: 'Comic Sans MS', isBold: true, isItalic: false, isUnderline: false, align: 'left', fill: '#000000' });
+        allNewTexts.push({ id: nameId, pageIndex: pageIdx, text: 'Name : ...........................................................Date : ...........................', x: 50, y: 50, fontSize: 24, fontFamily: 'Comic Neue', isBold: false, isItalic: false, isUnderline: false, align: 'left', fill: '#0f172a' });
+        allNewTexts.push({ id: titleId, pageIndex: pageIdx, text: titleText, x: 220, y: 150, fontSize: 42, fontFamily: 'Comic Neue', isBold: true, isItalic: false, isUnderline: false, align: 'left', fill: '#000000' });
       }
       
       problemsWithPositions.forEach(prob => {
@@ -475,7 +475,7 @@ function App() {
              y: prob.y + 5,
              width: 600,
              fontSize: 18,
-             fontFamily: 'Comic Sans MS',
+             fontFamily: 'Comic Neue',
              isBold: false,
              isItalic: false,
              isUnderline: false,
@@ -533,7 +533,7 @@ function App() {
 
   const addCustomText = () => {
     const id = `text_${Date.now()}`;
-    setCustomTexts([...customTexts, { id, pageIndex: currentPage, text: 'Double click to edit', x: 100, y: 100, fontSize: 24, fontFamily: 'Comic Sans MS', isBold: false, isItalic: false, isUnderline: false, align: 'left', fill: '#0f172a' }]);
+    setCustomTexts([...customTexts, { id, pageIndex: currentPage, text: 'Double click to edit', x: 100, y: 100, fontSize: 24, fontFamily: 'Comic Neue', isBold: false, isItalic: false, isUnderline: false, align: 'left', fill: '#0f172a' }]);
     setSelectedIds([id]);
   };
 
@@ -615,8 +615,8 @@ function App() {
     
     setCustomTexts(prev => [
       ...prev,
-      { id: `header_name_date_${newPageIdx}`, pageIndex: newPageIdx, text: 'Name : ...........................................................Date : ...........................', x: 50, y: 50, fontSize: 24, fontFamily: 'Comic Sans MS', isBold: false, isItalic: false, isUnderline: false, align: 'left', fill: '#0f172a' },
-      { id: `header_title_${newPageIdx}`, pageIndex: newPageIdx, text: titleText, x: 220, y: 150, fontSize: 42, fontFamily: 'Comic Sans MS', isBold: true, isItalic: false, isUnderline: false, align: 'left', fill: '#000000' }
+      { id: `header_name_date_${newPageIdx}`, pageIndex: newPageIdx, text: 'Name : ...........................................................Date : ...........................', x: 50, y: 50, fontSize: 24, fontFamily: 'Comic Neue', isBold: false, isItalic: false, isUnderline: false, align: 'left', fill: '#0f172a' },
+      { id: `header_title_${newPageIdx}`, pageIndex: newPageIdx, text: titleText, x: 220, y: 150, fontSize: 42, fontFamily: 'Comic Neue', isBold: true, isItalic: false, isUnderline: false, align: 'left', fill: '#000000' }
     ]);
   };
 
@@ -1255,6 +1255,7 @@ function App() {
                   className="form-select" style={{ width: '130px', height: '32px', fontSize: '14px', padding: '0 8px' }}
                   value={selectedText.fontFamily} onChange={(e) => applyTextFormat({ fontFamily: e.target.value })}
                 >
+                  <option value="Comic Neue">Comic Neue</option>
                   <option value="Comic Sans MS">Comic Sans</option>
                   <option value="Plus Jakarta Sans">Jakarta</option>
                   <option value="Arial">Arial</option>

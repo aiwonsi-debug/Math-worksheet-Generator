@@ -424,6 +424,7 @@ export default function CoverGeneratorModal({ isOpen, onClose, pageImages: captu
             <div style={{ display: 'flex', gap: '4px' }}>
               <select style={{...inputStyle, flex: 1, padding: '4px 8px'}} value={titleFontFamily} onChange={e => setTitleFontFamily(e.target.value)} title="Font">
                 <option value="Arial Black">Arial Black</option>
+                <option value="Comic Neue">Comic Neue</option>
                 <option value="Comic Sans MS">Comic</option>
                 <option value="Impact">Impact</option>
                 <option value="Verdana">Verdana</option>
@@ -440,6 +441,7 @@ export default function CoverGeneratorModal({ isOpen, onClose, pageImages: captu
             <div style={{ display: 'flex', gap: '4px' }}>
               <select style={{...inputStyle, flex: 1, padding: '4px 8px'}} value={subtitleFontFamily} onChange={e => setSubtitleFontFamily(e.target.value)} title="Font">
                 <option value="Arial Black">Arial Black</option>
+                <option value="Comic Neue">Comic Neue</option>
                 <option value="Comic Sans MS">Comic</option>
                 <option value="Impact">Impact</option>
                 <option value="Verdana">Verdana</option>

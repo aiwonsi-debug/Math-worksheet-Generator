@@ -118,9 +118,9 @@ const ProblemBlock = ({ problem, index, showAnswers, onDragEnd, onSelect, nodeRe
     if (options.orientation === 'vertical') {
       return (
         <Group {...commonProps}>
-          <Text text={operands[0].toString()} fontSize={fontSize} fontFamily="Comic Sans MS" fontStyle="bold" align="right" width={80} y={0} />
-          <Text text={operator} fontSize={fontSize} fontFamily="Comic Sans MS" fontStyle="bold" x={10} y={40} />
-          <Text text={operands[1].toString()} fontSize={fontSize} fontFamily="Comic Sans MS" fontStyle="bold" align="right" width={80} y={40} />
+          <Text text={operands[0].toString()} fontSize={fontSize} fontFamily="Comic Neue" fontStyle="bold" align="right" width={80} y={0} />
+          <Text text={operator} fontSize={fontSize} fontFamily="Comic Neue" fontStyle="bold" x={10} y={40} />
+          <Text text={operands[1].toString()} fontSize={fontSize} fontFamily="Comic Neue" fontStyle="bold" align="right" width={80} y={40} />
           <Line points={[20, 80, 80, 80]} stroke="black" strokeWidth={3} />
           <Rect x={0} y={0} width={90} height={90} fill="transparent" />
         </Group>
@@ -129,19 +129,19 @@ const ProblemBlock = ({ problem, index, showAnswers, onDragEnd, onSelect, nodeRe
       const drawBox = (val, posX) => (
         <Group x={posX} y={-17}>
           <Rect width={75} height={75} stroke="black" strokeWidth={2} cornerRadius={10} />
-          {showAnswers && <Text text={val.toString()} fontSize={fontSize} fontFamily="Comic Sans MS" fill="#ef4444" fontStyle="bold" y={21} width={75} align="center" />}
+          {showAnswers && <Text text={val.toString()} fontSize={fontSize} fontFamily="Comic Neue" fill="#ef4444" fontStyle="bold" y={21} width={75} align="center" />}
         </Group>
       );
-      const drawText = (val, posX, isMissing) => isMissing ? drawBox(val, posX) : <Text text={val.toString()} fontSize={fontSize} fontFamily="Comic Sans MS" x={posX} y={4} width={75} align="center" />;
+      const drawText = (val, posX, isMissing) => isMissing ? drawBox(val, posX) : <Text text={val.toString()} fontSize={fontSize} fontFamily="Comic Neue" x={posX} y={4} width={75} align="center" />;
       return (
         <Group {...commonProps}>
           <Circle x={15} y={20} radius={18} stroke="black" strokeWidth={1.5} />
-          <Text text={problemNumber.toString()} fontSize={20} fontFamily="Comic Sans MS" x={-5} y={10} width={40} align="center" />
+          <Text text={problemNumber.toString()} fontSize={20} fontFamily="Comic Neue" x={-5} y={10} width={40} align="center" />
           
           {drawText(operands[0], 45, options.missingPart === 'first')}
-          <Text text={operator} fontSize={fontSize} fontFamily="Comic Sans MS" x={125} y={4} width={20} align="center" />
+          <Text text={operator} fontSize={fontSize} fontFamily="Comic Neue" x={125} y={4} width={20} align="center" />
           {drawText(operands[1], 145, options.missingPart === 'second')}
-          <Text text="=" fontSize={fontSize} fontFamily="Comic Sans MS" x={225} y={4} width={20} align="center" />
+          <Text text="=" fontSize={fontSize} fontFamily="Comic Neue" x={225} y={4} width={20} align="center" />
           {drawText(answer, 245, options.missingPart === 'answer')}
           
           <Rect x={0} y={-20} width={320} height={80} fill="transparent" />
@@ -157,21 +157,21 @@ const ProblemBlock = ({ problem, index, showAnswers, onDragEnd, onSelect, nodeRe
     const drawLine = (val, posX) => (
       <Group x={posX}>
         <Line points={[10, 40, 65, 40]} stroke="black" strokeWidth={3} />
-        {showAnswers && <Text text={val.toString()} fontSize={fontSize} fontFamily="Comic Sans MS" fill="#ef4444" fontStyle="bold" y={4} width={75} align="center" />}
+        {showAnswers && <Text text={val.toString()} fontSize={fontSize} fontFamily="Comic Neue" fill="#ef4444" fontStyle="bold" y={4} width={75} align="center" />}
       </Group>
     );
-    const drawText = (val, posX, isMissing) => isMissing ? drawLine(val, posX) : <Text text={val.toString()} fontSize={fontSize} fontFamily="Comic Sans MS" x={posX} y={4} width={75} align="center" />;
+    const drawText = (val, posX, isMissing) => isMissing ? drawLine(val, posX) : <Text text={val.toString()} fontSize={fontSize} fontFamily="Comic Neue" x={posX} y={4} width={75} align="center" />;
     
     return (
       <Group {...commonProps}>
         <Circle x={15} y={20} radius={18} stroke="black" strokeWidth={1.5} />
-        <Text text={problemNumber.toString()} fontSize={20} fontFamily="Comic Sans MS" x={-5} y={10} width={40} align="center" />
+        <Text text={problemNumber.toString()} fontSize={20} fontFamily="Comic Neue" x={-5} y={10} width={40} align="center" />
         
         {drawText(operands[0], 45, isMissingFirst)}
-        <Text text={operator} fontSize={fontSize} fontFamily="Comic Sans MS" x={125} y={4} width={20} align="center" />
+        <Text text={operator} fontSize={fontSize} fontFamily="Comic Neue" x={125} y={4} width={20} align="center" />
         {drawText(operands[1], 145, isMissingSecond)}
-        <Text text="=" fontSize={fontSize} fontFamily="Comic Sans MS" x={225} y={4} width={20} align="center" />
-        <Text text={options.sum.toString()} fontSize={fontSize} fontFamily="Comic Sans MS" x={245} y={4} width={75} align="center" />
+        <Text text="=" fontSize={fontSize} fontFamily="Comic Neue" x={225} y={4} width={20} align="center" />
+        <Text text={options.sum.toString()} fontSize={fontSize} fontFamily="Comic Neue" x={245} y={4} width={75} align="center" />
         
         <Rect x={0} y={-20} width={320} height={80} fill="transparent" />
       </Group>
@@ -195,7 +195,7 @@ const ProblemBlock = ({ problem, index, showAnswers, onDragEnd, onSelect, nodeRe
             <Group x={boxX} key={i}>
               <Rect width={55} height={55} y={-8} stroke="#0f172a" strokeWidth={2} cornerRadius={8} dash={isMissing ? [4, 4] : undefined} />
               {(!isMissing || showAnswers) && (
-                <Text text={num.toString()} fontSize={32} fontFamily="Comic Sans MS" fontStyle="bold" fill={isMissing && showAnswers ? '#ef4444' : '#0f172a'} width={55} y={5} align="center" />
+                <Text text={num.toString()} fontSize={32} fontFamily="Comic Neue" fontStyle="bold" fill={isMissing && showAnswers ? '#ef4444' : '#0f172a'} width={55} y={5} align="center" />
               )}
             </Group>
           );
@@ -216,10 +216,10 @@ const ProblemBlock = ({ problem, index, showAnswers, onDragEnd, onSelect, nodeRe
     return (
       <Group {...commonProps}>
         {/* Equation */}
-        <Text text={`${op1} + ${op2} =`} fontSize={32} fontFamily="Comic Sans MS" x={0} y={15} />
+        <Text text={`${op1} + ${op2} =`} fontSize={32} fontFamily="Comic Neue" x={0} y={15} />
         <Group x={140} y={0}>
           <Rect width={50} height={60} stroke="black" strokeWidth={2} />
-          {showAnswers && <Text text={answer.toString()} fontSize={32} fontFamily="Comic Sans MS" fill="#ef4444" fontStyle="bold" width={50} y={15} align="center" />}
+          {showAnswers && <Text text={answer.toString()} fontSize={32} fontFamily="Comic Neue" fill="#ef4444" fontStyle="bold" width={50} y={15} align="center" />}
         </Group>
 
         {/* Number Line */}
@@ -237,7 +237,7 @@ const ProblemBlock = ({ problem, index, showAnswers, onDragEnd, onSelect, nodeRe
           {Array.from({ length: numTicks }).map((_, i) => (
             <Group x={i * tickSpacing} key={i}>
               <Line points={[0, 10, 0, 30]} stroke="black" strokeWidth={2} />
-              <Text text={(lineStart + i).toString()} fontSize={14} fontFamily="Comic Sans MS" x={-10} y={35} width={20} align="center" />
+              <Text text={(lineStart + i).toString()} fontSize={14} fontFamily="Comic Neue" x={-10} y={35} width={20} align="center" />
             </Group>
           ))}
         </Group>
@@ -277,7 +277,7 @@ const ProblemBlock = ({ problem, index, showAnswers, onDragEnd, onSelect, nodeRe
         {/* Answer Box */}
         <Group x={100} y={framesCount * 120 + 20}>
           <Rect width={50} height={50} stroke="black" strokeWidth={2} />
-          {showAnswers && <Text text={val.toString()} fontSize={32} fontFamily="Comic Sans MS" fill="#ef4444" fontStyle="bold" width={50} y={8} align="center" />}
+          {showAnswers && <Text text={val.toString()} fontSize={32} fontFamily="Comic Neue" fill="#ef4444" fontStyle="bold" width={50} y={8} align="center" />}
         </Group>
         
         <Rect x={-10} y={-10} width={270} height={framesCount * 120 + 90} fill="transparent" />
@@ -319,13 +319,13 @@ const ProblemBlock = ({ problem, index, showAnswers, onDragEnd, onSelect, nodeRe
         {drawTenFrame(leftVal, 0, 0)}
         
         <Line points={[220, 70, 280, 70]} stroke="black" strokeWidth={2} />
-        {showAnswers && <Text text={leftVal.toString()} fontSize={36} fontFamily="Comic Sans MS" fill="#ef4444" x={220} y={28} width={60} align="center" />}
+        {showAnswers && <Text text={leftVal.toString()} fontSize={36} fontFamily="Comic Neue" fill="#ef4444" x={220} y={28} width={60} align="center" />}
         
         <Rect x={300} y={15} width={60} height={60} stroke="black" strokeWidth={2} />
-        {showAnswers && <Text text={answer} fontSize={40} fontFamily="Comic Sans MS" fill="#ef4444" fontStyle="bold" x={300} y={17} width={60} align="center" />}
+        {showAnswers && <Text text={answer} fontSize={40} fontFamily="Comic Neue" fill="#ef4444" fontStyle="bold" x={300} y={17} width={60} align="center" />}
         
         <Line points={[380, 70, 440, 70]} stroke="black" strokeWidth={2} />
-        {showAnswers && <Text text={rightVal.toString()} fontSize={36} fontFamily="Comic Sans MS" fill="#ef4444" x={380} y={28} width={60} align="center" />}
+        {showAnswers && <Text text={rightVal.toString()} fontSize={36} fontFamily="Comic Neue" fill="#ef4444" x={380} y={28} width={60} align="center" />}
         
         {drawTenFrame(rightVal, 460, 0)}
         
@@ -337,10 +337,10 @@ const ProblemBlock = ({ problem, index, showAnswers, onDragEnd, onSelect, nodeRe
   if (type === 'comparison') {
     return (
       <Group {...commonProps}>
-        <Text text={operands[0].toString()} fontSize={fontSize} fontFamily="Comic Sans MS" fontStyle="bold" x={0} y={5} width={40} align="center" />
+        <Text text={operands[0].toString()} fontSize={fontSize} fontFamily="Comic Neue" fontStyle="bold" x={0} y={5} width={40} align="center" />
         <Circle x={75} y={20} radius={25} stroke="black" strokeWidth={2} />
-        {showAnswers && <Text text={answer} fontSize={32} fontFamily="Comic Sans MS" fill="#ef4444" fontStyle="bold" x={55} y={1} width={40} align="center" />}
-        <Text text={operands[1].toString()} fontSize={fontSize} fontFamily="Comic Sans MS" fontStyle="bold" x={110} y={5} width={40} align="center" />
+        {showAnswers && <Text text={answer} fontSize={32} fontFamily="Comic Neue" fill="#ef4444" fontStyle="bold" x={55} y={1} width={40} align="center" />}
+        <Text text={operands[1].toString()} fontSize={fontSize} fontFamily="Comic Neue" fontStyle="bold" x={110} y={5} width={40} align="center" />
         <Rect x={0} y={-5} width={150} height={50} fill="transparent" />
       </Group>
     );
@@ -353,8 +353,8 @@ const ProblemBlock = ({ problem, index, showAnswers, onDragEnd, onSelect, nodeRe
       return (
         <Group x={xPos} y={150}>
           <Rect x={0} y={0} width={40} height={40} stroke="black" strokeWidth={2} cornerRadius={6} />
-          {!isMissing && <Text text={val.toString()} fontSize={24} fontFamily="Comic Sans MS" fontStyle="bold" width={40} y={8} align="center" />}
-          {isMissing && showAnswers && <Text text={val.toString()} fontSize={24} fontFamily="Comic Sans MS" fill="#ef4444" fontStyle="bold" width={40} y={8} align="center" />}
+          {!isMissing && <Text text={val.toString()} fontSize={24} fontFamily="Comic Neue" fontStyle="bold" width={40} y={8} align="center" />}
+          {isMissing && showAnswers && <Text text={val.toString()} fontSize={24} fontFamily="Comic Neue" fill="#ef4444" fontStyle="bold" width={40} y={8} align="center" />}
         </Group>
       );
     };
@@ -367,24 +367,24 @@ const ProblemBlock = ({ problem, index, showAnswers, onDragEnd, onSelect, nodeRe
         
         {/* Top Circle (Whole) */}
         <Circle x={100} y={25} radius={30} stroke="black" strokeWidth={2} fill="white" />
-        {options.missingIndex !== 0 && <Text text={whole.toString()} fontSize={28} fontFamily="Comic Sans MS" fontStyle="bold" x={75} y={12} width={50} align="center" />}
-        {options.missingIndex === 0 && showAnswers && <Text text={whole.toString()} fontSize={28} fontFamily="Comic Sans MS" fill="#ef4444" fontStyle="bold" x={75} y={12} width={50} align="center" />}
+        {options.missingIndex !== 0 && <Text text={whole.toString()} fontSize={28} fontFamily="Comic Neue" fontStyle="bold" x={75} y={12} width={50} align="center" />}
+        {options.missingIndex === 0 && showAnswers && <Text text={whole.toString()} fontSize={28} fontFamily="Comic Neue" fill="#ef4444" fontStyle="bold" x={75} y={12} width={50} align="center" />}
         
         {/* Left Circle (Part 1) */}
         <Circle x={60} y={100} radius={25} stroke="black" strokeWidth={2} fill="white" />
-        {options.missingIndex !== 1 && <Text text={part1.toString()} fontSize={24} fontFamily="Comic Sans MS" fontStyle="bold" x={40} y={88} width={40} align="center" />}
-        {options.missingIndex === 1 && showAnswers && <Text text={part1.toString()} fontSize={24} fontFamily="Comic Sans MS" fill="#ef4444" fontStyle="bold" x={40} y={88} width={40} align="center" />}
+        {options.missingIndex !== 1 && <Text text={part1.toString()} fontSize={24} fontFamily="Comic Neue" fontStyle="bold" x={40} y={88} width={40} align="center" />}
+        {options.missingIndex === 1 && showAnswers && <Text text={part1.toString()} fontSize={24} fontFamily="Comic Neue" fill="#ef4444" fontStyle="bold" x={40} y={88} width={40} align="center" />}
         
         {/* Right Circle (Part 2) */}
         <Circle x={140} y={100} radius={25} stroke="black" strokeWidth={2} fill="white" />
-        {options.missingIndex !== 2 && <Text text={part2.toString()} fontSize={24} fontFamily="Comic Sans MS" fontStyle="bold" x={120} y={88} width={40} align="center" />}
-        {options.missingIndex === 2 && showAnswers && <Text text={part2.toString()} fontSize={24} fontFamily="Comic Sans MS" fill="#ef4444" fontStyle="bold" x={120} y={88} width={40} align="center" />}
+        {options.missingIndex !== 2 && <Text text={part2.toString()} fontSize={24} fontFamily="Comic Neue" fontStyle="bold" x={120} y={88} width={40} align="center" />}
+        {options.missingIndex === 2 && showAnswers && <Text text={part2.toString()} fontSize={24} fontFamily="Comic Neue" fill="#ef4444" fontStyle="bold" x={120} y={88} width={40} align="center" />}
         
         {/* Equation underneath: Part 1 + Part 2 = Whole */}
         {drawEqBox(part1, 25, options.missingIndex === 1)}
-        <Text text="+" fontSize={24} fontFamily="Comic Sans MS" fontStyle="bold" x={70} y={155} width={20} align="center" />
+        <Text text="+" fontSize={24} fontFamily="Comic Neue" fontStyle="bold" x={70} y={155} width={20} align="center" />
         {drawEqBox(part2, 95, options.missingIndex === 2)}
-        <Text text="=" fontSize={24} fontFamily="Comic Sans MS" fontStyle="bold" x={140} y={155} width={20} align="center" />
+        <Text text="=" fontSize={24} fontFamily="Comic Neue" fontStyle="bold" x={140} y={155} width={20} align="center" />
         {drawEqBox(whole, 165, options.missingIndex === 0)}
 
         {/* Drag bounds */}
@@ -397,7 +397,7 @@ const ProblemBlock = ({ problem, index, showAnswers, onDragEnd, onSelect, nodeRe
     return (
       <Group {...commonProps}>
         <Circle x={15} y={15} radius={18} stroke="black" strokeWidth={1.5} />
-        <Text text={problemNumber.toString()} fontSize={20} fontFamily="Comic Sans MS" x={-5} y={5} width={40} align="center" />
+        <Text text={problemNumber.toString()} fontSize={20} fontFamily="Comic Neue" x={-5} y={5} width={40} align="center" />
 
         {/* Dash work space container */}
         <Rect 
@@ -416,7 +416,7 @@ const ProblemBlock = ({ problem, index, showAnswers, onDragEnd, onSelect, nodeRe
         <Text 
           text={`Answer: _______________________ ${options.answerWord}`} 
           fontSize={20} 
-          fontFamily="Comic Sans MS" 
+          fontFamily="Comic Neue" 
           x={45} 
           y={235} 
         />
@@ -424,7 +424,7 @@ const ProblemBlock = ({ problem, index, showAnswers, onDragEnd, onSelect, nodeRe
           <Text 
             text={answer.toString()} 
             fontSize={22} 
-            fontFamily="Comic Sans MS" 
+            fontFamily="Comic Neue" 
             fontStyle="bold" 
             fill="#ef4444" 
             x={130} 
@@ -445,66 +445,66 @@ const ProblemBlock = ({ problem, index, showAnswers, onDragEnd, onSelect, nodeRe
         
         {/* Apex Circle & Whole Number */}
         <Circle x={100} y={20} radius={22} fill="white" stroke="black" strokeWidth={1.5} />
-        <Text text={c.toString()} fontSize={22} fontFamily="Comic Sans MS" fontStyle="bold" x={75} y={10} width={50} align="center" />
+        <Text text={c.toString()} fontSize={22} fontFamily="Comic Neue" fontStyle="bold" x={75} y={10} width={50} align="center" />
 
         {/* Left corner Circle & Part A */}
         <Circle x={30} y={130} radius={22} fill="white" stroke="black" strokeWidth={1.5} />
-        <Text text={a.toString()} fontSize={22} fontFamily="Comic Sans MS" fontStyle="bold" x={5} y={120} width={50} align="center" />
+        <Text text={a.toString()} fontSize={22} fontFamily="Comic Neue" fontStyle="bold" x={5} y={120} width={50} align="center" />
 
         {/* Right corner Circle & Part B */}
         <Circle x={170} y={130} radius={22} fill="white" stroke="black" strokeWidth={1.5} />
-        <Text text={b.toString()} fontSize={22} fontFamily="Comic Sans MS" fontStyle="bold" x={145} y={120} width={50} align="center" />
+        <Text text={b.toString()} fontSize={22} fontFamily="Comic Neue" fontStyle="bold" x={145} y={120} width={50} align="center" />
 
         {/* Math Operation symbols inside the triangle */}
-        <Text text="+" fontSize={24} fontFamily="Comic Sans MS" fontStyle="bold" x={88} y={100} />
-        <Text text="-" fontSize={22} fontFamily="Comic Sans MS" x={58} y={55} />
-        <Text text="-" fontSize={22} fontFamily="Comic Sans MS" x={128} y={55} />
+        <Text text="+" fontSize={24} fontFamily="Comic Neue" fontStyle="bold" x={88} y={100} />
+        <Text text="-" fontSize={22} fontFamily="Comic Neue" x={58} y={55} />
+        <Text text="-" fontSize={22} fontFamily="Comic Neue" x={128} y={55} />
 
         {/* Blank equation templates */}
         {/* Equation 1: A + B = C */}
         <Group x={210} y={10}>
-          <Text text="____ + ____ = ____" fontSize={20} fontFamily="Comic Sans MS" />
+          <Text text="____ + ____ = ____" fontSize={20} fontFamily="Comic Neue" />
           {showAnswers && (
             <Group>
-              <Text text={a.toString()} fontSize={20} fontFamily="Comic Sans MS" fontStyle="bold" fill="#ef4444" x={10} y={-2} />
-              <Text text={b.toString()} fontSize={20} fontFamily="Comic Sans MS" fontStyle="bold" fill="#ef4444" x={90} y={-2} />
-              <Text text={c.toString()} fontSize={20} fontFamily="Comic Sans MS" fontStyle="bold" fill="#ef4444" x={170} y={-2} />
+              <Text text={a.toString()} fontSize={20} fontFamily="Comic Neue" fontStyle="bold" fill="#ef4444" x={10} y={-2} />
+              <Text text={b.toString()} fontSize={20} fontFamily="Comic Neue" fontStyle="bold" fill="#ef4444" x={90} y={-2} />
+              <Text text={c.toString()} fontSize={20} fontFamily="Comic Neue" fontStyle="bold" fill="#ef4444" x={170} y={-2} />
             </Group>
           )}
         </Group>
 
         {/* Equation 2: B + A = C */}
         <Group x={210} y={45}>
-          <Text text="____ + ____ = ____" fontSize={20} fontFamily="Comic Sans MS" />
+          <Text text="____ + ____ = ____" fontSize={20} fontFamily="Comic Neue" />
           {showAnswers && (
             <Group>
-              <Text text={b.toString()} fontSize={20} fontFamily="Comic Sans MS" fontStyle="bold" fill="#ef4444" x={10} y={-2} />
-              <Text text={a.toString()} fontSize={20} fontFamily="Comic Sans MS" fontStyle="bold" fill="#ef4444" x={90} y={-2} />
-              <Text text={c.toString()} fontSize={20} fontFamily="Comic Sans MS" fontStyle="bold" fill="#ef4444" x={170} y={-2} />
+              <Text text={b.toString()} fontSize={20} fontFamily="Comic Neue" fontStyle="bold" fill="#ef4444" x={10} y={-2} />
+              <Text text={a.toString()} fontSize={20} fontFamily="Comic Neue" fontStyle="bold" fill="#ef4444" x={90} y={-2} />
+              <Text text={c.toString()} fontSize={20} fontFamily="Comic Neue" fontStyle="bold" fill="#ef4444" x={170} y={-2} />
             </Group>
           )}
         </Group>
 
         {/* Equation 3: C - A = B */}
         <Group x={210} y={80}>
-          <Text text="____ - ____ = ____" fontSize={20} fontFamily="Comic Sans MS" />
+          <Text text="____ - ____ = ____" fontSize={20} fontFamily="Comic Neue" />
           {showAnswers && (
             <Group>
-              <Text text={c.toString()} fontSize={20} fontFamily="Comic Sans MS" fontStyle="bold" fill="#ef4444" x={10} y={-2} />
-              <Text text={a.toString()} fontSize={20} fontFamily="Comic Sans MS" fontStyle="bold" fill="#ef4444" x={90} y={-2} />
-              <Text text={b.toString()} fontSize={20} fontFamily="Comic Sans MS" fontStyle="bold" fill="#ef4444" x={170} y={-2} />
+              <Text text={c.toString()} fontSize={20} fontFamily="Comic Neue" fontStyle="bold" fill="#ef4444" x={10} y={-2} />
+              <Text text={a.toString()} fontSize={20} fontFamily="Comic Neue" fontStyle="bold" fill="#ef4444" x={90} y={-2} />
+              <Text text={b.toString()} fontSize={20} fontFamily="Comic Neue" fontStyle="bold" fill="#ef4444" x={170} y={-2} />
             </Group>
           )}
         </Group>
 
         {/* Equation 4: C - B = A */}
         <Group x={210} y={115}>
-          <Text text="____ - ____ = ____" fontSize={20} fontFamily="Comic Sans MS" />
+          <Text text="____ - ____ = ____" fontSize={20} fontFamily="Comic Neue" />
           {showAnswers && (
             <Group>
-              <Text text={c.toString()} fontSize={20} fontFamily="Comic Sans MS" fontStyle="bold" fill="#ef4444" x={10} y={-2} />
-              <Text text={b.toString()} fontSize={20} fontFamily="Comic Sans MS" fontStyle="bold" fill="#ef4444" x={90} y={-2} />
-              <Text text={a.toString()} fontSize={20} fontFamily="Comic Sans MS" fontStyle="bold" fill="#ef4444" x={170} y={-2} />
+              <Text text={c.toString()} fontSize={20} fontFamily="Comic Neue" fontStyle="bold" fill="#ef4444" x={10} y={-2} />
+              <Text text={b.toString()} fontSize={20} fontFamily="Comic Neue" fontStyle="bold" fill="#ef4444" x={90} y={-2} />
+              <Text text={a.toString()} fontSize={20} fontFamily="Comic Neue" fontStyle="bold" fill="#ef4444" x={170} y={-2} />
             </Group>
           )}
         </Group>
@@ -653,7 +653,7 @@ const CanvasEditor = ({
           )}
           
           {copyrightText && (
-            <Text text={copyrightText} x={0} y={paperHeight - 40} width={paperWidth} align="center" fontSize={12} fontFamily="Comic Sans MS" fill="#94a3b8" name="bgRect" />
+            <Text text={copyrightText} x={0} y={paperHeight - 40} width={paperWidth} align="center" fontSize={12} fontFamily="Comic Neue" fill="#94a3b8" name="bgRect" />
           )}
 
           {customTexts.map((textObj) => (
