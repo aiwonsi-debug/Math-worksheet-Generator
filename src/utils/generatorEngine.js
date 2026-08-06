@@ -84,8 +84,10 @@ export const generateMissingNumber = (min, max, length = 10) => {
 };
 
 export const generateNumberLine = (min, max) => {
-  const op1 = randomInt(min, max);
-  const op2 = randomInt(min, max);
+  const maxCap = Math.max(2, max);
+  const op1 = randomInt(Math.max(1, min), Math.max(1, maxCap - 1));
+  const maxOp2 = Math.max(1, maxCap - op1);
+  const op2 = randomInt(1, maxOp2);
   return {
     id: Math.random().toString(36).substr(2, 9),
     type: 'number_line',
@@ -161,9 +163,17 @@ export const generateNumberBond = (min, max) => {
 
 export const generateWordProblem = (min, max) => {
   const op = Math.random() < 0.5 ? '+' : '-';
-  const val1 = randomInt(Math.max(5, min), max);
-  const val2 = randomInt(min, val1 - 1);
-  const answer = op === '+' ? val1 + val2 : val1 - val2;
+  let val1, val2, answer;
+  if (op === '+') {
+    const sumCap = Math.max(2, max);
+    val1 = randomInt(Math.max(1, min), Math.max(1, sumCap - 1));
+    val2 = randomInt(1, Math.max(1, sumCap - val1));
+    answer = val1 + val2;
+  } else {
+    val1 = randomInt(Math.max(2, min), Math.max(2, max));
+    val2 = randomInt(1, val1 - 1);
+    answer = val1 - val2;
+  }
 
   const additionTemplates = [
     { text: `There are {v1} birds sitting on a fence. {v2} more birds fly over and land on the fence. How many birds are on the fence now?`, answerWord: 'birds' },

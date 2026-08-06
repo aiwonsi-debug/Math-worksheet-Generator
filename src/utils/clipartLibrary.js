@@ -17,16 +17,16 @@ export const clipartCategories = [
   {
     name: '🎒 AI Back to School Special',
     items: [
-      e('ai_school_bus', 'AI School Bus', 'png'),
-      e('ai_backpack', 'AI School Backpack', 'png'),
-      e('ai_pencil_character', 'AI Pencil Character', 'png'),
-      e('ai_apple_books', 'AI Apple & Books', 'png'),
+      e('ai_school_bus', 'AI School Bus', 'svg'),
+      e('ai_backpack', 'AI School Backpack', 'svg'),
+      e('ai_pencil_character', 'AI Pencil Character', 'svg'),
+      e('ai_apple_books', 'AI Apple & Books', 'svg'),
     ]
   },
   {
     name: '🐶 AI Cute Animals Special',
     items: [
-      e('ai_cute_puppy', 'AI Cute Puppy', 'png'),
+      e('ai_cute_puppy', 'AI Cute Puppy', 'svg'),
     ]
   },
   {

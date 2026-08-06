@@ -90,37 +90,29 @@ def main():
     color_dir = os.path.join(project_root, "public", "emoji", "color")
     bw_dir = os.path.join(project_root, "public", "emoji", "bw")
     
-    # Process all SVGs in bw_dir and color_dir
-    bw_files = glob.glob(os.path.join(bw_dir, "*.svg"))
-    color_files = glob.glob(os.path.join(color_dir, "*.svg"))
-    
-    all_filenames = set([os.path.basename(p) for p in (bw_files + color_files)])
-    print(f"✨ Converting {len(all_filenames)} SVGs into clean, crisp line art with viewBox-normalized stroke width...\n")
+    # Target SVGs in color_dir, fallback to bw_dir
+    svg_files = glob.glob(os.path.join(color_dir, "*.svg"))
+    if not svg_files:
+        svg_files = glob.glob(os.path.join(bw_dir, "*.svg"))
+        
+    print(f"✨ Converting {len(svg_files)} SVGs into thin, clean line art...\n")
     
     converted_count = 0
-    for filename in sorted(all_filenames):
-        if filename.startswith("ai_"):
-            continue
-            
-        color_path = os.path.join(color_dir, filename)
+    for svg_path in svg_files:
+        filename = os.path.basename(svg_path)
         bw_path = os.path.join(bw_dir, filename)
-        
-        # Read from color_path if exists, else bw_path
-        source_path = color_path if os.path.exists(color_path) else bw_path
             
-        with open(source_path, 'r', encoding='utf-8', errors='ignore') as f:
+        with open(svg_path, 'r', encoding='utf-8', errors='ignore') as f:
             content = f.read()
-
-        stroke_w = "3.8"
             
-        thin_svg = convert_svg_content_to_thin_lineart(content, stroke_w=stroke_w)
+        thin_svg = convert_svg_content_to_thin_lineart(content, stroke_w="1.2")
         
         with open(bw_path, 'w', encoding='utf-8') as f:
             f.write(thin_svg)
             
         converted_count += 1
 
-    print(f"🎉 Successfully converted {converted_count} SVGs into bold, clean B&W line art!")
+    print(f"🎉 Successfully converted {converted_count} SVGs into thin, clean B&W line art!")
 
 if __name__ == "__main__":
     main()

@@ -84,12 +84,12 @@ function App() {
   const [operator, setOperator] = useState('+');
   const [minVal, setMinVal] = useState(1);
   const [maxVal, setMaxVal] = useState(10);
-  const allowCarryBorrow = true;
+  const [allowCarryBorrow, setAllowCarryBorrow] = useState(true);
   const [problemCount, setProblemCount] = useState(10);
   const [orientation, setOrientation] = useState('horizontal');
   const [missingPart, setMissingPart] = useState('first');
   const [sequenceLength, setSequenceLength] = useState(10);
-  const [copyrightText, setCopyrightText] = useState('© 2026 Attapol.k All rights reserved. For personal or single-classroom use only. Redistribution or resale is prohibited.');
+  const [copyrightText, setCopyrightText] = useState('© 2026 Attapol K. All rights reserved. For personal or single-classroom use only. Redistribution or resale is prohibited.');
   
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -232,41 +232,64 @@ function App() {
     }
   };
 
-  const handleGenerate = () => {
-    const config = { topic, operator, min: minVal, max: maxVal, allowCarryBorrow, orientation, missingPart, sequenceLength };
-    const rawProblems = generateWorksheet(problemCount, config);
+  const handleGenerate = (customConfig = null, customCount = null) => {
+    const activeTopic = customConfig?.topic || topic;
+    const activeOperator = customConfig?.operator || operator;
+    const activeMinVal = customConfig?.minVal !== undefined ? customConfig.minVal : minVal;
+    const activeMaxVal = customConfig?.maxVal !== undefined ? customConfig.maxVal : maxVal;
+    const activeAllowCarryBorrow = customConfig?.allowCarryBorrow !== undefined ? customConfig.allowCarryBorrow : allowCarryBorrow;
+    const activeOrientation = customConfig?.orientation || orientation;
+    const activeMissingPart = customConfig?.missingPart || missingPart;
+    const activeSequenceLength = customConfig?.sequenceLength || sequenceLength;
+    const pCount = customCount || customConfig?.problemCount || problemCount;
+
+    const config = {
+      topic: activeTopic,
+      operator: activeOperator,
+      min: activeMinVal,
+      max: activeMaxVal,
+      allowCarryBorrow: activeAllowCarryBorrow,
+      orientation: activeOrientation,
+      missingPart: activeMissingPart,
+      sequenceLength: activeSequenceLength
+    };
+    
+    const rawProblems = generateWorksheet(pCount, config);
     
     let cols = 2; let itemsPerPage = 10; let startX = 60; let spacingX = 360; let spacingY = 120; let startY = 250;
 
-    if (topic === 'basic_math') {
-      cols = orientation === 'horizontal' ? 2 : 3;
-      itemsPerPage = orientation === 'horizontal' ? 10 : 15;
-      startX = orientation === 'horizontal' ? 60 : 80;
-      spacingX = orientation === 'horizontal' ? 360 : 240;
-    } else if (topic === 'missing_number') {
+    if (activeTopic === 'basic_math') {
+      cols = activeOrientation === 'horizontal' ? 2 : 3;
+      itemsPerPage = activeOrientation === 'horizontal' ? 10 : 15;
+      startX = activeOrientation === 'horizontal' ? 60 : 80;
+      spacingX = activeOrientation === 'horizontal' ? 360 : 240;
+    } else if (activeTopic === 'missing_number') {
       cols = 1; itemsPerPage = 7; startX = 70; spacingY = 110;
-    } else if (topic === 'comparison') {
+    } else if (activeTopic === 'comparison') {
       cols = 2; itemsPerPage = 12; spacingY = 100;
-    } else if (topic === 'number_bond') {
+    } else if (activeTopic === 'number_bond') {
       cols = 3; itemsPerPage = 9; startX = 70; spacingX = 240; spacingY = 260; startY = 200;
-    } else if (topic === 'number_line') {
+    } else if (activeTopic === 'number_line') {
       cols = 1; itemsPerPage = 8; startX = 80; spacingY = 100; startY = 250;
-    } else if (topic === 'ten_frame') {
+    } else if (activeTopic === 'ten_frame') {
       cols = 2; itemsPerPage = 4; startX = 80; spacingX = 350; spacingY = 320; startY = 250;
-    } else if (topic === 'ten_frame_comparison') {
+    } else if (activeTopic === 'ten_frame_comparison') {
       cols = 1; itemsPerPage = 7; startX = 50; spacingY = 120; startY = 220;
-    } else if (topic === 'word_problem') {
+    } else if (activeTopic === 'word_problem') {
       cols = 1; itemsPerPage = 3; startX = 70; spacingY = 275; startY = 240;
-    } else if (topic === 'fact_family') {
+    } else if (activeTopic === 'fact_family') {
       cols = 1; itemsPerPage = 3; startX = 70; spacingX = 350; spacingY = 260; startY = 230;
-    } else if (topic === 'missing_addend') {
+    } else if (activeTopic === 'missing_addend') {
       cols = 2; itemsPerPage = 10; startX = 60; spacingX = 360; spacingY = 120; startY = 250;
-    } else if (topic === 'decodable_word_problem') {
+    } else if (activeTopic === 'decodable_word_problem') {
       cols = 1; itemsPerPage = 3; startX = 70; spacingY = 275; startY = 240;
     }
     
-    const total = Math.ceil(problemCount / itemsPerPage) || 1;
-    const targetStartPage = currentPage;
+    const total = Math.ceil(pCount / itemsPerPage) || 1;
+    const targetStartPage = customConfig ? 0 : currentPage;
+    if (customConfig) {
+      setCurrentPage(0);
+    }
     setTotalPages(prev => Math.max(prev, targetStartPage + total));
 
     const problemsWithPositions = rawProblems.map((prob, index) => {
@@ -286,32 +309,32 @@ function App() {
     ]);
 
     let titleText = 'Math Worksheet';
-    if (topic === 'basic_math') {
-      titleText = operator === '+' ? `Addition Within ${maxVal}` : `Subtraction Within ${maxVal}`;
-    } else if (topic === 'number_bond') {
-      titleText = `Number Bonds Within ${maxVal}`;
-    } else if (topic === 'missing_number') {
+    if (activeTopic === 'basic_math') {
+      titleText = activeOperator === '+' ? `Addition Within ${activeMaxVal}` : `Subtraction Within ${activeMaxVal}`;
+    } else if (activeTopic === 'number_bond') {
+      titleText = `Number Bonds Within ${activeMaxVal}`;
+    } else if (activeTopic === 'missing_number') {
       titleText = 'Missing Numbers';
-    } else if (topic === 'comparison') {
+    } else if (activeTopic === 'comparison') {
       titleText = 'Comparing Numbers';
-    } else if (topic === 'number_line') {
+    } else if (activeTopic === 'number_line') {
       titleText = 'Number Line Addition';
-    } else if (topic === 'ten_frame') {
+    } else if (activeTopic === 'ten_frame') {
       titleText = 'Ten Frames';
-    } else if (topic === 'ten_frame_comparison') {
+    } else if (activeTopic === 'ten_frame_comparison') {
       titleText = 'COMPARING NUMBERS';
-    } else if (topic === 'word_problem') {
+    } else if (activeTopic === 'word_problem') {
       titleText = 'Math Word Problems';
-    } else if (topic === 'fact_family') {
+    } else if (activeTopic === 'fact_family') {
       titleText = 'Fact Families';
-    } else if (topic === 'missing_addend') {
-      titleText = `Missing Addends (Sum to ${maxVal})`;
-    } else if (topic === 'decodable_word_problem') {
+    } else if (activeTopic === 'missing_addend') {
+      titleText = `Missing Addends (Sum to ${activeMaxVal})`;
+    } else if (activeTopic === 'decodable_word_problem') {
       titleText = 'Read & Solve Math Problems';
     }
 
     setCustomTexts(prevTexts => {
-       const updated = [...prevTexts];
+       const updated = prevTexts.filter(t => !t.id.startsWith('text_wp_') || !pagesAffected.includes(t.pageIndex));
        pagesAffected.forEach(pageIdx => {
           const nameId = `header_name_date_${pageIdx}`;
           const titleId = `header_title_${pageIdx}`;
@@ -816,7 +839,7 @@ function App() {
         'Thank you for downloading this resource!',
         '',
         'Terms of Use:',
-        '© 2026 Attapol.k',
+        '© 2026 Math Worksheet Generator.',
         'All rights reserved. Purchase or download of this item entitles the',
         'purchaser the right to reproduce the pages in limited quantities for',
         'single classroom use only. Duplication for an entire school, an entire',
@@ -947,7 +970,7 @@ function App() {
       <aside className="sidebar">
         {/* Tab Navigation */}
         <div style={{ display: 'flex', borderBottom: '1px solid #e2e8f0', background: '#f8fafc' }}>
-          {[['worksheet', '📝', 'Worksheet'], ['tpt', '🛒', 'TPT Helper']].map(([id, icon, label]) => (
+          {[['worksheet', '📝', 'Worksheet'], ['tpt', '🛒', 'TPT Helper'], ['planner', '📈', 'Planner']].map(([id, icon, label]) => (
             <button key={id} onClick={() => setActiveTab(id)} style={{
               flex: 1, padding: '12px 6px', border: 'none', cursor: 'pointer', fontSize: '12px',
               fontWeight: activeTab === id ? 700 : 500,
@@ -1035,7 +1058,7 @@ function App() {
 
           <div className="form-group">
             <label className="form-label">Copyright Text (Footer)</label>
-            <input type="text" className="form-input" value={copyrightText} onChange={(e) => setCopyrightText(e.target.value)} placeholder="© 2026 Attapol.k" />
+            <input type="text" className="form-input" value={copyrightText} onChange={(e) => setCopyrightText(e.target.value)} placeholder="© 2026 Math Worksheet" />
           </div>
 
           <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -1379,7 +1402,26 @@ function App() {
               />
             )}
             {activeTab === 'planner' && (
-              <TrendPlanner />
+              <TrendPlanner 
+                onApplyPreset={(p) => {
+                  const cfg = p.config || {};
+                  if (cfg.topic) setTopic(cfg.topic);
+                  if (cfg.operator) setOperator(cfg.operator);
+                  if (cfg.minVal !== undefined) setMinVal(cfg.minVal);
+                  if (cfg.maxVal !== undefined) setMaxVal(cfg.maxVal);
+                  if (cfg.problemCount) setProblemCount(cfg.problemCount);
+                  if (cfg.allowCarryBorrow !== undefined) setAllowCarryBorrow(cfg.allowCarryBorrow);
+                  if (cfg.missingPart) setMissingPart(cfg.missingPart);
+
+                  handleGenerate(cfg, cfg.problemCount);
+
+                  setActiveTab('worksheet');
+                  setShowElements(true);
+                  if (p.themeCategory) {
+                    setExpandedCategory(p.themeCategory);
+                  }
+                }}
+              />
             )}
           </div>
         </div>
