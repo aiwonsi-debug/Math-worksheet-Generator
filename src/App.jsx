@@ -113,6 +113,8 @@ function App() {
   const [expandedCategory, setExpandedCategory] = useState(null);
   const [zoom, setZoom] = useState(1);
   const [emojiStyle, setEmojiStyle] = useState('bw');
+  const [isFetchingEmoji, setIsFetchingEmoji] = useState(false);
+  const [emojiFetchStatus, setEmojiFetchStatus] = useState('');
   
   const updateEmojiStyle = (style) => {
     setEmojiStyle(style);
@@ -124,6 +126,50 @@ function App() {
       }
       return img;
     }));
+  };
+
+  const handleGenerateLiveEmoji = async (inputQuery) => {
+    const query = (inputQuery || clipartSearch).trim();
+    if (!query) return;
+
+    setIsFetchingEmoji(true);
+    setEmojiFetchStatus('Searching GitHub for vector clipart...');
+
+    try {
+      let hex = '';
+      if (/^[0-9a-fA-F_]+$/.test(query)) {
+        hex = query.toLowerCase();
+      } else {
+        const codePoints = [];
+        for (const char of query) {
+          codePoints.push(char.codePointAt(0).toString(16));
+        }
+        hex = codePoints.join('_');
+      }
+
+      const url = `https://raw.githubusercontent.com/googlefonts/noto-emoji/main/svg/emoji_u${hex}.svg`;
+      const resp = await fetch(url);
+      if (!resp.ok) {
+        throw new Error(`Emoji '${query}' (${hex}) not found on GitHub.`);
+      }
+
+      let svgText = await resp.text();
+      if (!svgText.includes('width=')) {
+        svgText = svgText.replace('<svg', '<svg width="512" height="512"');
+      }
+      const dataUrl = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgText)))}`;
+
+      const id = `clip_${Date.now()}`;
+      setCustomImages(prev => [...prev, { id, pageIndex: currentPage, src: dataUrl, x: 200, y: 300, width: 160, height: 160, grayscale: false }]);
+      setSelectedIds([id]);
+      setEmojiFetchStatus(`✅ Added clipart for '${query}'!`);
+      setTimeout(() => setEmojiFetchStatus(''), 3500);
+    } catch (err) {
+      setEmojiFetchStatus(`❌ ${err.message || 'Could not fetch emoji'}`);
+      setTimeout(() => setEmojiFetchStatus(''), 4500);
+    } finally {
+      setIsFetchingEmoji(false);
+    }
   };
   
   const stageRef = useRef(null);
@@ -475,7 +521,7 @@ function App() {
     const reader = new FileReader();
     reader.onload = (event) => {
       const id = `img_${Date.now()}`;
-      setCustomImages([...customImages, { id, pageIndex: currentPage, src: event.target.result, x: 100, y: 100, width: 150, height: 150, grayscale: true }]);
+      setCustomImages([...customImages, { id, pageIndex: currentPage, src: event.target.result, x: 100, y: 100, width: 150, height: 150, grayscale: false }]);
       setSelectedIds([id]);
     };
     reader.readAsDataURL(file);
@@ -488,7 +534,7 @@ function App() {
     
     if (clipart.isTabler) {
       const svgString = ReactDOMServer.renderToStaticMarkup(
-        React.createElement(clipart.component, { size: 100, color: emojiStyle === 'bw' ? 'black' : '#3b82f6', strokeWidth: 1.5 })
+        React.createElement(clipart.component, { size: 512, color: emojiStyle === 'bw' ? 'black' : '#3b82f6', strokeWidth: 1.5 })
       );
       let properSvg = svgString;
       if (!properSvg.includes('xmlns=')) {
@@ -496,10 +542,11 @@ function App() {
       }
       src = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(properSvg)))}`;
     } else {
-      src = `/emoji/${emojiStyle}/${clipart.code}.svg`;
+      const ext = clipart.ext || 'svg';
+      src = `/emoji/${emojiStyle}/${clipart.code}.${ext}`;
     }
     
-    setCustomImages(prev => [...prev, { id, pageIndex: currentPage, src, x: 200, y: 300, width: 100, height: 100, grayscale: true }]);
+    setCustomImages(prev => [...prev, { id, pageIndex: currentPage, src, x: 200, y: 300, width: 160, height: 160, grayscale: false }]);
     setSelectedIds([id]);
   };
 
@@ -1083,11 +1130,34 @@ function App() {
               <div style={{ position: 'relative', marginBottom: '0.75rem' }}>
                 <Search size={16} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                 <input 
-                  type="text" className="form-input" placeholder="Search clipart..." 
+                  type="text" className="form-input" placeholder="Search clipart or paste emoji (e.g. 🦁)..." 
                   value={clipartSearch} onChange={(e) => setClipartSearch(e.target.value)}
                   style={{ paddingLeft: '32px' }}
                 />
               </div>
+
+              {/* 1-Click Live Emoji / GitHub Clipart Fetcher */}
+              {clipartSearch.trim() && (
+                <button
+                  onClick={() => handleGenerateLiveEmoji(clipartSearch)}
+                  disabled={isFetchingEmoji}
+                  style={{
+                    width: '100%', marginBottom: '10px', padding: '8px 12px',
+                    background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
+                    color: 'white', border: 'none', borderRadius: '8px',
+                    fontSize: '0.76rem', fontWeight: 700, cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                    boxShadow: '0 2px 6px rgba(99,102,241,0.25)'
+                  }}
+                >
+                  {isFetchingEmoji ? '⏳ Fetching from GitHub...' : `✨ Fetch & Add '${clipartSearch}' Clipart`}
+                </button>
+              )}
+              {emojiFetchStatus && (
+                <div style={{ fontSize: '0.72rem', color: emojiFetchStatus.startsWith('✅') ? '#10b981' : '#ef4444', marginBottom: '8px', fontWeight: 600, textAlign: 'center' }}>
+                  {emojiFetchStatus}
+                </div>
+              )}
 
               <div style={{ paddingRight: '4px' }}>
                 {filteredClipart.map(cat => (
@@ -1111,7 +1181,7 @@ function App() {
                             {item.isTabler ? (
                               <item.component size={32} color={emojiStyle === 'bw' ? 'black' : '#3b82f6'} stroke={1.5} />
                             ) : (
-                              <img src={`/emoji/${emojiStyle}/${item.code}.svg`} alt={item.name} style={{ width: '32px', height: '32px' }} loading="lazy" />
+                              <img src={`/emoji/${emojiStyle}/${item.code}.${item.ext || 'svg'}`} alt={item.name} style={{ width: '32px', height: '32px', objectFit: 'contain' }} loading="lazy" />
                             )}
                             <span style={{ fontSize: '0.65rem', color: '#64748b', textAlign: 'center' }}>{item.name}</span>
                           </button>

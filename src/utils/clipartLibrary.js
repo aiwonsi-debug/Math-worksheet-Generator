@@ -2,9 +2,243 @@
 // License: SIL Open Font License 1.1 — Free for commercial use, no attribution required.
 // Source: https://github.com/googlefonts/noto-emoji
 
-const e = (code, name) => ({ name, code });
+const e = (code, name, ext = 'svg') => ({ name, code, ext });
 
 export const clipartCategories = [
+  {
+    name: '👻 AI Halloween Special',
+    items: [
+      e('ai_ghost', 'AI Ghost & Pumpkin', 'png'),
+      e('ai_cauldron', 'AI Potion Cauldron', 'png'),
+      e('ai_witch_hat', 'AI Magic Witch Hat', 'png'),
+      e('ai_pumpkin_cat', 'AI Pumpkin Cat', 'png'),
+    ]
+  },
+  {
+    name: '🎒 AI Back to School Special',
+    items: [
+      e('ai_school_bus', 'AI School Bus', 'svg'),
+      e('ai_backpack', 'AI School Backpack', 'svg'),
+      e('ai_pencil_character', 'AI Pencil Character', 'svg'),
+      e('ai_apple_books', 'AI Apple & Books', 'svg'),
+    ]
+  },
+  {
+    name: '🐶 AI Cute Animals Special',
+    items: [
+      e('ai_cute_puppy', 'AI Cute Puppy', 'svg'),
+    ]
+  },
+  {
+    name: '🎒 Back to School (10)',
+    items: [
+      e('1f34e', 'Apple'),
+      e('1f392', 'Backpack'),
+      e('270f', 'Pencil'),
+      e('1f4da', 'Books'),
+      e('1f68c', 'School Bus'),
+      e('1f4d0', 'Triangular Ruler'),
+      e('1f4cf', 'Ruler'),
+      e('2702', 'Scissors'),
+      e('1f393', 'Graduation Cap'),
+      e('1f3eb', 'School'),
+    ]
+  },
+  {
+    name: '🎃 Halloween (10)',
+    items: [
+      e('1f383', 'Jack-o-lantern'),
+      e('1f47b', 'Ghost'),
+      e('1f987', 'Bat'),
+      e('1f577', 'Spider'),
+      e('1f578', 'Spider Web'),
+      e('1f36c', 'Candy'),
+      e('1f480', 'Skull'),
+      e('26b0', 'Coffin'),
+      e('1f9d9', 'Witch/Mage'),
+      e('1f9df', 'Zombie'),
+    ]
+  },
+  {
+    name: '💯 100th Day of School (10)',
+    items: [
+      e('2b50', 'Star'),
+      e('1f389', 'Party Popper'),
+      e('1f388', 'Balloon'),
+      e('1f4af', '100 Mark'),
+      e('1f3c6', 'Trophy'),
+      e('1f3c5', 'Medal'),
+      e('1f451', 'Crown'),
+      e('2728', 'Sparkles'),
+      e('1f382', 'Birthday Cake'),
+      e('1f387', 'Sparkler Ribbon'),
+    ]
+  },
+  {
+    name: '🦃 Thanksgiving (10)',
+    items: [
+      e('1f983', 'Turkey'),
+      e('1f967', 'Pie'),
+      e('1f342', 'Fallen Leaf'),
+      e('1f33d', 'Ear of Corn'),
+      e('1f35e', 'Bread'),
+      e('1f357', 'Poultry Leg'),
+      e('1f330', 'Chestnut'),
+      e('1f360', 'Sweet Potato'),
+      e('1f34e', 'Red Apple'),
+      e('1f33e', 'Ear of Wheat'),
+    ]
+  },
+  {
+    name: '❄️ Winter (10)',
+    items: [
+      e('2603', 'Snowman'),
+      e('2744', 'Snowflake'),
+      e('26f8', 'Ice Skate'),
+      e('1f9e3', 'Scarf'),
+      e('1f9e4', 'Gloves'),
+      e('1f6f7', 'Sled'),
+      e('2615', 'Hot Cocoa'),
+      e('1f328', 'Snow Cloud'),
+      e('1fca8', 'Ice Cube'),
+      e('1f9e2', 'Winter Cap'),
+    ]
+  },
+  {
+    name: '🎄 Christmas (10)',
+    items: [
+      e('1f384', 'Christmas Tree'),
+      e('1f385', 'Santa Claus'),
+      e('1f381', 'Wrapped Gift'),
+      e('1f514', 'Bell'),
+      e('1f56f', 'Candle'),
+      e('1f98c', 'Deer'),
+      e('1f9e6', 'Stocking'),
+      e('2b50', 'Star'),
+      e('1f36a', 'Cookie'),
+      e('2603', 'Snowman'),
+    ]
+  },
+  {
+    name: '💕 Valentine (10)',
+    items: [
+      e('1f495', 'Two Hearts'),
+      e('1f339', 'Rose'),
+      e('1f48c', 'Love Letter'),
+      e('1f49d', 'Heart Ribbon'),
+      e('1f9c1', 'Cupcake'),
+      e('1f36b', 'Chocolate Bar'),
+      e('1f9fa', 'Teddy Bear'),
+      e('1f48d', 'Ring'),
+      e('1f496', 'Sparkling Heart'),
+      e('1f337', 'Tulip'),
+    ]
+  },
+  {
+    name: '☘️ St. Patrick\'s (10)',
+    items: [
+      e('2618', 'Shamrock'),
+      e('1f340', 'Four Leaf Clover'),
+      e('1f308', 'Rainbow'),
+      e('1f4b0', 'Money Bag'),
+      e('1f451', 'Crown'),
+      e('1f37a', 'Beer Mug'),
+      e('1f3a9', 'Top Hat'),
+      e('2728', 'Sparkles'),
+      e('1f4b8', 'Money with Wings'),
+      e('1f343', 'Fluttering Leaf'),
+    ]
+  },
+  {
+    name: '🐣 Easter (10)',
+    items: [
+      e('1f95a', 'Egg'),
+      e('1f430', 'Rabbit'),
+      e('1f425', 'Baby Chick'),
+      e('1f423', 'Hatching Chick'),
+      e('1f337', 'Tulip'),
+      e('1f338', 'Blossom'),
+      e('1f955', 'Carrot'),
+      e('1f98b', 'Butterfly'),
+      e('2600', 'Sun'),
+      e('1f33a', 'Hibiscus'),
+    ]
+  },
+  {
+    name: '🚀 Summer & Space (10)',
+    items: [
+      e('1f680', 'Rocket'),
+      e('2600', 'Sun'),
+      e('1fa90', 'Ringed Planet'),
+      e('1f6f8', 'UFO'),
+      e('2b50', 'Star'),
+      e('1f52d', 'Telescope'),
+      e('1f47d', 'Alien'),
+      e('1f6f0', 'Satellite'),
+      e('1f319', 'Crescent Moon'),
+      e('1f308', 'Rainbow'),
+    ]
+  },
+  {
+    name: '⚽ Sports (10)',
+    items: [
+      e('26bd', 'Soccer Ball'),
+      e('26be', 'Baseball'),
+      e('1f3c8', 'Football'),
+      e('1f3c0', 'Basketball'),
+      e('1f3be', 'Tennis'),
+      e('1f3d0', 'Volleyball'),
+      e('1f3c6', 'Trophy'),
+      e('1f3c5', 'Sports Medal'),
+      e('1f3b3', 'Bowling'),
+      e('1f3d2', 'Ice Hockey'),
+    ]
+  },
+  {
+    name: '🚗 Vehicles (10)',
+    items: [
+      e('1f697', 'Car'),
+      e('2708', 'Airplane'),
+      e('1f686', 'Train'),
+      e('1f6b2', 'Bicycle'),
+      e('1f68c', 'Bus'),
+      e('1f681', 'Helicopter'),
+      e('1f692', 'Fire Engine'),
+      e('1f693', 'Police Car'),
+      e('1f680', 'Rocket'),
+      e('1f6a2', 'Ship'),
+    ]
+  },
+  {
+    name: '☁️ Weather (10)',
+    items: [
+      e('2601', 'Cloud'),
+      e('1f327', 'Rain Cloud'),
+      e('2602', 'Umbrella'),
+      e('26a1', 'Lightning'),
+      e('2600', 'Sun'),
+      e('2744', 'Snowflake'),
+      e('1f32a', 'Tornado'),
+      e('1f308', 'Rainbow'),
+      e('1f321', 'Thermometer'),
+      e('26c5', 'Sun Behind Cloud'),
+    ]
+  },
+  {
+    name: '🎓 Community Helpers & Careers (10)',
+    items: [
+      e('1fa7a', 'Stethoscope'),
+      e('1f692', 'Fire Engine'),
+      e('1f693', 'Police Car'),
+      e('1f393', 'Graduation Cap'),
+      e('1f4da', 'Books'),
+      e('1f3a8', 'Artist Palette'),
+      e('1f373', 'Chef Utensils'),
+      e('1f4bc', 'Briefcase'),
+      e('1f52c', 'Microscope'),
+      e('1f9af', 'Helper Tool'),
+    ]
+  },
   {
     name: '😀 Faces',
     items: [
@@ -101,153 +335,45 @@ export const clipartCategories = [
     ]
   },
   {
-    name: '🎨 Objects',
+    name: '🦖 Dinosaurs',
     items: [
-      e('270f', 'Pencil'),
-      e('1f4da', 'Books'),
-      e('1f392', 'Backpack'),
-      e('1f514', 'Bell'),
-      e('1f3b5', 'Music Note'),
-      e('1f3a8', 'Palette'),
-      e('1f3c6', 'Trophy'),
-      e('1f381', 'Gift'),
-      e('1f388', 'Balloon'),
-      e('1f3c0', 'Basketball'),
+      e('1f996', 'T-Rex'),
     ]
   },
   {
-    name: '🎃 Halloween',
+    name: '🐮 Farm Animals',
     items: [
-      e('1f383', 'Jack-o-lantern'),
-      e('1f47b', 'Ghost'),
-      e('1f987', 'Bat'),
-      e('1f577', 'Spider'),
-      e('1f578', 'Spider Web'),
-      e('1f480', 'Skull'),
-      e('1f9d9', 'Witch'),
-      e('1f9df', 'Zombie'),
+      e('1f404', 'Cow'),
+      e('1f437', 'Pig'),
+      e('1f411', 'Sheep'),
+      e('1f414', 'Chicken'),
     ]
   },
   {
-    name: '➕ Math Symbols',
+    name: '🦈 Ocean Life',
     items: [
-      e('2795', 'Plus'),
-      e('2796', 'Minus'),
-      e('2716', 'Multiply'),
-      e('2797', 'Divide'),
+      e('1f988', 'Shark'),
+      e('1f980', 'Crab'),
+      e('1f419', 'Octopus'),
+      e('1f433', 'Whale'),
+      e('1f42c', 'Dolphin'),
     ]
   },
   {
-    name: '👋 Hands',
+    name: '📐 Math & Tools',
     items: [
-      e('1f44d', 'Thumbs Up'),
-      e('1f44b', 'Waving'),
-      e('1f44f', 'Clapping'),
-      e('270b', 'Raised Hand'),
-      e('270c', 'Victory'),
+      e('1f4d0', 'Triangular Ruler'),
+      e('1f4cf', 'Ruler'),
+      e('1f552', 'Clock'),
+      e('1f9ee', 'Abacus'),
+      e('1f4b8', 'Money'),
     ]
   },
   {
-    name: '✨ Symbols',
+    name: '🍿 Snacks & Treats',
     items: [
-      e('2764', 'Heart'),
-      e('2728', 'Sparkles'),
-      e('26a1', 'Lightning'),
-      e('1f525', 'Fire'),
-      e('1f4a5', 'Boom'),
-    ]
-  },
-  {
-    name: '👦 People',
-    items: [
-      e('1f466', 'Boy'),
-      e('1f467', 'Girl'),
-      e('1f9d1', 'Person'),
-    ]
-  },
-  {
-    name: '🦃 Thanksgiving',
-    items: [
-      e('1f983', 'Turkey'),
-      e('1f33d', 'Corn'),
-      e('1f967', 'Pie'),
-      e('1f342', 'Fallen Leaf'),
-    ]
-  },
-  {
-    name: '❄️ Winter',
-    items: [
-      e('2603', 'Snowman'),
-      e('2744', 'Snowflake'),
-      e('1f384', 'Christmas Tree'),
-      e('1f385', 'Santa'),
-    ]
-  },
-  {
-    name: '💕 Valentine',
-    items: [
-      e('1f495', 'Two Hearts'),
-      e('1f48d', 'Ring'),
-      e('1f339', 'Rose'),
-    ]
-  },
-  {
-    name: '☘️ St. Patrick\'s',
-    items: [
-      e('2618', 'Shamrock'),
-    ]
-  },
-  {
-    name: '🐣 Easter',
-    items: [
-      e('1f425', 'Baby Chick'),
-      e('1f95a', 'Egg'),
-      e('1f337', 'Tulip'),
-    ]
-  },
-  {
-    name: '🚀 Summer / 100th Day',
-    items: [
-      e('1f680', 'Rocket'),
-      e('2600', 'Sun'),
-      e('1f4af', '100'),
-      e('1f389', 'Party Popper'),
-    ]
-  },
-  {
-    name: '⚽ Sports',
-    items: [
-      e('26bd', 'Soccer Ball'),
-      e('26be', 'Baseball'),
-      e('1f3c8', 'Football'),
-      e('1f3c5', 'Medal'),
-    ]
-  },
-  {
-    name: '🚗 Vehicles',
-    items: [
-      e('1f697', 'Car'),
-      e('2708', 'Airplane'),
-      e('1f686', 'Train'),
-      e('1f6b2', 'Bicycle'),
-    ]
-  },
-  {
-    name: '☁️ Weather',
-    items: [
-      e('2601', 'Cloud'),
-      e('1f327', 'Rain Cloud'),
-      e('2602', 'Umbrella'),
-      e('1f32a', 'Tornado'),
-    ]
-  },
-  {
-    name: '🎓 Careers',
-    items: [
-      e('1fa7a', 'Stethoscope'),
-      e('1f692', 'Fire Engine'),
-      e('1f693', 'Police Car'),
-      e('1f393', 'Graduation Cap'),
+      e('1f37f', 'Popcorn'),
+      e('1f9c7', 'Waffle'),
     ]
   },
 ];

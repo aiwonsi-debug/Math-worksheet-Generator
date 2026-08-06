@@ -60,14 +60,19 @@ export const ResizableImage = ({ imageObj, isSelected, onSelect, onChange, onDra
   useEffect(() => {
     if (image && imgRef.current) {
       try {
-        imgRef.current.cache();
+        imgRef.current.clearCache();
+        if (imageObj.grayscale) {
+          const maxScale = Math.max(Math.abs(imageObj.scaleX || 1), Math.abs(imageObj.scaleY || 1), 1);
+          const ratio = Math.max(4, Math.ceil(maxScale * 4));
+          imgRef.current.cache({ pixelRatio: ratio });
+        }
         const layer = imgRef.current.getLayer();
         if (layer) layer.batchDraw();
       } catch (e) {
         console.warn("Could not cache image: ", e);
       }
     }
-  }, [image, imageObj.grayscale]);
+  }, [image, imageObj.grayscale, imageObj.scaleX, imageObj.scaleY, imageObj.width, imageObj.height]);
 
   const setRef = (node) => {
     imgRef.current = node;
@@ -622,7 +627,7 @@ const CanvasEditor = ({
   return (
     <div className="canvas-wrapper" style={{ boxShadow: 'var(--shadow-lg)', backgroundColor: 'white', position: 'relative' }}>
       <Stage 
-        width={paperWidth} height={paperHeight} ref={stageRef}
+        width={paperWidth} height={paperHeight} pixelRatio={Math.max(2, window.devicePixelRatio || 1)} ref={stageRef}
         onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp}
         onTouchStart={handleMouseDown} onTouchMove={handleMouseMove} onTouchEnd={handleMouseUp}
       >
