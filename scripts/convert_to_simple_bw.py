@@ -99,6 +99,9 @@ def main():
     
     converted_count = 0
     for filename in sorted(all_filenames):
+        if filename.startswith("ai_"):
+            continue
+            
         color_path = os.path.join(color_dir, filename)
         bw_path = os.path.join(bw_dir, filename)
         
@@ -108,15 +111,7 @@ def main():
         with open(source_path, 'r', encoding='utf-8', errors='ignore') as f:
             content = f.read()
 
-        # Determine viewBox width (default 128)
-        vb_match = re.search(r'viewBox=["\']\s*0\s+0\s+([0-9.]+)\s+([0-9.]+)', content)
-        if vb_match:
-            vb_w = float(vb_match.group(1))
-        else:
-            vb_w = 128.0
-
-        # Calculate normalized stroke-width (2.2px for 128 viewBox, 8.8px for 512 viewBox)
-        stroke_w = f"{round((vb_w / 128.0) * 2.2, 1)}"
+        stroke_w = "2.5"
             
         thin_svg = convert_svg_content_to_thin_lineart(content, stroke_w=stroke_w)
         
@@ -125,7 +120,7 @@ def main():
             
         converted_count += 1
 
-    print(f"🎉 Successfully converted {converted_count} SVGs into normalized, clean B&W line art!")
+    print(f"🎉 Successfully converted {converted_count} SVGs into bold, clean B&W line art!")
 
 if __name__ == "__main__":
     main()
