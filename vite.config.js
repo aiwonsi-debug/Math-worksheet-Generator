@@ -10,5 +10,17 @@ export default defineConfig({
     port: 5173,
     allowedHosts: true,
     cors: true
+  },
+  build: {
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-pdf': ['jspdf', 'html2canvas'],
+          'vendor-konva': ['konva', 'react-konva', 'react-konva-utils'],
+          'vendor-tabler': ['@tabler/icons-react']
+        }
+      }
+    }
   }
 })

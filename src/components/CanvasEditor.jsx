@@ -53,7 +53,7 @@ export const EditableText = ({ textObj, isSelected, onSelect, onChange, onDragEn
 
 import Konva from 'konva';
 
-export const ResizableImage = ({ imageObj, isSelected, onSelect, onChange, onDragEnd, nodeRef }) => {
+export const ResizableImage = ({ imageObj, _isSelected, onSelect, _onChange, onDragEnd, nodeRef }) => {
   const [image] = useImage(imageObj.src, 'anonymous');
   const imgRef = useRef();
 
@@ -553,7 +553,7 @@ const CanvasEditor = ({
     setSelectionBox(prev => ({ ...prev, x2: pos.x, y2: pos.y }));
   };
 
-  const handleMouseUp = (e) => {
+  const handleMouseUp = (_e) => {
     if (!selectionBox.visible) return;
     setSelectionBox(prev => ({ ...prev, visible: false }));
     
@@ -596,7 +596,7 @@ const CanvasEditor = ({
     }
   };
 
-  const handleTransformEnd = (e) => {
+  const handleTransformEnd = (_e) => {
     try {
       const nodes = trRef.current.nodes();
       if (nodes.length === 0) return;

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import ReactDOMServer from 'react-dom/server';
 import Download from '@tabler/icons-react/dist/esm/icons/IconDownload.mjs';
 import ImageIcon from '@tabler/icons-react/dist/esm/icons/IconPhoto.mjs';
@@ -553,6 +553,7 @@ function App() {
     setCurrentPage(targetStartPage);
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { handleGenerate(); }, []);
 
   const handleProblemDragEnd = (id, newX, newY) => setProblems(prev => prev.map(p => p.id === id ? { ...p, x: newX, y: newY } : p));
@@ -769,6 +770,7 @@ function App() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedIds, customTexts, customImages, problems]);
 
   const applyTextFormat = (attrs) => {
@@ -941,7 +943,7 @@ function App() {
         setHistory([{ problems: data.problems, customTexts: data.customTexts, customImages: data.customImages, totalPages }]);
         setHistoryIndex(0);
         setCurrentPage(0);
-      } catch (err) {
+      } catch {
         alert("Error loading project: Invalid JSON file.");
       }
     };

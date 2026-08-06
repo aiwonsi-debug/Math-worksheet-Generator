@@ -120,7 +120,7 @@ export default function CoverGeneratorModal({ isOpen, onClose, pageImages: captu
             const counter = theme.counters[count % theme.counters.length];
             if (counter.code) {
               let emoji = '';
-              try { emoji = String.fromCodePoint(parseInt(counter.code, 16)); } catch(e){}
+              try { emoji = String.fromCodePoint(parseInt(counter.code, 16)); } catch {}
               ctx.save();
               // Staggered grid for a better pattern
               const offsetX = (y / spacing) % 2 === 0 ? 0 : spacing / 2;

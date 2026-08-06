@@ -388,7 +388,7 @@ export default function TrendPlanner({ onApplyPreset }) {
           setCustomPresets(prev => [...prev, ...imported]);
           alert(`Successfully imported ${imported.length} custom presets!`);
         }
-      } catch (err) {
+      } catch {
         alert("Invalid JSON file format.");
       }
     };
