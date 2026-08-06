@@ -100,7 +100,7 @@ export const clipartCategories = [
       e('1f6f7', 'Sled'),
       e('2615', 'Hot Cocoa'),
       e('1f328', 'Snow Cloud'),
-      e('1fca8', 'Ice Cube'),
+      e('1f9ca', 'Ice Cube'),
       e('1f9e2', 'Winter Cap'),
     ]
   },

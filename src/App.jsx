@@ -1181,7 +1181,18 @@ function App() {
                             {item.isTabler ? (
                               <item.component size={32} color={emojiStyle === 'bw' ? 'black' : '#3b82f6'} stroke={1.5} />
                             ) : (
-                              <img src={`/emoji/${emojiStyle}/${item.code}.${item.ext || 'svg'}`} alt={item.name} style={{ width: '32px', height: '32px', objectFit: 'contain' }} loading="lazy" />
+                              <img 
+                                src={`/emoji/${emojiStyle}/${item.code}.${item.ext || 'svg'}`} 
+                                alt="" 
+                                style={{ width: '32px', height: '32px', objectFit: 'contain' }} 
+                                loading="lazy" 
+                                onError={(e) => {
+                                  if (emojiStyle === 'bw' && !e.currentTarget.getAttribute('data-retried')) {
+                                    e.currentTarget.setAttribute('data-retried', 'true');
+                                    e.currentTarget.src = `/emoji/color/${item.code}.${item.ext || 'svg'}`;
+                                  }
+                                }}
+                              />
                             )}
                             <span style={{ fontSize: '0.65rem', color: '#64748b', textAlign: 'center' }}>{item.name}</span>
                           </button>
