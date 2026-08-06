@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import IconBolt from '@tabler/icons-react/dist/esm/icons/IconBolt.mjs';
 import IconCheckbox from '@tabler/icons-react/dist/esm/icons/IconCheckbox.mjs';
 import IconBook from '@tabler/icons-react/dist/esm/icons/IconBook.mjs';
@@ -9,6 +9,10 @@ import IconRefresh from '@tabler/icons-react/dist/esm/icons/IconRefresh.mjs';
 import IconAward from '@tabler/icons-react/dist/esm/icons/IconAward.mjs';
 import IconStack from '@tabler/icons-react/dist/esm/icons/IconStack.mjs';
 import IconRocket from '@tabler/icons-react/dist/esm/icons/IconRocket.mjs';
+import IconPlus from '@tabler/icons-react/dist/esm/icons/IconPlus.mjs';
+import IconDownload from '@tabler/icons-react/dist/esm/icons/IconDownload.mjs';
+import IconUpload from '@tabler/icons-react/dist/esm/icons/IconUpload.mjs';
+import IconTrash from '@tabler/icons-react/dist/esm/icons/IconTrash.mjs';
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -191,42 +195,205 @@ export default function TrendPlanner({ onApplyPreset }) {
   const [activeTab, setActiveTab] = useState('presets'); // 'presets' | 'checklist' | 'recipes' | 'calendar'
   const [selectedTargetMonth, setSelectedTargetMonth] = useState(suggestedTarget);
 
-  // Persistent checklist state
-  const [checklist, setChecklist] = useState(() => {
+  // Custom Presets State (localStorage)
+  const [customPresets, setCustomPresets] = useState(() => {
     try {
-      const saved = localStorage.getItem('math_planner_checklist');
-      return saved ? JSON.parse(saved) : DEFAULT_CHECKLIST;
+      const saved = localStorage.getItem('math_planner_custom_presets');
+      return saved ? JSON.parse(saved) : [];
     } catch {
-      return DEFAULT_CHECKLIST;
+      return [];
     }
+  });
+
+  const [showAddCustomModal, setShowAddCustomModal] = useState(false);
+  const [newPresetForm, setNewPresetForm] = useState({
+    title: '',
+    icon: '✨',
+    season: 'All Year Round',
+    grade: 'K - Grade 2',
+    topic: 'basic_math',
+    operator: '+',
+    minVal: 1,
+    maxVal: 10,
+    problemCount: 10,
+    desc: ''
   });
 
   useEffect(() => {
     try {
-      localStorage.setItem('math_planner_checklist', JSON.stringify(checklist));
+      localStorage.setItem('math_planner_custom_presets', JSON.stringify(customPresets));
     } catch (err) {
-      console.error("Failed to save checklist:", err);
+      console.error("Failed to save custom presets:", err);
     }
-  }, [checklist]);
+  }, [customPresets]);
 
-  const toggleChecklistItem = (id) => {
-    setChecklist(prev => prev.map(item => item.id === id ? { ...item, done: !item.done } : item));
+  // All combined presets for lookup
+  const allPresets = useMemo(() => {
+    const defaultFlat = PRESET_CATEGORIES.flatMap(c => c.presets);
+    return [...defaultFlat, ...customPresets];
+  }, [customPresets]);
+
+  // Product Pipeline State (Per-product checklist)
+  const [pipelines, setPipelines] = useState(() => {
+    try {
+      const saved = localStorage.getItem('math_planner_pipelines');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.error(e);
+    }
+    return [
+      { id: 'default', title: 'Main Product Bundle Pipeline', checklist: DEFAULT_CHECKLIST }
+    ];
+  });
+
+  const [activePipelineId, setActivePipelineId] = useState('default');
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('math_planner_pipelines', JSON.stringify(pipelines));
+    } catch (err) {
+      console.error("Failed to save pipelines:", err);
+    }
+  }, [pipelines]);
+
+  // Current active pipeline
+  const activePipeline = useMemo(() => {
+    return pipelines.find(p => p.id === activePipelineId) || pipelines[0];
+  }, [pipelines, activePipelineId]);
+
+  // Migration helper for active checklist items
+  const currentChecklist = useMemo(() => {
+    const loaded = activePipeline.checklist || DEFAULT_CHECKLIST;
+    const savedMap = new Map(loaded.map(item => [item.id, item.done]));
+    return DEFAULT_CHECKLIST.map(def => ({
+      ...def,
+      done: savedMap.has(def.id) ? savedMap.get(def.id) : def.done
+    }));
+  }, [activePipeline]);
+
+  const toggleChecklistItem = (itemId) => {
+    setPipelines(prev => prev.map(pipeline => {
+      if (pipeline.id !== activePipeline.id) return pipeline;
+      const updatedChecklist = currentChecklist.map(item =>
+        item.id === itemId ? { ...item, done: !item.done } : item
+      );
+      return { ...pipeline, checklist: updatedChecklist };
+    }));
   };
 
   const resetChecklist = () => {
-    setChecklist(DEFAULT_CHECKLIST);
+    setPipelines(prev => prev.map(pipeline => {
+      if (pipeline.id !== activePipeline.id) return pipeline;
+      return { ...pipeline, checklist: DEFAULT_CHECKLIST };
+    }));
   };
 
-  const completedCount = checklist.filter(c => c.done).length;
-  const progressPercent = Math.round((completedCount / checklist.length) * 100);
+  const addPipeline = (title) => {
+    const newId = `pipe_${Date.now()}`;
+    const newPipe = { id: newId, title, checklist: DEFAULT_CHECKLIST };
+    setPipelines(prev => [...prev, newPipe]);
+    setActivePipelineId(newId);
+  };
+
+  const deletePipeline = (id) => {
+    if (pipelines.length <= 1) return;
+    setPipelines(prev => prev.filter(p => p.id !== id));
+    setActivePipelineId(pipelines[0].id);
+  };
+
+  const completedCount = currentChecklist.filter(c => c.done).length;
+  const progressPercent = Math.round((completedCount / currentChecklist.length) * 100);
 
   const currentMonthName = MONTHS[currentMonthIdx];
   const targetMonthName = MONTHS[selectedTargetMonth];
+
+  // Presets matching selected target month for Seasonal Lookahead Calendar
+  const seasonalMatchingPresets = useMemo(() => {
+    const monthShort = targetMonthName.substring(0, 3).toLowerCase();
+    const monthFull = targetMonthName.toLowerCase();
+    
+    return allPresets.filter(p => {
+      if (!p.season) return false;
+      const s = p.season.toLowerCase();
+      return s.includes(monthFull) || s.includes(monthShort);
+    });
+  }, [allPresets, targetMonthName]);
 
   const handleLaunchPreset = (preset) => {
     if (onApplyPreset) {
       onApplyPreset(preset);
     }
+  };
+
+  const handleAddCustomPreset = (e) => {
+    e.preventDefault();
+    if (!newPresetForm.title.trim()) return;
+    
+    const newPreset = {
+      id: `custom_${Date.now()}`,
+      icon: newPresetForm.icon || '✨',
+      title: newPresetForm.title.trim(),
+      season: newPresetForm.season || 'All Year Round',
+      grade: newPresetForm.grade || 'K - Grade 2',
+      topicName: newPresetForm.topic,
+      desc: newPresetForm.desc || 'Custom saved preset.',
+      isCustom: true,
+      config: {
+        topic: newPresetForm.topic,
+        operator: newPresetForm.operator,
+        minVal: Number(newPresetForm.minVal),
+        maxVal: Number(newPresetForm.maxVal),
+        problemCount: Number(newPresetForm.problemCount)
+      }
+    };
+
+    setCustomPresets(prev => [...prev, newPreset]);
+    setShowAddCustomModal(false);
+    setNewPresetForm({
+      title: '',
+      icon: '✨',
+      season: 'All Year Round',
+      grade: 'K - Grade 2',
+      topic: 'basic_math',
+      operator: '+',
+      minVal: 1,
+      maxVal: 10,
+      problemCount: 10,
+      desc: ''
+    });
+  };
+
+  const handleDeleteCustomPreset = (id) => {
+    setCustomPresets(prev => prev.filter(p => p.id !== id));
+  };
+
+  const handleExportPresetsJSON = () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(customPresets, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `custom_math_presets_${Date.now()}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+  };
+
+  const handleImportPresetsJSON = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const imported = JSON.parse(event.target.result);
+        if (Array.isArray(imported)) {
+          setCustomPresets(prev => [...prev, ...imported]);
+          alert(`Successfully imported ${imported.length} custom presets!`);
+        }
+      } catch (err) {
+        alert("Invalid JSON file format.");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
   };
 
   return (
@@ -248,7 +415,7 @@ export default function TrendPlanner({ onApplyPreset }) {
             </div>
           </div>
           <div style={{ background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(10px)', padding: '10px 16px', borderRadius: '12px', textAlign: 'right', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
-            <div style={{ fontSize: '11px', textTransform: 'uppercase', tracking: '0.05em', opacity: 0.8, fontWeight: 700 }}>CURRENT MONTH</div>
+            <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', opacity: 0.8, fontWeight: 700 }}>CURRENT MONTH</div>
             <div style={{ fontSize: '18px', fontWeight: 800 }}>{currentMonthName}</div>
             <div style={{ fontSize: '12px', marginTop: '2px', color: '#fef08a', fontWeight: 600 }}>Target Launch: {MONTHS[suggestedTarget]}</div>
           </div>
@@ -256,10 +423,10 @@ export default function TrendPlanner({ onApplyPreset }) {
       </div>
 
       {/* Sub Navigation Tabs */}
-      <div style={{ display: 'flex', gap: '8px', borderBottom: '2px solid #e2e8f0', paddingBottom: '2px' }}>
+      <div style={{ display: 'flex', gap: '8px', borderBottom: '2px solid var(--color-border)', paddingBottom: '2px', flexWrap: 'wrap' }}>
         {[
           { id: 'presets', label: '⚡ 1-Click Launch Presets', icon: IconBolt },
-          { id: 'checklist', label: `📋 Bundle Pipeline (${completedCount}/${checklist.length})`, icon: IconCheckbox },
+          { id: 'checklist', label: `📋 Bundle Pipeline (${completedCount}/${currentChecklist.length})`, icon: IconCheckbox },
           { id: 'recipes', label: '📦 Product Blueprints & Pricing', icon: IconBook },
           { id: 'calendar', label: '📅 Seasonal Lookahead Calendar', icon: IconCalendar },
         ].map(tab => {
@@ -273,8 +440,8 @@ export default function TrendPlanner({ onApplyPreset }) {
                 display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px',
                 border: 'none', background: 'transparent', cursor: 'pointer',
                 fontWeight: isActive ? 700 : 500, fontSize: '14px',
-                color: isActive ? '#4f46e5' : '#64748b',
-                borderBottom: isActive ? '3px solid #4f46e5' : '3px solid transparent',
+                color: isActive ? 'var(--color-primary)' : 'var(--color-text-muted)',
+                borderBottom: isActive ? '3px solid var(--color-primary)' : '3px solid transparent',
                 marginBottom: '-2px', transition: 'all 0.15s ease'
               }}
             >
@@ -287,6 +454,94 @@ export default function TrendPlanner({ onApplyPreset }) {
       {/* TAB 1: 1-CLICK LAUNCH PRESETS */}
       {activeTab === 'presets' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          
+          {/* Custom Presets Controls Bar */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', background: 'white', padding: '14px 18px', borderRadius: '12px', border: '1px solid var(--color-border)' }}>
+            <div style={{ fontWeight: 700, fontSize: '14px', color: 'var(--color-text-main)' }}>
+              ⭐ Custom & Saved Presets ({customPresets.length})
+            </div>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <button
+                onClick={() => setShowAddCustomModal(true)}
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', background: '#4f46e5', color: 'white', border: 'none', borderRadius: '8px', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}
+              >
+                <IconPlus size={14} /> Add Custom Preset
+              </button>
+              <button
+                onClick={handleExportPresetsJSON}
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', background: '#f8fafc', color: '#475569', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}
+                title="Export Custom Presets to JSON"
+              >
+                <IconDownload size={14} /> Export JSON
+              </button>
+              <label
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', background: '#f8fafc', color: '#475569', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}
+                title="Import Custom Presets from JSON"
+              >
+                <IconUpload size={14} /> Import JSON
+                <input type="file" accept=".json" onChange={handleImportPresetsJSON} style={{ display: 'none' }} />
+              </label>
+            </div>
+          </div>
+
+          {/* Render Custom Presets if any */}
+          {customPresets.length > 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div style={{ fontSize: '17px', fontWeight: 800, color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                🌟 Your Saved Custom Presets
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))', gap: '16px' }}>
+                {customPresets.map(p => (
+                  <div
+                    key={p.id}
+                    className="planner-card"
+                    style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'relative' }}
+                  >
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '10px' }}>
+                        <span style={{ fontSize: '28px' }}>{p.icon}</span>
+                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                          <span className="badge-chip">{p.grade}</span>
+                          <button
+                            onClick={() => handleDeleteCustomPreset(p.id)}
+                            style={{ border: 'none', background: 'transparent', color: '#ef4444', cursor: 'pointer', padding: '2px' }}
+                            title="Delete Preset"
+                          >
+                            <IconTrash size={15} />
+                          </button>
+                        </div>
+                      </div>
+                      <div style={{ fontWeight: 800, fontSize: '15px', color: '#0f172a', marginBottom: '4px' }}>
+                        {p.title}
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#6366f1', fontWeight: 600, marginBottom: '8px' }}>
+                        📅 Season: {p.season}
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.5, marginBottom: '14px' }}>
+                        {p.desc}
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => handleLaunchPreset(p)}
+                      style={{
+                        width: '100%', padding: '10px 14px',
+                        background: 'linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)',
+                        color: 'white', border: 'none', borderRadius: '8px',
+                        fontWeight: 700, fontSize: '13px', cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                        boxShadow: '0 4px 12px rgba(79, 70, 229, 0.2)'
+                      }}
+                    >
+                      <IconBolt size={15} /> Launch Custom Preset <IconArrowRight size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Render Default Preset Categories */}
           {PRESET_CATEGORIES.map(cat => (
             <div key={cat.id} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div style={{ fontSize: '17px', fontWeight: 800, color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -297,19 +552,13 @@ export default function TrendPlanner({ onApplyPreset }) {
                 {cat.presets.map(p => (
                   <div
                     key={p.id}
-                    style={{
-                      background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0',
-                      padding: '18px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.04)', transition: 'all 0.2s ease',
-                      position: 'relative'
-                    }}
+                    className="planner-card"
+                    style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'relative' }}
                   >
                     <div>
                       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '10px' }}>
                         <span style={{ fontSize: '28px' }}>{p.icon}</span>
-                        <span style={{ fontSize: '11px', fontWeight: 700, padding: '4px 8px', borderRadius: '20px', background: '#f1f5f9', color: '#475569' }}>
-                          {p.grade}
-                        </span>
+                        <span className="badge-chip">{p.grade}</span>
                       </div>
                       <div style={{ fontWeight: 800, fontSize: '15px', color: '#0f172a', marginBottom: '4px' }}>
                         {p.title}
@@ -347,10 +596,48 @@ export default function TrendPlanner({ onApplyPreset }) {
 
       {/* TAB 2: INTERACTIVE BUNDLE PIPELINE & CHECKLIST */}
       {activeTab === 'checklist' && (
-        <div style={{ background: 'white', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div style={{ background: 'white', borderRadius: '14px', border: '1px solid var(--color-border)', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          
+          {/* Pipeline Selector / Multi-Product Manager */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', background: '#f8fafc', padding: '12px 16px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <label htmlFor="pipeline-select" style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>Active Product Pipeline:</label>
+              <select
+                id="pipeline-select"
+                value={activePipelineId}
+                onChange={(e) => setActivePipelineId(e.target.value)}
+                style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', fontWeight: 600, background: 'white' }}
+              >
+                {pipelines.map(p => (
+                  <option key={p.id} value={p.id}>{p.title}</option>
+                ))}
+              </select>
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <button
+                onClick={() => {
+                  const title = prompt("Enter new product bundle title:");
+                  if (title) addPipeline(title);
+                }}
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 10px', background: '#4f46e5', color: 'white', border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}
+              >
+                <IconPlus size={14} /> New Product Pipeline
+              </button>
+              {pipelines.length > 1 && (
+                <button
+                  onClick={() => deletePipeline(activePipelineId)}
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 10px', background: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}
+                >
+                  <IconTrash size={14} /> Delete
+                </button>
+              )}
+            </div>
+          </div>
+
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
             <div>
-              <div style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>📋 Active Product Bundle Pipeline</div>
+              <div style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>📋 {activePipeline.title} Checklist</div>
               <div style={{ fontSize: '13px', color: '#64748b', marginTop: '2px' }}>
                 Track your product creation steps from initial math setup to exporting and TPT listing.
               </div>
@@ -366,7 +653,7 @@ export default function TrendPlanner({ onApplyPreset }) {
           {/* Progress Bar */}
           <div style={{ background: '#f1f5f9', borderRadius: '10px', padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: 700, color: '#334155' }}>
-              <span>Bundle Progress ({completedCount} of {checklist.length} completed)</span>
+              <span>Bundle Progress ({completedCount} of {currentChecklist.length} completed)</span>
               <span>{progressPercent}%</span>
             </div>
             <div style={{ width: '100%', height: '10px', background: '#e2e8f0', borderRadius: '5px', overflow: 'hidden' }}>
@@ -374,15 +661,17 @@ export default function TrendPlanner({ onApplyPreset }) {
             </div>
           </div>
 
-          {/* Checklist Items */}
+          {/* Checklist Items with Keyboard & Accessibility Fix */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {checklist.map((item, idx) => (
-              <div
+            {currentChecklist.map((item, idx) => (
+              <button
+                type="button"
                 key={item.id}
                 onClick={() => toggleChecklistItem(item.id)}
+                aria-pressed={item.done}
                 style={{
                   display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px',
-                  borderRadius: '10px', border: '1px solid', cursor: 'pointer',
+                  borderRadius: '10px', border: '1px solid', cursor: 'pointer', textAlign: 'left',
                   background: item.done ? '#f0fdf4' : '#fff',
                   borderColor: item.done ? '#bbf7d0' : '#e2e8f0',
                   transition: 'all 0.15s ease'
@@ -400,7 +689,7 @@ export default function TrendPlanner({ onApplyPreset }) {
                 <div style={{ flex: 1, fontSize: '14px', fontWeight: item.done ? 600 : 500, color: item.done ? '#15803d' : '#334155', textDecoration: item.done ? 'line-through' : 'none' }}>
                   {idx + 1}. {item.label}
                 </div>
-              </div>
+              </button>
             ))}
           </div>
 
@@ -425,10 +714,10 @@ export default function TrendPlanner({ onApplyPreset }) {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '18px' }}>
             {PACK_RECIPES.map((recipe, idx) => (
-              <div key={idx} style={{ background: 'white', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+              <div key={idx} className="planner-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '16px' }}>
                 <div>
                   <div style={{ fontWeight: 800, fontSize: '17px', color: '#0f172a', marginBottom: '6px' }}>{recipe.title}</div>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#dcfce7', color: '#15803d', padding: '4px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: 700, marginBottom: '12px' }}>
+                  <div className="badge-chip success" style={{ marginBottom: '12px' }}>
                     <IconCurrencyDollar size={13} /> Recommended Price: {recipe.price}
                   </div>
                   <div style={{ fontSize: '13px', color: '#334155', marginBottom: '6px' }}><strong>Scope:</strong> {recipe.target}</div>
@@ -437,7 +726,7 @@ export default function TrendPlanner({ onApplyPreset }) {
 
                 <button
                   onClick={() => {
-                    const preset = PRESET_CATEGORIES[0].presets.find(p => p.id === recipe.presetId) || PRESET_CATEGORIES[0].presets[0];
+                    const preset = allPresets.find(p => p.id === recipe.presetId) || allPresets[0];
                     handleLaunchPreset(preset);
                   }}
                   style={{ width: '100%', padding: '10px', background: '#1e293b', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 700, fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
@@ -452,10 +741,13 @@ export default function TrendPlanner({ onApplyPreset }) {
 
       {/* TAB 4: SEASONAL LOOKAHEAD CALENDAR */}
       {activeTab === 'calendar' && (
-        <div style={{ background: 'white', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div style={{ background: 'white', borderRadius: '14px', border: '1px solid var(--color-border)', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-            <div style={{ fontSize: '14px', fontWeight: 700, color: '#334155' }}>Select Target Sales Month:</div>
+            <label htmlFor="target-month-select" style={{ fontSize: '14px', fontWeight: 700, color: '#334155' }}>
+              Select Target Sales Month:
+            </label>
             <select
+              id="target-month-select"
               value={selectedTargetMonth}
               onChange={(e) => setSelectedTargetMonth(parseInt(e.target.value))}
               style={{ padding: '8px 14px', borderRadius: '8px', border: '2px solid #e2e8f0', fontSize: '14px', fontWeight: 700, color: '#1e293b', outline: 'none', background: 'white' }}
@@ -475,6 +767,168 @@ export default function TrendPlanner({ onApplyPreset }) {
             <div style={{ fontSize: '13px', color: '#64748b', lineHeight: 1.6 }}>
               TPT data shows that teachers search and purchase seasonal resources <strong>4 to 8 weeks before</strong> the holiday or month begins. Building and uploading your products during {MONTHS[(selectedTargetMonth + 10) % 12]} ensures maximum search indexing and early reviews!
             </div>
+          </div>
+
+          {/* Connected Seasonal Presets Recommendation Section */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ fontWeight: 800, fontSize: '16px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              ⚡ Recommended Presets to Start Building for {targetMonthName} ({seasonalMatchingPresets.length}):
+            </div>
+            {seasonalMatchingPresets.length > 0 ? (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '14px' }}>
+                {seasonalMatchingPresets.map(p => (
+                  <div key={p.id} className="planner-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '12px' }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                        <span style={{ fontSize: '24px' }}>{p.icon}</span>
+                        <div style={{ fontWeight: 800, fontSize: '14px', color: '#0f172a' }}>{p.title}</div>
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#475569', marginBottom: '6px' }}>{p.desc}</div>
+                      <div className="badge-chip primary">{p.season}</div>
+                    </div>
+                    <button
+                      onClick={() => handleLaunchPreset(p)}
+                      style={{ width: '100%', padding: '8px 12px', background: '#4f46e5', color: 'white', border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
+                    >
+                      <IconBolt size={14} /> Launch in Generator
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{ padding: '16px', background: '#f8fafc', borderRadius: '8px', border: '1px dashed #cbd5e1', fontSize: '13px', color: '#64748b' }}>
+                No specific seasonal preset tagged for {targetMonthName} yet. Try launching an evergreen preset or create a Custom Preset!
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Modal for Adding Custom Preset */}
+      {showAddCustomModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div style={{ background: 'white', borderRadius: '16px', padding: '24px', maxWidth: '500px', width: '100%', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
+            <div style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>✨ Create Custom Preset</div>
+            <form onSubmit={handleAddCustomPreset} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>Preset Title *</label>
+                <input
+                  type="text" required
+                  placeholder="e.g. Summer Addition Challenge"
+                  value={newPresetForm.title}
+                  onChange={e => setNewPresetForm({ ...newPresetForm, title: e.target.value })}
+                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', boxSizing: 'border-box' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div>
+                  <label style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>Icon (Emoji)</label>
+                  <input
+                    type="text"
+                    value={newPresetForm.icon}
+                    onChange={e => setNewPresetForm({ ...newPresetForm, icon: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', boxSizing: 'border-box' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>Season / Month</label>
+                  <input
+                    type="text"
+                    value={newPresetForm.season}
+                    onChange={e => setNewPresetForm({ ...newPresetForm, season: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', boxSizing: 'border-box' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div>
+                  <label style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>Topic</label>
+                  <select
+                    value={newPresetForm.topic}
+                    onChange={e => setNewPresetForm({ ...newPresetForm, topic: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', boxSizing: 'border-box' }}
+                  >
+                    <option value="basic_math">Basic Arithmetic</option>
+                    <option value="missing_number">Missing Numbers</option>
+                    <option value="number_bond">Number Bonds</option>
+                    <option value="ten_frame">Ten Frames</option>
+                    <option value="ten_frame_comparison">Ten Frame Compare</option>
+                    <option value="number_line">Number Line</option>
+                    <option value="word_problem">Word Problem</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>Operator</label>
+                  <select
+                    value={newPresetForm.operator}
+                    onChange={e => setNewPresetForm({ ...newPresetForm, operator: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', boxSizing: 'border-box' }}
+                  >
+                    <option value="+">Addition (+)</option>
+                    <option value="-">Subtraction (-)</option>
+                    <option value="*">Multiplication (×)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+                <div>
+                  <label style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>Min Val</label>
+                  <input
+                    type="number"
+                    value={newPresetForm.minVal}
+                    onChange={e => setNewPresetForm({ ...newPresetForm, minVal: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', boxSizing: 'border-box' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>Max Val</label>
+                  <input
+                    type="number"
+                    value={newPresetForm.maxVal}
+                    onChange={e => setNewPresetForm({ ...newPresetForm, maxVal: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', boxSizing: 'border-box' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>Problems</label>
+                  <input
+                    type="number"
+                    value={newPresetForm.problemCount}
+                    onChange={e => setNewPresetForm({ ...newPresetForm, problemCount: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', boxSizing: 'border-box' }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>Description</label>
+                <textarea
+                  value={newPresetForm.desc}
+                  onChange={e => setNewPresetForm({ ...newPresetForm, desc: e.target.value })}
+                  placeholder="Short description for this preset..."
+                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', boxSizing: 'border-box', minHeight: '60px' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '10px' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowAddCustomModal(false)}
+                  style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#f8fafc', color: '#475569', fontWeight: 600, fontSize: '13px', cursor: 'pointer' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#4f46e5', color: 'white', fontWeight: 700, fontSize: '13px', cursor: 'pointer' }}
+                >
+                  Save Preset
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

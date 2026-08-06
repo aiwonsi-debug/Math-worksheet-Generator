@@ -75,11 +75,17 @@ import { generateWorksheet } from './utils/generatorEngine';
 import { clipartCategories } from './utils/clipartLibrary';
 import CanvasEditor from './components/CanvasEditor';
 import CoverGeneratorModal from './components/CoverGeneratorModal';
-import TPTListingHelper from './components/TPTListingHelper';
-import TrendPlanner from './components/TrendPlanner';
+const TPTListingHelper = React.lazy(() => import('./components/TPTListingHelper'));
+const TrendPlanner = React.lazy(() => import('./components/TrendPlanner'));
 import "./index.css";
 
 const HEADER_NAME_DATE_TEXT = "Name : ............................................................................................................................Date : ........................................................ ";
+
+const NAV_TABS = [
+  ['worksheet', '📝', 'Worksheet'],
+  ['tpt', '🛒', 'TPT Helper'],
+  ['planner', '📈', 'Planner']
+];
 
 function App() {
   const [topic, setTopic] = useState('basic_math');
@@ -994,7 +1000,7 @@ function App() {
       <aside className="sidebar">
         {/* Tab Navigation */}
         <div style={{ display: 'flex', borderBottom: '1px solid #e2e8f0', background: '#f8fafc' }}>
-          {[['worksheet', '📝', 'Worksheet'], ['tpt', '🛒', 'TPT Helper'], ['planner', '📈', 'Planner']].map(([id, icon, label]) => (
+          {NAV_TABS.map(([id, icon, label]) => (
             <button key={id} onClick={() => setActiveTab(id)} style={{
               flex: 1, padding: '12px 6px', border: 'none', cursor: 'pointer', fontSize: '12px',
               fontWeight: activeTab === id ? 700 : 500,
@@ -1391,7 +1397,7 @@ function App() {
           {/* Sidebar still visible with tabs */}
           <div style={{ width: '280px', background: '#f8fafc', borderRight: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', borderBottom: '1px solid #e2e8f0' }}>
-              {[['worksheet', '📝', 'Worksheet'], ['tpt', '🛒', 'TPT Helper'], ['planner', '📈', 'Planner']].map(([id, icon, label]) => (
+              {NAV_TABS.map(([id, icon, label]) => (
                 <button key={id} onClick={() => setActiveTab(id)} style={{
                   flex: 1, padding: '12px 6px', border: 'none', cursor: 'pointer', fontSize: '12px',
                   fontWeight: activeTab === id ? 700 : 500,
@@ -1417,37 +1423,40 @@ function App() {
           </div>
           {/* Main TPT content */}
           <div style={{ flex: 1, overflowY: 'auto', background: '#f1f5f9' }}>
-            {activeTab === 'tpt' && (
-              <TPTListingHelper
-                topic={topic}
-                operator={operator}
-                maxVal={maxVal}
-                totalPages={totalPages}
-                numProblems={problemCount}
-              />
-            )}
-            {activeTab === 'planner' && (
-              <TrendPlanner 
-                onApplyPreset={(p) => {
-                  const cfg = p.config || {};
-                  if (cfg.topic) setTopic(cfg.topic);
-                  if (cfg.operator) setOperator(cfg.operator);
-                  if (cfg.minVal !== undefined) setMinVal(cfg.minVal);
-                  if (cfg.maxVal !== undefined) setMaxVal(cfg.maxVal);
-                  if (cfg.problemCount) setProblemCount(cfg.problemCount);
-                  if (cfg.allowCarryBorrow !== undefined) setAllowCarryBorrow(cfg.allowCarryBorrow);
-                  if (cfg.missingPart) setMissingPart(cfg.missingPart);
+            <React.Suspense fallback={<div style={{ padding: '40px', textAlign: 'center', color: '#64748b', fontSize: '14px', fontWeight: 600 }}>Loading Planner...</div>}>
+              {activeTab === 'tpt' && (
+                <TPTListingHelper
+                  topic={topic}
+                  operator={operator}
+                  maxVal={maxVal}
+                  totalPages={totalPages}
+                  numProblems={problemCount}
+                />
+              )}
+              {activeTab === 'planner' && (
+                <TrendPlanner 
+                  onApplyPreset={(p) => {
+                    const cfg = p.config || {};
+                    if (cfg.topic) setTopic(cfg.topic);
+                    if (cfg.operator) setOperator(cfg.operator);
+                    if (cfg.minVal !== undefined) setMinVal(cfg.minVal);
+                    if (cfg.maxVal !== undefined) setMaxVal(cfg.maxVal);
+                    if (cfg.problemCount) setProblemCount(cfg.problemCount);
+                    if (cfg.allowCarryBorrow !== undefined) setAllowCarryBorrow(cfg.allowCarryBorrow);
+                    if (cfg.missingPart) setMissingPart(cfg.missingPart);
+                    if (cfg.sequenceLength !== undefined) setSequenceLength(cfg.sequenceLength);
 
-                  handleGenerate(cfg, cfg.problemCount);
+                    handleGenerate(cfg, cfg.problemCount);
 
-                  setActiveTab('worksheet');
-                  setShowElements(true);
-                  if (p.themeCategory) {
-                    setExpandedCategory(p.themeCategory);
-                  }
-                }}
-              />
-            )}
+                    setActiveTab('worksheet');
+                    setShowElements(true);
+                    if (p.themeCategory) {
+                      setExpandedCategory(p.themeCategory);
+                    }
+                  }}
+                />
+              )}
+            </React.Suspense>
           </div>
         </div>
       )}
