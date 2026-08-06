@@ -111,7 +111,7 @@ def main():
         with open(source_path, 'r', encoding='utf-8', errors='ignore') as f:
             content = f.read()
 
-        stroke_w = "2.5"
+        stroke_w = "3.8"
             
         thin_svg = convert_svg_content_to_thin_lineart(content, stroke_w=stroke_w)
         
