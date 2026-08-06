@@ -339,7 +339,7 @@ function App() {
           const nameId = `header_name_date_${pageIdx}`;
           const titleId = `header_title_${pageIdx}`;
           if (!updated.find(t => t.id === nameId)) {
-             updated.push({ id: nameId, pageIndex: pageIdx, text: 'Name : ...........................................................Date : ...........................', x: 50, y: 50, fontSize: 24, fontFamily: 'Comic Neue', isBold: false, isItalic: false, isUnderline: false, align: 'left', fill: '#0f172a' });
+             updated.push({ id: nameId, pageIndex: pageIdx, text: 'Name : ................................................. Date : ....................', x: 50, y: 50, fontSize: 20, fontFamily: 'Comic Neue', isBold: false, isItalic: false, isUnderline: false, align: 'left', fill: '#0f172a' });
           }
           const existingTitle = updated.find(t => t.id === titleId);
           if (existingTitle) existingTitle.text = titleText;
@@ -460,7 +460,7 @@ function App() {
         const pageIdx = varStartPage + p;
         const nameId = `header_name_date_${pageIdx}`;
         const titleId = `header_title_${pageIdx}`;
-        allNewTexts.push({ id: nameId, pageIndex: pageIdx, text: 'Name : ...........................................................Date : ...........................', x: 50, y: 50, fontSize: 24, fontFamily: 'Comic Neue', isBold: false, isItalic: false, isUnderline: false, align: 'left', fill: '#0f172a' });
+        allNewTexts.push({ id: nameId, pageIndex: pageIdx, text: 'Name : ................................................. Date : ....................', x: 50, y: 50, fontSize: 20, fontFamily: 'Comic Neue', isBold: false, isItalic: false, isUnderline: false, align: 'left', fill: '#0f172a' });
         allNewTexts.push({ id: titleId, pageIndex: pageIdx, text: titleText, x: 220, y: 150, fontSize: 42, fontFamily: 'Comic Neue', isBold: true, isItalic: false, isUnderline: false, align: 'left', fill: '#000000' });
       }
       
@@ -615,7 +615,7 @@ function App() {
     
     setCustomTexts(prev => [
       ...prev,
-      { id: `header_name_date_${newPageIdx}`, pageIndex: newPageIdx, text: 'Name : ...........................................................Date : ...........................', x: 50, y: 50, fontSize: 24, fontFamily: 'Comic Neue', isBold: false, isItalic: false, isUnderline: false, align: 'left', fill: '#0f172a' },
+      { id: `header_name_date_${newPageIdx}`, pageIndex: newPageIdx, text: 'Name : ................................................. Date : ....................', x: 50, y: 50, fontSize: 20, fontFamily: 'Comic Neue', isBold: false, isItalic: false, isUnderline: false, align: 'left', fill: '#0f172a' },
       { id: `header_title_${newPageIdx}`, pageIndex: newPageIdx, text: titleText, x: 220, y: 150, fontSize: 42, fontFamily: 'Comic Neue', isBold: true, isItalic: false, isUnderline: false, align: 'left', fill: '#000000' }
     ]);
   };
