@@ -7,10 +7,10 @@ def enhance_svg(filepath):
     with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
         content = f.read()
         
-    # Replace thick strokes with clean, thin 1.2 stroke-width for detailed line art
-    new_content = re.sub(r'stroke-width="2\.[0-9]+"', 'stroke-width="1.2"', content)
-    new_content = re.sub(r'stroke-width="3\.[0-9]+"', 'stroke-width="1.2"', new_content)
-    new_content = re.sub(r'stroke-width="2"', 'stroke-width="1.2"', new_content)
+    # Replace thick strokes with clean 1.8 stroke-width for balanced line art
+    new_content = re.sub(r'stroke-width="2\.[0-9]+"', 'stroke-width="1.8"', content)
+    new_content = re.sub(r'stroke-width="3\.[0-9]+"', 'stroke-width="1.8"', new_content)
+    new_content = re.sub(r'stroke-width="1\.[0-6]"', 'stroke-width="1.8"', new_content)
     
     # If content changed, save back
     if new_content != content:

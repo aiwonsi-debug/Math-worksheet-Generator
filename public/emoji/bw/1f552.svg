@@ -4,13 +4,13 @@
 	 viewBox="0 0 128 128" style="enable-background:new 0 0 128 128;" xml:space="preserve">
 <g>
 	<g>
-		<circle cx="64" cy="64" r="60" fill="#ffffff" stroke="#000000" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-		<circle cx="64" cy="64" r="48.14" fill="#ffffff" stroke="#000000" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+		<circle cx="64" cy="64" r="60" fill="#ffffff" stroke="#000000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+		<circle cx="64" cy="64" r="48.14" fill="#ffffff" stroke="#000000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
 		<path d="M50.3,15.06c-6.42,1.86-15.41,4.71-25.03,16.2C15.77,42.63,13.81,55.84,13.2,64.95
 			c0,0-5.49,6.87-5.75,5.59c-2.07-9.95,2.11-32.19,13.04-43.95C33.21,12.91,49.75,8.06,55.73,7.15C56.76,6.99,52.25,14.5,50.3,15.06
-			z" fill="#ffffff" stroke="#000000" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+			z" fill="#ffffff" stroke="#000000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
 		<g>
-			<circle cx="64" cy="64" r="45.59" fill="#ffffff" stroke="#000000" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+			<circle cx="64" cy="64" r="45.59" fill="#ffffff" stroke="#000000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
 		</g>
 	</g>
 	<g>

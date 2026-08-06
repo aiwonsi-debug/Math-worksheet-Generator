@@ -103,7 +103,7 @@ def trace_image_to_svg_vector(input_path, output_path):
         for px, py in path[1:]:
             d_pts.append(f"L {px} {py}")
         d_str = " ".join(d_pts)
-        svg_lines.append(f'  <path d="{d_str}" fill="none" stroke="black" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>')
+        svg_lines.append(f'  <path d="{d_str}" fill="none" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>')
 
     svg_lines.append('</svg>')
 

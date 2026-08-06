@@ -105,7 +105,7 @@ def main():
         with open(svg_path, 'r', encoding='utf-8', errors='ignore') as f:
             content = f.read()
             
-        thin_svg = convert_svg_content_to_thin_lineart(content, stroke_w="1.2")
+        thin_svg = convert_svg_content_to_thin_lineart(content, stroke_w="1.8")
         
         with open(bw_path, 'w', encoding='utf-8') as f:
             f.write(thin_svg)
