@@ -89,7 +89,7 @@ function App() {
   const [orientation, setOrientation] = useState('horizontal');
   const [missingPart, setMissingPart] = useState('first');
   const [sequenceLength, setSequenceLength] = useState(10);
-  const [copyrightText, setCopyrightText] = useState('© 2026 Attapol K. All rights reserved. For personal or single-classroom use only. Redistribution or resale is prohibited.');
+  const [copyrightText, setCopyrightText] = useState('© 2026 Attapol.k All rights reserved. For personal or single-classroom use only. Redistribution or resale is prohibited.');
   
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -816,7 +816,7 @@ function App() {
         'Thank you for downloading this resource!',
         '',
         'Terms of Use:',
-        '© 2026 Math Worksheet Generator.',
+        '© 2026 Attapol.k',
         'All rights reserved. Purchase or download of this item entitles the',
         'purchaser the right to reproduce the pages in limited quantities for',
         'single classroom use only. Duplication for an entire school, an entire',
@@ -1035,7 +1035,7 @@ function App() {
 
           <div className="form-group">
             <label className="form-label">Copyright Text (Footer)</label>
-            <input type="text" className="form-input" value={copyrightText} onChange={(e) => setCopyrightText(e.target.value)} placeholder="© 2026 Math Worksheet" />
+            <input type="text" className="form-input" value={copyrightText} onChange={(e) => setCopyrightText(e.target.value)} placeholder="© 2026 Attapol.k" />
           </div>
 
           <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
