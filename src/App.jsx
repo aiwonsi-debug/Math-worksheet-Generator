@@ -79,6 +79,8 @@ import TPTListingHelper from './components/TPTListingHelper';
 import TrendPlanner from './components/TrendPlanner';
 import "./index.css";
 
+const HEADER_NAME_DATE_TEXT = "Name : ............................................................................................................................Date : ........................................................ ";
+
 function App() {
   const [topic, setTopic] = useState('basic_math');
   const [operator, setOperator] = useState('+');
@@ -232,6 +234,85 @@ function App() {
     }
   };
 
+  const getPositionedProblems = (rawProblems, activeTopic, activeOrientation, targetStartPage) => {
+    let cols = 2;
+    let itemsPerPage = 10;
+    let startX = 60;
+    let spacingX = 360;
+    let startY = 230;
+    let targetMaxY = 970;
+    let itemHeight = 75;
+    let defaultSpacingY = 120;
+    let maxAllowedSpacing = 220;
+
+    if (activeTopic === 'basic_math') {
+      cols = activeOrientation === 'horizontal' ? 2 : 3;
+      itemsPerPage = activeOrientation === 'horizontal' ? 12 : 15;
+      startX = activeOrientation === 'horizontal' ? 60 : 80;
+      spacingX = activeOrientation === 'horizontal' ? 360 : 240;
+      itemHeight = activeOrientation === 'horizontal' ? 75 : 100;
+      defaultSpacingY = activeOrientation === 'horizontal' ? 120 : 135;
+      maxAllowedSpacing = activeOrientation === 'horizontal' ? 220 : 175;
+    } else if (activeTopic === 'missing_number') {
+      cols = 1; itemsPerPage = 8; startX = 70; itemHeight = 90; defaultSpacingY = 110; maxAllowedSpacing = 130;
+    } else if (activeTopic === 'comparison') {
+      cols = 2; itemsPerPage = 14; startX = 120; spacingX = 300; itemHeight = 50; defaultSpacingY = 100; maxAllowedSpacing = 150;
+    } else if (activeTopic === 'number_bond') {
+      cols = 3; itemsPerPage = 9; startX = 70; spacingX = 240; startY = 210; itemHeight = 210; defaultSpacingY = 250; maxAllowedSpacing = 270;
+    } else if (activeTopic === 'number_line') {
+      cols = 1; itemsPerPage = 8; startX = 80; itemHeight = 80; defaultSpacingY = 100; maxAllowedSpacing = 130;
+    } else if (activeTopic === 'ten_frame') {
+      cols = 2; itemsPerPage = 4; startX = 80; spacingX = 350; itemHeight = 180; defaultSpacingY = 250; maxAllowedSpacing = 300;
+    } else if (activeTopic === 'ten_frame_comparison') {
+      cols = 1; itemsPerPage = 7; startX = 50; startY = 220; itemHeight = 100; defaultSpacingY = 120; maxAllowedSpacing = 140;
+    } else if (activeTopic === 'word_problem' || activeTopic === 'decodable_word_problem') {
+      cols = 1; itemsPerPage = 3; startX = 70; startY = 220; itemHeight = 250; defaultSpacingY = 265; maxAllowedSpacing = 275;
+    } else if (activeTopic === 'fact_family') {
+      cols = 1; itemsPerPage = 3; startX = 70; spacingX = 350; startY = 220; itemHeight = 180; defaultSpacingY = 260; maxAllowedSpacing = 270;
+    } else if (activeTopic === 'missing_addend') {
+      cols = 2; itemsPerPage = 12; startX = 60; spacingX = 360; itemHeight = 75; defaultSpacingY = 120; maxAllowedSpacing = 220;
+    }
+
+    const problemsByPageOffset = {};
+    rawProblems.forEach((prob, index) => {
+      const pageOffset = Math.floor(index / itemsPerPage);
+      if (!problemsByPageOffset[pageOffset]) problemsByPageOffset[pageOffset] = [];
+      problemsByPageOffset[pageOffset].push({ prob, indexOnPage: index % itemsPerPage });
+    });
+
+    const problemsWithPositions = [];
+
+    Object.keys(problemsByPageOffset).forEach(offsetStr => {
+      const pageOffset = parseInt(offsetStr, 10);
+      const targetPage = targetStartPage + pageOffset;
+      const pageItems = problemsByPageOffset[offsetStr];
+      const countOnPage = pageItems.length;
+      const rowsOnPage = Math.ceil(countOnPage / cols);
+
+      const availHeight = (targetMaxY - itemHeight) - startY;
+      let spacingY = defaultSpacingY;
+      let actualStartY = startY;
+
+      if (rowsOnPage === 1) {
+        actualStartY = startY + availHeight / 2;
+      } else if (rowsOnPage > 1) {
+        spacingY = Math.min(maxAllowedSpacing, availHeight / (rowsOnPage - 1));
+        const totalSpan = (rowsOnPage - 1) * spacingY;
+        actualStartY = startY + (availHeight - totalSpan) / 2;
+      }
+
+      pageItems.forEach(({ prob, indexOnPage }) => {
+        const col = indexOnPage % cols;
+        const row = Math.floor(indexOnPage / cols);
+        const x = startX + (col * spacingX);
+        const y = actualStartY + (row * spacingY);
+        problemsWithPositions.push({ ...prob, pageIndex: targetPage, x, y });
+      });
+    });
+
+    return { problemsWithPositions, itemsPerPage, cols };
+  };
+
   const handleGenerate = (customConfig = null, customCount = null) => {
     const activeTopic = customConfig?.topic || topic;
     const activeOperator = customConfig?.operator || operator;
@@ -255,52 +336,15 @@ function App() {
     };
     
     const rawProblems = generateWorksheet(pCount, config);
-    
-    let cols = 2; let itemsPerPage = 10; let startX = 60; let spacingX = 360; let spacingY = 120; let startY = 250;
-
-    if (activeTopic === 'basic_math') {
-      cols = activeOrientation === 'horizontal' ? 2 : 3;
-      itemsPerPage = activeOrientation === 'horizontal' ? 10 : 15;
-      startX = activeOrientation === 'horizontal' ? 60 : 80;
-      spacingX = activeOrientation === 'horizontal' ? 360 : 240;
-    } else if (activeTopic === 'missing_number') {
-      cols = 1; itemsPerPage = 7; startX = 70; spacingY = 110;
-    } else if (activeTopic === 'comparison') {
-      cols = 2; itemsPerPage = 12; spacingY = 100;
-    } else if (activeTopic === 'number_bond') {
-      cols = 3; itemsPerPage = 9; startX = 70; spacingX = 240; spacingY = 260; startY = 200;
-    } else if (activeTopic === 'number_line') {
-      cols = 1; itemsPerPage = 8; startX = 80; spacingY = 100; startY = 250;
-    } else if (activeTopic === 'ten_frame') {
-      cols = 2; itemsPerPage = 4; startX = 80; spacingX = 350; spacingY = 320; startY = 250;
-    } else if (activeTopic === 'ten_frame_comparison') {
-      cols = 1; itemsPerPage = 7; startX = 50; spacingY = 120; startY = 220;
-    } else if (activeTopic === 'word_problem') {
-      cols = 1; itemsPerPage = 3; startX = 70; spacingY = 275; startY = 240;
-    } else if (activeTopic === 'fact_family') {
-      cols = 1; itemsPerPage = 3; startX = 70; spacingX = 350; spacingY = 260; startY = 230;
-    } else if (activeTopic === 'missing_addend') {
-      cols = 2; itemsPerPage = 10; startX = 60; spacingX = 360; spacingY = 120; startY = 250;
-    } else if (activeTopic === 'decodable_word_problem') {
-      cols = 1; itemsPerPage = 3; startX = 70; spacingY = 275; startY = 240;
-    }
-    
-    const total = Math.ceil(pCount / itemsPerPage) || 1;
     const targetStartPage = customConfig ? 0 : currentPage;
     if (customConfig) {
       setCurrentPage(0);
     }
+
+    const { problemsWithPositions, itemsPerPage } = getPositionedProblems(rawProblems, activeTopic, activeOrientation, targetStartPage);
+    const total = Math.ceil(pCount / itemsPerPage) || 1;
     setTotalPages(prev => Math.max(prev, targetStartPage + total));
 
-    const problemsWithPositions = rawProblems.map((prob, index) => {
-      const pageOffset = Math.floor(index / itemsPerPage);
-      const targetPage = targetStartPage + pageOffset;
-      const indexOnPage = index % itemsPerPage;
-      const col = indexOnPage % cols;
-      const row = Math.floor(indexOnPage / cols);
-      return { ...prob, pageIndex: targetPage, x: startX + (col * spacingX), y: startY + (row * spacingY) };
-    });
-    
     const pagesAffected = Array.from({length: total}, (_, i) => targetStartPage + i);
     
     setProblems(prev => [
@@ -338,8 +382,15 @@ function App() {
        pagesAffected.forEach(pageIdx => {
           const nameId = `header_name_date_${pageIdx}`;
           const titleId = `header_title_${pageIdx}`;
-          if (!updated.find(t => t.id === nameId)) {
-             updated.push({ id: nameId, pageIndex: pageIdx, text: 'Name : ................................................. Date : ....................', x: 50, y: 50, fontSize: 20, fontFamily: 'Comic Neue', isBold: false, isItalic: false, isUnderline: false, align: 'left', fill: '#0f172a' });
+          const existingName = updated.find(t => t.id === nameId);
+          if (existingName) {
+             existingName.text = HEADER_NAME_DATE_TEXT;
+             existingName.x = 50;
+             existingName.y = 50;
+             existingName.width = 1400;
+             existingName.fontSize = 20;
+          } else {
+             updated.push({ id: nameId, pageIndex: pageIdx, text: HEADER_NAME_DATE_TEXT, x: 50, y: 50, width: 1400, fontSize: 20, fontFamily: 'Comic Neue', isBold: false, isItalic: false, isUnderline: false, align: 'left', fill: '#0f172a' });
           }
           const existingTitle = updated.find(t => t.id === titleId);
           if (existingTitle) existingTitle.text = titleText;
@@ -349,7 +400,12 @@ function App() {
        problemsWithPositions.forEach(prob => {
          if (prob.type === 'word_problem' || prob.type === 'decodable_word_problem') {
            const id = `text_wp_${prob.id}`;
-           if (!updated.find(t => t.id === id)) {
+           const existing = updated.find(t => t.id === id);
+           if (existing) {
+             existing.x = prob.x + 45;
+             existing.y = prob.y + 5;
+             existing.pageIndex = prob.pageIndex;
+           } else {
              updated.push({
                id,
                pageIndex: prob.pageIndex,
@@ -377,33 +433,9 @@ function App() {
   const handleBatchGenerate = () => {
     const config = { topic, operator, min: minVal, max: maxVal, allowCarryBorrow, orientation, missingPart, sequenceLength };
     
-    let cols = 2; let itemsPerPage = 10; let startX = 60; let spacingX = 360; let spacingY = 120; let startY = 250;
-    if (topic === 'basic_math') {
-      cols = orientation === 'horizontal' ? 2 : 3;
-      itemsPerPage = orientation === 'horizontal' ? 10 : 15;
-      startX = orientation === 'horizontal' ? 60 : 80;
-      spacingX = orientation === 'horizontal' ? 360 : 240;
-    } else if (topic === 'missing_number') {
-      cols = 1; itemsPerPage = 7; startX = 70; spacingY = 110;
-    } else if (topic === 'comparison') {
-      cols = 2; itemsPerPage = 12; spacingY = 100;
-    } else if (topic === 'number_bond') {
-      cols = 3; itemsPerPage = 9; startX = 70; spacingX = 240; spacingY = 260; startY = 200;
-    } else if (topic === 'number_line') {
-      cols = 1; itemsPerPage = 8; startX = 80; spacingY = 100; startY = 250;
-    } else if (topic === 'ten_frame') {
-      cols = 2; itemsPerPage = 4; startX = 80; spacingX = 350; spacingY = 320; startY = 250;
-    } else if (topic === 'ten_frame_comparison') {
-      cols = 1; itemsPerPage = 7; startX = 50; spacingY = 120; startY = 220;
-    } else if (topic === 'word_problem') {
-      cols = 1; itemsPerPage = 3; startX = 70; spacingY = 275; startY = 240;
-    } else if (topic === 'fact_family') {
-      cols = 1; itemsPerPage = 3; startX = 70; spacingX = 350; spacingY = 260; startY = 230;
-    } else if (topic === 'missing_addend') {
-      cols = 2; itemsPerPage = 10; startX = 60; spacingX = 360; spacingY = 120; startY = 250;
-    } else if (topic === 'decodable_word_problem') {
-      cols = 1; itemsPerPage = 3; startX = 70; spacingY = 275; startY = 240;
-    }
+    // Determine itemsPerPage for pagesPerVariation calculation
+    const sample = getPositionedProblems([], topic, orientation, 0);
+    const itemsPerPage = sample.itemsPerPage;
     
     const pagesPerVariation = Math.ceil(problemCount / itemsPerPage) || 1;
     const totalVariations = 5;
@@ -445,22 +477,14 @@ function App() {
       const rawProblems = generateWorksheet(problemCount, config);
       const varStartPage = targetStartPage + (v * pagesPerVariation);
       
-      const problemsWithPositions = rawProblems.map((prob, index) => {
-        const pageOffset = Math.floor(index / itemsPerPage);
-        const targetPage = varStartPage + pageOffset;
-        const indexOnPage = index % itemsPerPage;
-        const col = indexOnPage % cols;
-        const row = Math.floor(indexOnPage / cols);
-        return { ...prob, pageIndex: targetPage, x: startX + (col * spacingX), y: startY + (row * spacingY) };
-      });
-      
+      const { problemsWithPositions } = getPositionedProblems(rawProblems, topic, orientation, varStartPage);
       allNewProblems.push(...problemsWithPositions);
       
       for(let p = 0; p < pagesPerVariation; p++) {
         const pageIdx = varStartPage + p;
         const nameId = `header_name_date_${pageIdx}`;
         const titleId = `header_title_${pageIdx}`;
-        allNewTexts.push({ id: nameId, pageIndex: pageIdx, text: 'Name : ................................................. Date : ....................', x: 50, y: 50, fontSize: 20, fontFamily: 'Comic Neue', isBold: false, isItalic: false, isUnderline: false, align: 'left', fill: '#0f172a' });
+        allNewTexts.push({ id: nameId, pageIndex: pageIdx, text: HEADER_NAME_DATE_TEXT, x: 50, y: 50, width: 1400, fontSize: 20, fontFamily: 'Comic Neue', isBold: false, isItalic: false, isUnderline: false, align: 'left', fill: '#0f172a' });
         allNewTexts.push({ id: titleId, pageIndex: pageIdx, text: titleText, x: 220, y: 150, fontSize: 42, fontFamily: 'Comic Neue', isBold: true, isItalic: false, isUnderline: false, align: 'left', fill: '#000000' });
       }
       
@@ -615,7 +639,7 @@ function App() {
     
     setCustomTexts(prev => [
       ...prev,
-      { id: `header_name_date_${newPageIdx}`, pageIndex: newPageIdx, text: 'Name : ................................................. Date : ....................', x: 50, y: 50, fontSize: 20, fontFamily: 'Comic Neue', isBold: false, isItalic: false, isUnderline: false, align: 'left', fill: '#0f172a' },
+      { id: `header_name_date_${newPageIdx}`, pageIndex: newPageIdx, text: HEADER_NAME_DATE_TEXT, x: 50, y: 50, width: 1400, fontSize: 20, fontFamily: 'Comic Neue', isBold: false, isItalic: false, isUnderline: false, align: 'left', fill: '#0f172a' },
       { id: `header_title_${newPageIdx}`, pageIndex: newPageIdx, text: titleText, x: 220, y: 150, fontSize: 42, fontFamily: 'Comic Neue', isBold: true, isItalic: false, isUnderline: false, align: 'left', fill: '#000000' }
     ]);
   };

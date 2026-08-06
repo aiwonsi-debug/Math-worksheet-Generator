@@ -27,11 +27,11 @@ export default function CoverGeneratorModal({ isOpen, onClose, pageImages: captu
 
   const [titleFontSize, setTitleFontSize] = useState(88);
   const [titleColor, setTitleColor] = useState('#ffffff');
-  const [titleFontFamily, setTitleFontFamily] = useState('Arial Black');
+  const [titleFontFamily, setTitleFontFamily] = useState('Comic Neue');
 
   const [subtitleFontSize, setSubtitleFontSize] = useState(50);
   const [subtitleColor, setSubtitleColor] = useState('#fde047');
-  const [subtitleFontFamily, setSubtitleFontFamily] = useState('Arial Black');
+  const [subtitleFontFamily, setSubtitleFontFamily] = useState('Comic Neue');
 
   // เลือกธีมจาก dropdown แล้วเซ็ตสีให้ทันที ยังปรับสีเองภายหลังได้ตามปกติ
   const handleThemeSelect = (themeId) => {
