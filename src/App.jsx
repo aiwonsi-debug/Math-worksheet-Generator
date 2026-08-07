@@ -28,6 +28,7 @@ import AlignEndHorizontal from '@tabler/icons-react/dist/esm/icons/IconLayoutAli
 import AlignHorizontalSpaceBetween from '@tabler/icons-react/dist/esm/icons/IconLayoutDistributeHorizontal.mjs';
 import AlignVerticalSpaceBetween from '@tabler/icons-react/dist/esm/icons/IconLayoutDistributeVertical.mjs';
 import Undo from '@tabler/icons-react/dist/esm/icons/IconArrowBackUp.mjs';
+import Terminal from '@tabler/icons-react/dist/esm/icons/IconTerminal.mjs';
 import Redo from '@tabler/icons-react/dist/esm/icons/IconArrowForwardUp.mjs';
 import Sticker from '@tabler/icons-react/dist/esm/icons/IconSticker.mjs';
 import Search from '@tabler/icons-react/dist/esm/icons/IconSearch.mjs';
@@ -97,7 +98,7 @@ function App() {
   const [orientation, setOrientation] = useState('horizontal');
   const [missingPart, setMissingPart] = useState('first');
   const [sequenceLength, setSequenceLength] = useState(10);
-  const [copyrightText, setCopyrightText] = useState('© 2026 Attapol K. All rights reserved. For personal or single-classroom use only. Redistribution or resale is prohibited.');
+  const [copyrightText, setCopyrightText] = useState('© 2026 Attapol.k. For personal or single-classroom use only. Redistribution or resale is prohibited.');
   
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -871,7 +872,7 @@ function App() {
         'Thank you for downloading this resource!',
         '',
         'Terms of Use:',
-        '© 2026 Math Worksheet Generator.',
+        '© 2026 Attapol.k.',
         'All rights reserved. Purchase or download of this item entitles the',
         'purchaser the right to reproduce the pages in limited quantities for',
         'single classroom use only. Duplication for an entire school, an entire',
@@ -1090,7 +1091,7 @@ function App() {
 
           <div className="form-group">
             <label className="form-label">Copyright Text (Footer)</label>
-            <input type="text" className="form-input" value={copyrightText} onChange={(e) => setCopyrightText(e.target.value)} placeholder="© 2026 Math Worksheet" />
+            <input type="text" className="form-input" value={copyrightText} onChange={(e) => setCopyrightText(e.target.value)} placeholder="© 2026 Attapol.k" />
           </div>
 
           <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -1103,6 +1104,18 @@ function App() {
           </button>
           <button className="btn" style={{ width: '100%', marginTop: '0.5rem', background: '#f59e0b', color: 'white', border: 'none' }} onClick={handleBatchGenerate}>
             <Copy size={18} /> Generate 5 Variations (Batch)
+          </button>
+          <button 
+            className="btn" 
+            style={{ width: '100%', marginTop: '0.5rem', background: '#8b5cf6', color: 'white', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: 600 }} 
+            onClick={() => {
+              const cmd = "python generator.py topics/addition-missing-first-classic.json";
+              navigator.clipboard.writeText(cmd);
+              alert(`Copied Python CLI Command to clipboard:\n\n${cmd}\n\nPaste and run this in your terminal to generate the full TPT bundle!`);
+            }}
+            title="Copy Python generator CLI command"
+          >
+            <Terminal size={18} /> Run Python TPT Generator (CLI)
           </button>
 
           <div style={{ borderTop: '1px solid #e2e8f0', marginTop: '1rem', paddingTop: '1rem', display: 'flex', flexDirection: 'column', gap: '10px' }}>

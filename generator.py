@@ -11,6 +11,44 @@ from pypdf import PdfWriter
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8")
 
+EMOJI_DIR = Path("public/emoji/bw")
+
+THEMES = {
+    "halloween-2026": ["1f383", "1f47b", "1f577", "1f480", "1f47d"],
+    "back-to-school-2026": ["1f392", "1f393", "1f4da", "270f", "1f4d0"],
+    "autumn-2026": ["1f342", "1f343", "1f330", "1f98a", "1f33d"],
+    "space-2026": ["1f680", "1f6f8", "1f319", "2b50", "1fa90"]
+}
+
+def load_clipart_svg(code, width=28, height=28):
+    svg_path = EMOJI_DIR / f"{code}.svg"
+    if not svg_path.exists():
+        return ""
+    try:
+        content = svg_path.read_text(encoding="utf-8")
+        # Ensure width and height are injected cleanly
+        if "<svg" in content:
+            content = content.replace("<svg", f'<svg width="{width}" height="{height}" class="clipart-icon"', 1)
+        return content
+    except Exception:
+        return ""
+
+def get_theme_cliparts(config, count=2):
+    codes = config.get("clipart_codes", [])
+    if not codes and "clipart_theme" in config:
+        codes = THEMES.get(config["clipart_theme"], [])
+    if not codes:
+        return []
+    return [load_clipart_svg(c) for c in codes[:count] if load_clipart_svg(c)]
+
+def get_cover_cliparts(config):
+    codes = config.get("clipart_codes", [])
+    if not codes and "clipart_theme" in config:
+        codes = THEMES.get(config["clipart_theme"], [])
+    if not codes:
+        return []
+    return [load_clipart_svg(c, width=44, height=44) for c in codes if load_clipart_svg(c, width=44, height=44)]
+
 def generate_problems(config):
     op_min = config.get("operand_min", 0)
     op_max = config.get("operand_max", 10)
@@ -28,7 +66,6 @@ def generate_problems(config):
     for v in range(1, num_versions + 1):
         random.seed(42 + v * 101)  # Reproducible seed per version
         selected = []
-        # Ensure balanced distribution
         shuffled = list(all_possible)
         random.shuffle(shuffled)
         
@@ -41,12 +78,20 @@ def generate_problems(config):
         versions.append((v, selected))
     return versions
 
-def render_dots_svg(count, color):
+def render_dots_svg(count, color, config=None, is_right=False):
     if count <= 0:
         return ""
     
+    # Check for clipart SVG theme
+    clipart_svg = ""
+    codes = config.get("clipart_codes", []) if config else []
+    if not codes and config and "clipart_theme" in config:
+        codes = THEMES.get(config["clipart_theme"], [])
+    if codes:
+        code_idx = 1 if is_right and len(codes) > 1 else 0
+        clipart_svg = load_clipart_svg(codes[code_idx], width=16, height=16)
+
     dots_html = []
-    # Grid arrangement: max 5 per row
     rows = []
     remaining = count
     while remaining > 0:
@@ -54,15 +99,15 @@ def render_dots_svg(count, color):
         remaining -= 5
 
     for r in rows:
-        row_dots = "".join([
-            f'<div class="dot" style="background-color: {color};"></div>'
-            for _ in range(r)
-        ])
-        dots_html.append(f'<div class="dot-row">{row_dots}</div>')
+        if clipart_svg:
+            row_items = "".join([f'<div class="dot-clip">{clipart_svg}</div>' for _ in range(r)])
+        else:
+            row_items = "".join([f'<div class="dot" style="background-color: {color};"></div>' for _ in range(r)])
+        dots_html.append(f'<div class="dot-row">{row_items}</div>')
     
     return f'<div class="dots-group">{"".join(dots_html)}</div>'
 
-def generate_worksheet_html(version, problems, config, is_answer_key=False):
+def generate_dots_worksheet_html(version, problems, config, is_answer_key=False):
     title = config["title"]
     subtitle = config["subtitle"]
     author = config.get("author", "Attapol.k")
@@ -77,8 +122,8 @@ def generate_worksheet_html(version, problems, config, is_answer_key=False):
     grid_items = []
     for idx, (a, b) in enumerate(problems, 1):
         sum_val = a + b
-        left_dots = render_dots_svg(a, dot_colors[0])
-        right_dots = render_dots_svg(b, dot_colors[1])
+        left_dots = render_dots_svg(a, dot_colors[0], config, is_right=False)
+        right_dots = render_dots_svg(b, dot_colors[1], config, is_right=True)
         
         if is_answer_key:
             eq_text = f'{a} + {b} = <span class="answer-val">{sum_val}</span>'
@@ -88,7 +133,6 @@ def generate_worksheet_html(version, problems, config, is_answer_key=False):
             eq_text = f'{a} + {b} = <span class="blank-line">___</span>'
             card_class = "card"
             
-            # Manipulative layout logic
             if a > 0 and b > 0:
                 dots_markup = f'''
                 <div class="manipulatives-row">
@@ -272,6 +316,12 @@ def generate_worksheet_html(version, problems, config, is_answer_key=False):
             display: inline-block;
         }}
 
+        .dot-clip {{
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }}
+
         .plus-sign {{
             font-size: 18px;
             font-weight: 700;
@@ -314,18 +364,365 @@ def generate_worksheet_html(version, problems, config, is_answer_key=False):
 '''
     return html_content
 
+def generate_classic_worksheet_html(version, problems, config, is_answer_key=False):
+    title = config["title"]
+    subtitle = config["subtitle"]
+    author = config.get("author", "Attapol.k")
+    footer = config.get("footer", f"Created by {author} · For classroom or home use")
+    theme = config.get("theme", {})
+    primary_color = theme.get("primary_color", "#1E293B")
+    card_border = theme.get("card_border", "#CBD5E1")
+    answer_bg = theme.get("answer_key_bg", "#EBF7ED")
+    answer_border = theme.get("answer_key_border", "#A3E0B2")
+    answer_text = theme.get("answer_key_text", "#2E7D32")
+    missing_part = config.get("missing_part", "answer")
+
+    page_title = f"{title} — Answer Key" if is_answer_key else title
+
+    clipart_accents = get_theme_cliparts(config, count=2)
+    accent_left = clipart_accents[0] if len(clipart_accents) > 0 else ""
+    accent_right = clipart_accents[1] if len(clipart_accents) > 1 else accent_left
+
+    grid_items = []
+    for idx, (a, b) in enumerate(problems, 1):
+        sum_val = a + b
+
+        if is_answer_key:
+            if missing_part == "first":
+                eq_html = f'<span class="ans-box">{a}</span> + {b} = {sum_val}'
+            elif missing_part == "second":
+                eq_html = f'{a} + <span class="ans-box">{b}</span> = {sum_val}'
+            else:
+                eq_html = f'{a} + {b} = <span class="ans-box">{sum_val}</span>'
+            card_class = "classic-card answer-card"
+        else:
+            if missing_part == "first":
+                eq_html = f'<div class="blank-box"></div> + {b} = {sum_val}'
+            elif missing_part == "second":
+                eq_html = f'{a} + <div class="blank-box"></div> = {sum_val}'
+            else:
+                eq_html = f'{a} + {b} = <div class="blank-box"></div>'
+            card_class = "classic-card"
+
+        grid_items.append(f'''
+        <div class="{card_class}">
+            <div class="prob-num-circle">#{idx}</div>
+            <div class="classic-eq">{eq_html}</div>
+        </div>
+        ''')
+
+    header_meta = ""
+    if not is_answer_key:
+        header_meta = '''
+        <div class="student-meta">
+            <span>Name: ______________________</span>
+            <span>Date: __________</span>
+        </div>
+        '''
+
+    title_markup = f'''
+    <div class="title-with-accents">
+        {f'<div class="header-accent">{accent_left}</div>' if accent_left else ''}
+        <h1>{page_title}</h1>
+        {f'<div class="header-accent">{accent_right}</div>' if accent_right else ''}
+    </div>
+    '''
+
+    html_content = f'''<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{page_title} - Version {version}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+        
+        @page {{
+            size: letter portrait;
+            margin: 12mm 15mm 12mm 15mm;
+        }}
+
+        * {{
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }}
+
+        body {{
+            font-family: 'Comic Neue', cursive, sans-serif;
+            color: #1E293B;
+            background: #ffffff;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }}
+
+        .header {{
+            text-align: center;
+            margin-bottom: 14px;
+        }}
+
+        .title-with-accents {{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }}
+
+        .header h1 {{
+            color: {primary_color};
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }}
+
+        .header .subtitle {{
+            color: #64748B;
+            font-size: 14px;
+            font-weight: 400;
+        }}
+
+        .student-meta {{
+            display: flex;
+            justify-content: space-between;
+            margin-top: 14px;
+            padding: 0 8px;
+            font-size: 14px;
+            color: #475569;
+        }}
+
+        .grid {{
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 12px;
+        }}
+
+        .classic-card {{
+            border: 2.5px dashed {card_border};
+            border-radius: 14px;
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 175px;
+            position: relative;
+            background: #ffffff;
+        }}
+
+        .answer-card {{
+            background-color: {answer_bg};
+            border: 2.5px dashed {answer_border};
+        }}
+
+        .prob-num-circle {{
+            position: absolute;
+            top: 10px;
+            left: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #64748B;
+            background: #F1F5F9;
+            border-radius: 12px;
+            padding: 2px 8px;
+        }}
+
+        .classic-eq {{
+            font-size: 26px;
+            font-weight: 700;
+            color: #0F172A;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+        }}
+
+        .blank-box {{
+            width: 48px;
+            height: 44px;
+            border: 2px solid #94A3B8;
+            border-radius: 8px;
+            background-color: #F8FAFC;
+            display: inline-block;
+        }}
+
+        .ans-box {{
+            color: {answer_text};
+            font-weight: 700;
+            background-color: #D1FAE5;
+            border: 2px solid #34D399;
+            border-radius: 8px;
+            padding: 2px 10px;
+            display: inline-block;
+        }}
+
+        .footer {{
+            text-align: center;
+            font-size: 11px;
+            color: #94A3B8;
+            padding-top: 4px;
+        }}
+    </style>
+</head>
+<body>
+    <div>
+        <div class="header">
+            {title_markup}
+            <div class="subtitle">{subtitle} · Version {version}</div>
+            {header_meta}
+        </div>
+
+        <div class="grid">
+            {"".join(grid_items)}
+        </div>
+    </div>
+
+    <div class="footer">
+        {footer}
+    </div>
+</body>
+</html>
+'''
+    return html_content
+
+def generate_worksheet_html(version, problems, config, is_answer_key=False):
+    style = config.get("style", "classic_boxes")
+    if style == "dots":
+        return generate_dots_worksheet_html(version, problems, config, is_answer_key)
+    return generate_classic_worksheet_html(version, problems, config, is_answer_key)
+
+def generate_tou_html(config):
+    style = config.get("style", "classic_boxes")
+    font_family = "'Comic Neue', cursive, sans-serif" if style == "classic_boxes" else "'Mali', sans-serif"
+    
+    html_content = f'''<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Terms of Use & Credits</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Mali:wght@400;700&display=swap');
+        
+        @page {{
+            size: letter portrait;
+            margin: 15mm 20mm 15mm 20mm;
+        }}
+
+        * {{
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }}
+
+        body {{
+            font-family: {font_family};
+            color: #1E293B;
+            background: #ffffff;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px 10px;
+        }}
+
+        .tou-title {{
+            font-size: 32px;
+            font-weight: 700;
+            color: #0F172A;
+            text-align: center;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #E2E8F0;
+            padding-bottom: 12px;
+        }}
+
+        .tou-section {{
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }}
+
+        .tou-section h2 {{
+            font-size: 18px;
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 8px;
+        }}
+
+        .tou-section p {{
+            font-size: 13.5px;
+            color: #475569;
+            margin-bottom: 10px;
+        }}
+
+        .copyright-highlight {{
+            font-weight: 700;
+            color: #0F172A;
+        }}
+
+        .footer {{
+            text-align: center;
+            font-size: 11px;
+            color: #94A3B8;
+            border-top: 1px solid #E2E8F0;
+            padding-top: 12px;
+        }}
+    </style>
+</head>
+<body>
+    <div>
+        <div class="tou-title">Terms of Use & Credits</div>
+
+        <div class="tou-section">
+            <p><strong>Thank you for downloading this resource!</strong></p>
+        </div>
+
+        <div class="tou-section">
+            <h2>Terms of Use:</h2>
+            <p class="copyright-highlight">© 2026 Attapol.k.</p>
+            <p>
+                All rights reserved. Purchase or download of this item entitles the purchaser the right to reproduce the pages in limited quantities for single classroom use only. Duplication for an entire school, an entire school system, or commercial purposes is strictly forbidden without written permission from the author.
+            </p>
+            <p>
+                Copying any part of this product and placing it on the internet in any form (even a personal/classroom website) is strictly forbidden and is a violation of the Digital Millennium Copyright Act (DMCA).
+            </p>
+        </div>
+
+        <div class="tou-section">
+            <h2>Credits:</h2>
+            <p>
+                Fonts provided by Google Fonts (Comic Neue and Mali).<br>
+                Clipart and vector art provided under open license.
+            </p>
+        </div>
+    </div>
+
+    <div class="footer">
+        Created by Attapol.k · For classroom or home use
+    </div>
+</body>
+</html>
+'''
+    return html_content
+
 def generate_cover_html(config):
     title = config["title"]
     subtitle = config["subtitle"]
     theme = config.get("theme", {})
-    primary_color = theme.get("primary_color", "#4C4592")
-    cover_dots = config.get("cover", {}).get("dots", ["#F5B000", "#E53935", "#E53935", "#E59400"])
-    pill_text = config.get("cover", {}).get("pill_text", "Addition within 10 • Number sense • Basic facts fluency")
+    primary_color = theme.get("primary_color", "#1E293B")
+    card_border = theme.get("card_border", "#CBD5E1")
+    pill_text = config.get("cover", {}).get("pill_text", "Addition within 10 • Grade 1 Math Practice")
 
-    dots_html = "".join([
-        f'<div class="cover-dot" style="background-color: {c};"></div>'
-        for c in cover_dots
-    ])
+    cover_cliparts = get_cover_cliparts(config)
+    if cover_cliparts:
+        cliparts_html = "".join([f'<div class="cover-clip-item">{c}</div>' for c in cover_cliparts])
+        icons_row = f'<div class="cover-cliparts-row">{cliparts_html}</div>'
+    else:
+        cover_dots = config.get("cover", {}).get("dots", ["#F5B000", "#E53935", "#E53935", "#E59400"])
+        dots_html = "".join([f'<div class="cover-dot" style="background-color: {c};"></div>' for c in cover_dots])
+        icons_row = f'<div class="dots-row">{dots_html}</div>'
 
     html_content = f'''<!DOCTYPE html>
 <html lang="en">
@@ -333,7 +730,7 @@ def generate_cover_html(config):
     <meta charset="UTF-8">
     <title>Cover - {title}</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Mali:wght@400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap');
         
         * {{
             box-sizing: border-box;
@@ -342,31 +739,51 @@ def generate_cover_html(config):
         }}
 
         body {{
-            font-family: 'Mali', sans-serif;
+            font-family: 'Comic Neue', cursive, sans-serif;
             width: 1200px;
             height: 1200px;
             background-color: #ffffff;
             display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 50px;
+        }}
+
+        .cover-box {{
+            width: 100%;
+            height: 100%;
+            border: 4px dashed {card_border};
+            border-radius: 36px;
+            display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 80px;
+            padding: 60px;
             text-align: center;
+            background: #ffffff;
         }}
 
         .title {{
-            font-size: 64px;
+            font-size: 68px;
             font-weight: 700;
             color: {primary_color};
-            margin-bottom: 12px;
+            margin-bottom: 16px;
             letter-spacing: -0.5px;
         }}
 
         .subtitle {{
-            font-size: 32px;
+            font-size: 34px;
             font-weight: 400;
-            color: #666666;
+            color: #64748B;
             margin-bottom: 50px;
+        }}
+
+        .cover-cliparts-row {{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 28px;
+            margin-bottom: 60px;
         }}
 
         .dots-row {{
@@ -386,23 +803,23 @@ def generate_cover_html(config):
         .pill-badge {{
             background-color: {primary_color};
             color: #ffffff;
-            font-size: 22px;
-            font-weight: 600;
-            padding: 16px 40px;
+            font-size: 24px;
+            font-weight: 700;
+            padding: 18px 44px;
             border-radius: 50px;
-            box-shadow: 0 4px 14px rgba(76, 69, 146, 0.25);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
             display: inline-block;
         }}
     </style>
 </head>
 <body>
-    <div class="title">{title}</div>
-    <div class="subtitle">{subtitle}</div>
-    <div class="dots-row">
-        {dots_html}
-    </div>
-    <div class="pill-badge">
-        {pill_text}
+    <div class="cover-box">
+        <div class="title">{title}</div>
+        <div class="subtitle">{subtitle}</div>
+        {icons_row}
+        <div class="pill-badge">
+            {pill_text}
+        </div>
     </div>
 </body>
 </html>
@@ -431,7 +848,7 @@ def generate_listing_md(config):
 
 ## Product Package Summary
 - **Format**: PDF + PNG Cover
-- **Page Count**: 10 Pages (5 Worksheets + 5 Answer Keys) + 1 Cover PNG
+- **Page Count**: 11 Pages (5 Worksheets + 5 Answer Keys + 1 TOU Page) + 1 Cover PNG
 - **Target Grade**: {config.get("grade", "Grade 1")}
 - **Subject**: Elementary Math / Fact Fluency / Number Sense
 '''
@@ -483,7 +900,21 @@ async def render_pdf_and_cover_async(output_dir, config, versions_data):
             )
             ak_pdf_paths.append(ak_pdf_path)
 
-        # 2. Render Square Cover Image
+        # 2. Render Terms of Use PDF Page
+        tou_html = generate_tou_html(config)
+        tou_html_path = output_dir / "tou.html"
+        tou_pdf_path = output_dir / "tou.pdf"
+        tou_html_path.write_text(tou_html, encoding="utf-8")
+
+        await page.goto(tou_html_path.resolve().as_uri(), wait_until="networkidle")
+        await page.pdf(
+            path=str(tou_pdf_path),
+            format="Letter",
+            print_background=True,
+            margin={"top": "15mm", "bottom": "15mm", "left": "20mm", "right": "20mm"}
+        )
+
+        # 3. Render Square Cover Image
         cover_html = generate_cover_html(config)
         cover_html_path = output_dir / "cover.html"
         cover_png_path = output_dir / "cover.png"
@@ -495,7 +926,7 @@ async def render_pdf_and_cover_async(output_dir, config, versions_data):
 
         await browser.close()
 
-    return ws_pdf_paths, ak_pdf_paths, cover_png_path
+    return ws_pdf_paths, ak_pdf_paths, tou_pdf_path, cover_png_path
 
 def merge_pdfs(pdf_paths, output_path):
     merger = PdfWriter()
@@ -511,7 +942,6 @@ def build_zip_package(topic_id, output_dir, complete_pdf, cover_png, listing_md_
         z.write(cover_png, arcname=cover_png.name)
         z.write(listing_md_path, arcname=listing_md_path.name)
         
-        # Include individual worksheets and answer keys
         for ws in (output_dir / "worksheets").glob("*.pdf"):
             z.write(ws, arcname=f"worksheets/{ws.name}")
         for ak in (output_dir / "answer_keys").glob("*.pdf"):
@@ -541,16 +971,16 @@ def main():
     versions_data = generate_problems(config)
 
     # 2. Render PDFs and Cover PNG via Playwright
-    ws_pdfs, ak_pdfs, cover_png = asyncio.run(render_pdf_and_cover_async(output_dir, config, versions_data))
+    ws_pdfs, ak_pdfs, tou_pdf, cover_png = asyncio.run(render_pdf_and_cover_async(output_dir, config, versions_data))
 
-    # 3. Merge PDFs
+    # 3. Merge PDFs (Append TOU PDF page to all bundles)
     ws_bundle = output_dir / f"{topic_id}-worksheets.pdf"
     ak_bundle = output_dir / f"{topic_id}-answer-keys.pdf"
     complete_bundle = output_dir / f"{topic_id}-complete.pdf"
 
-    merge_pdfs(ws_pdfs, ws_bundle)
-    merge_pdfs(ak_pdfs, ak_bundle)
-    merge_pdfs(ws_pdfs + ak_pdfs, complete_bundle)
+    merge_pdfs(ws_pdfs + [tou_pdf], ws_bundle)
+    merge_pdfs(ak_pdfs + [tou_pdf], ak_bundle)
+    merge_pdfs(ws_pdfs + ak_pdfs + [tou_pdf], complete_bundle)
 
     # 4. Generate Listing Copy
     listing_content = generate_listing_md(config)
@@ -561,9 +991,9 @@ def main():
     zip_path = build_zip_package(topic_id, output_dir, complete_bundle, cover_png, listing_path)
 
     print("\n✅ TPT Generator Pipeline Completed Successfully!")
-    print(f"  ├── Worksheets PDF Bundle: {ws_bundle}")
-    print(f"  ├── Answer Keys PDF Bundle: {ak_bundle}")
-    print(f"  ├── Complete Combined PDF: {complete_bundle}")
+    print(f"  ├── Worksheets PDF Bundle (+TOU): {ws_bundle}")
+    print(f"  ├── Answer Keys PDF Bundle (+TOU): {ak_bundle}")
+    print(f"  ├── Complete Combined PDF (+TOU): {complete_bundle}")
     print(f"  ├── Square Cover PNG: {cover_png}")
     print(f"  ├── TPT Listing Copy: {listing_path}")
     print(f"  └── Ready-to-Upload ZIP: {zip_path}")

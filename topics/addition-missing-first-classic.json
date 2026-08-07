@@ -1,0 +1,47 @@
+{
+  "id": "addition-missing-first-classic",
+  "title": "Addition Within 10",
+  "subtitle": "Grade 1 Math Practice",
+  "author": "Attapol.k",
+  "footer": "Created by Attapol.k · For classroom or home use",
+  "grade": "Grade 1",
+  "style": "classic_boxes",
+  "missing_part": "first",
+  "clipart_theme": "halloween-2026",
+  "operation": "+",
+  "operand_min": 0,
+  "operand_max": 10,
+  "max_sum": 10,
+  "items_per_page": 12,
+  "num_versions": 5,
+  "theme": {
+    "primary_color": "#D97706",
+    "secondary_color": "#666666",
+    "font_family": "'Comic Neue', sans-serif",
+    "card_border": "#F59E0B",
+    "answer_key_bg": "#FEF3C7",
+    "answer_key_border": "#F59E0B",
+    "answer_key_text": "#B45309"
+  },
+  "cover": {
+    "pill_text": "Addition within 10 • Missing Addend • Grade 1 Fluency"
+  },
+  "tpt_listing": {
+    "title": "Addition Within 10 Missing Addends - Grade 1 Math Practice Worksheets",
+    "bullet_points": [
+      "5 unique randomized worksheet versions + 5 matching answer keys",
+      "Classic boxed grid layout with missing addend practice",
+      "Theme clipart accents & print-ready black and white line art",
+      "Includes complete Terms of Use and merged PDF bundle"
+    ],
+    "description": "Engaging Grade 1 missing addend addition worksheets in classic boxed style! Includes 5 versions, complete answer keys, and terms of use page.",
+    "keywords": [
+      "Missing Addend",
+      "Addition Within 10",
+      "Grade 1 Math",
+      "Classic Math Worksheets",
+      "Halloween Math",
+      "Fact Fluency"
+    ]
+  }
+}
