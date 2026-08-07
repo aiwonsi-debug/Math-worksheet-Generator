@@ -59,7 +59,7 @@ function CopyButton({ text }) {
   return (
     <button onClick={copy} style={{
       padding: '4px 12px', borderRadius: '6px', border: '1px solid #cbd5e1',
-      background: copied ? '#10b981' : '#f8fafc', color: copied ? 'white' : '#64748b',
+      background: copied ? '#10b981' : 'var(--color-bg)', color: copied ? 'white' : 'var(--color-text-muted)',
       cursor: 'pointer', fontSize: '12px', fontWeight: 600, transition: 'all 0.2s',
       display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap'
     }}>
@@ -70,8 +70,8 @@ function CopyButton({ text }) {
 
 function Section({ title, hint, children }) {
   return (
-    <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
-      <div style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', padding: '12px 18px' }}>
+    <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+      <div style={{ background: 'var(--color-bg)', borderBottom: '1px solid var(--color-border)', padding: '12px 18px' }}>
         <div style={{ fontWeight: 700, fontSize: '15px', color: '#1e293b' }}>{title}</div>
         {hint && <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>{hint}</div>}
       </div>
@@ -139,7 +139,7 @@ export default function TPTListingHelper({ topic, operator, maxVal, totalPages, 
 
   const titleLen = title.length;
 
-  const labelStyle = { fontSize: '12px', fontWeight: 600, color: '#64748b', marginBottom: '6px', display: 'block' };
+  const labelStyle = { fontSize: '12px', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '6px', display: 'block' };
   const chipBase = { padding: '5px 12px', borderRadius: '20px', fontSize: '12px', cursor: 'pointer', border: '1.5px solid', fontWeight: 500, transition: 'all 0.15s' };
 
   return (
@@ -172,7 +172,7 @@ export default function TPTListingHelper({ topic, operator, maxVal, totalPages, 
           <input
             type="text" value={title} onChange={e => setTitle(e.target.value)}
             maxLength={80}
-            style={{ width: '100%', padding: '10px 14px', border: `2px solid ${titleLen > 75 ? '#ef4444' : titleLen > 60 ? '#f59e0b' : '#e2e8f0'}`, borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box', fontWeight: 600, outline: 'none' }}
+            style={{ width: '100%', padding: '10px 14px', border: `2px solid ${titleLen > 75 ? '#ef4444' : titleLen > 60 ? '#f59e0b' : 'var(--color-border)'}`, borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box', fontWeight: 600, outline: 'none' }}
           />
           <div style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '12px', color: titleLen > 75 ? '#ef4444' : '#94a3b8', fontWeight: 600 }}>
             {titleLen}/80
@@ -220,7 +220,7 @@ export default function TPTListingHelper({ topic, operator, maxVal, totalPages, 
         <textarea
           value={description} onChange={e => setDescription(e.target.value)}
           rows={16}
-          style={{ width: '100%', padding: '10px 14px', border: '2px solid #e2e8f0', borderRadius: '8px', fontSize: '13px', boxSizing: 'border-box', fontFamily: 'inherit', resize: 'vertical', outline: 'none', lineHeight: 1.6 }}
+          style={{ width: '100%', padding: '10px 14px', border: '2px solid var(--color-border)', borderRadius: '8px', fontSize: '13px', boxSizing: 'border-box', fontFamily: 'inherit', resize: 'vertical', outline: 'none', lineHeight: 1.6 }}
         />
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
           <CopyButton text={description} />
@@ -236,9 +236,9 @@ export default function TPTListingHelper({ topic, operator, maxVal, totalPages, 
             return (
               <button key={g} onClick={() => toggleGrade(g)} style={{
                 ...chipBase,
-                borderColor: active ? '#3b82f6' : suggested ? '#93c5fd' : '#e2e8f0',
-                background: active ? '#3b82f6' : suggested ? '#eff6ff' : '#f8fafc',
-                color: active ? 'white' : suggested ? '#1d4ed8' : '#64748b',
+                borderColor: active ? '#3b82f6' : suggested ? '#93c5fd' : 'var(--color-border)',
+                background: active ? '#3b82f6' : suggested ? '#eff6ff' : 'var(--color-bg)',
+                color: active ? 'white' : suggested ? '#1d4ed8' : 'var(--color-text-muted)',
               }}>
                 {suggested && !active ? '★ ' : ''}{g}
               </button>
@@ -262,9 +262,9 @@ export default function TPTListingHelper({ topic, operator, maxVal, totalPages, 
             return (
               <button key={s} onClick={() => toggleSubject(s)} style={{
                 ...chipBase,
-                borderColor: active ? '#8b5cf6' : '#e2e8f0',
-                background: active ? '#8b5cf6' : '#f8fafc',
-                color: active ? 'white' : '#64748b',
+                borderColor: active ? '#8b5cf6' : 'var(--color-border)',
+                background: active ? '#8b5cf6' : 'var(--color-bg)',
+                color: active ? 'white' : 'var(--color-text-muted)',
               }}>
                 {s}
               </button>
@@ -284,8 +284,8 @@ export default function TPTListingHelper({ topic, operator, maxVal, totalPages, 
               return (
                 <button key={t} onClick={() => toggleTag(t)} style={{
                   ...chipBase,
-                  borderColor: active ? '#10b981' : '#e2e8f0',
-                  background: active ? '#10b981' : '#f8fafc',
+                  borderColor: active ? '#10b981' : 'var(--color-border)',
+                  background: active ? '#10b981' : 'var(--color-bg)',
                   color: active ? 'white' : '#475569',
                 }}>
                   {t}
@@ -301,8 +301,8 @@ export default function TPTListingHelper({ topic, operator, maxVal, totalPages, 
               return (
                 <button key={t} onClick={() => toggleTag(t)} style={{
                   ...chipBase,
-                  borderColor: active ? '#f59e0b' : '#e2e8f0',
-                  background: active ? '#f59e0b' : '#f8fafc',
+                  borderColor: active ? '#f59e0b' : 'var(--color-border)',
+                  background: active ? '#f59e0b' : 'var(--color-bg)',
                   color: active ? 'white' : '#475569',
                 }}>
                   {t}
@@ -318,9 +318,9 @@ export default function TPTListingHelper({ topic, operator, maxVal, totalPages, 
             return (
               <button key={t} onClick={() => toggleTag(t)} style={{
                 ...chipBase,
-                borderColor: active ? '#10b981' : '#e2e8f0',
-                background: active ? '#10b981' : '#f8fafc',
-                color: active ? 'white' : '#64748b',
+                borderColor: active ? '#10b981' : 'var(--color-border)',
+                background: active ? '#10b981' : 'var(--color-bg)',
+                color: active ? 'white' : 'var(--color-text-muted)',
               }}>
                 {t}
               </button>
@@ -341,8 +341,8 @@ export default function TPTListingHelper({ topic, operator, maxVal, totalPages, 
           {/* Price */}
           <div>
             <label style={labelStyle}>💵 Price (USD)</label>
-            <div style={{ display: 'flex', alignItems: 'center', border: '2px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
-              <span style={{ padding: '0 10px', background: '#f1f5f9', color: '#64748b', fontWeight: 700, fontSize: '16px' }}>$</span>
+            <div style={{ display: 'flex', alignItems: 'center', border: '2px solid var(--color-border)', borderRadius: '8px', overflow: 'hidden' }}>
+              <span style={{ padding: '0 10px', background: '#f1f5f9', color: 'var(--color-text-muted)', fontWeight: 700, fontSize: '16px' }}>$</span>
               <input type="number" min="0" step="0.50" value={price} onChange={e => setPrice(e.target.value)}
                 style={{ border: 'none', padding: '10px 12px', fontSize: '16px', fontWeight: 700, width: '100%', outline: 'none', color: '#1e293b' }} />
             </div>
@@ -353,8 +353,8 @@ export default function TPTListingHelper({ topic, operator, maxVal, totalPages, 
           {/* Multi-license */}
           <div>
             <label style={labelStyle}>👥 Multiple Licenses</label>
-            <div style={{ display: 'flex', alignItems: 'center', border: '2px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden', background: '#f8fafc' }}>
-              <span style={{ padding: '0 10px', background: '#f1f5f9', color: '#64748b', fontWeight: 700, fontSize: '16px' }}>$</span>
+            <div style={{ display: 'flex', alignItems: 'center', border: '2px solid var(--color-border)', borderRadius: '8px', overflow: 'hidden', background: 'var(--color-bg)' }}>
+              <span style={{ padding: '0 10px', background: '#f1f5f9', color: 'var(--color-text-muted)', fontWeight: 700, fontSize: '16px' }}>$</span>
               <span style={{ padding: '10px 12px', fontSize: '16px', fontWeight: 700, color: '#1e293b' }}>{multiLicense}</span>
             </div>
             <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '4px' }}>Auto: price × 1.5</div>
@@ -362,8 +362,8 @@ export default function TPTListingHelper({ topic, operator, maxVal, totalPages, 
           {/* Bundle hint */}
           <div>
             <label style={labelStyle}>📦 Bundle Discount (optional)</label>
-            <div style={{ display: 'flex', alignItems: 'center', border: '2px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
-              <span style={{ padding: '0 10px', background: '#f1f5f9', color: '#64748b', fontWeight: 700, fontSize: '16px' }}>$</span>
+            <div style={{ display: 'flex', alignItems: 'center', border: '2px solid var(--color-border)', borderRadius: '8px', overflow: 'hidden' }}>
+              <span style={{ padding: '0 10px', background: '#f1f5f9', color: 'var(--color-text-muted)', fontWeight: 700, fontSize: '16px' }}>$</span>
               <input type="number" min="0" step="0.50" defaultValue=""
                 placeholder="—"
                 style={{ border: 'none', padding: '10px 12px', fontSize: '16px', fontWeight: 700, width: '100%', outline: 'none', color: '#1e293b' }} />

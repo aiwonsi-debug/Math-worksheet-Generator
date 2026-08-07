@@ -379,7 +379,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Planner Design Tokens & Utility Classes */
-.planner-card {
+.card, .planner-card {
   background: var(--color-surface);
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
@@ -388,11 +388,11 @@ h1, h2, h3, h4, h5, h6 {
   transition: all 0.2s ease;
 }
 
-.planner-card:hover {
+.card:hover, .planner-card:hover {
   box-shadow: var(--shadow-md);
 }
 
-.badge-chip {
+.chip, .badge-chip {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);

@@ -15,10 +15,10 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vendor-pdf': ['jspdf', 'html2canvas'],
-          'vendor-konva': ['konva', 'react-konva', 'react-konva-utils'],
-          'vendor-tabler': ['@tabler/icons-react']
+        manualChunks(id) {
+          if (id.includes('jspdf') || id.includes('html2canvas')) return 'vendor-pdf';
+          if (id.includes('konva') || id.includes('react-konva')) return 'vendor-konva';
+          if (id.includes('@tabler/icons-react')) return 'vendor-tabler';
         }
       }
     }

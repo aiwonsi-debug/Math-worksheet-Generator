@@ -252,7 +252,7 @@ export default function CoverGeneratorModal({ isOpen, onClose, pageImages: captu
       const sy = pY + 168 + i * 68;
       if (isLast) {
         // Common Core Aligned — separator line + italic grey
-        ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1.5;
+        ctx.strokeStyle = 'var(--color-border)'; ctx.lineWidth = 1.5;
         ctx.beginPath(); ctx.moveTo(pX + 20, sy - 14); ctx.lineTo(pX + pW - 20, sy - 14); ctx.stroke();
         ctx.fillStyle = '#94a3b8'; ctx.font = 'italic 19px Arial';
         ctx.fillText(skill, pX + 22, sy + 8);
@@ -403,7 +403,7 @@ export default function CoverGeneratorModal({ isOpen, onClose, pageImages: captu
 
   if (!isOpen) return null;
 
-  const labelStyle = { fontSize: '11px', fontWeight: 600, color: '#64748b', display: 'block', marginBottom: '3px', textTransform: 'uppercase', letterSpacing: '0.5px' };
+  const labelStyle = { fontSize: '11px', fontWeight: 600, color: 'var(--color-text-muted)', display: 'block', marginBottom: '3px', textTransform: 'uppercase', letterSpacing: '0.5px' };
   const inputStyle = { width: '100%', padding: '7px 10px', border: '1px solid #cbd5e1', borderRadius: '7px', fontSize: '13px', boxSizing: 'border-box', outline: 'none' };
 
   return (
@@ -414,7 +414,7 @@ export default function CoverGeneratorModal({ isOpen, onClose, pageImages: captu
         <div style={{ display: 'flex', flexDirection: 'column', gap: '11px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px' }}>
             <h2 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#1e293b' }}>🎨 Cover Settings</h2>
-            <button onClick={resetLayout} style={{ fontSize: '11px', padding: '4px 8px', border: '1px solid #cbd5e1', borderRadius: '6px', backgroundColor: '#f8fafc', cursor: 'pointer', color: '#64748b' }}>↺ Reset Layout</button>
+            <button onClick={resetLayout} style={{ fontSize: '11px', padding: '4px 8px', border: '1px solid #cbd5e1', borderRadius: '6px', backgroundColor: 'var(--color-bg)', cursor: 'pointer', color: 'var(--color-text-muted)' }}>↺ Reset Layout</button>
           </div>
 
           {/* Title with controls */}
@@ -585,7 +585,7 @@ function getContrastColor(hex) {
   const g = parseInt(color.substr(2, 2), 16);
   const b = parseInt(color.substr(4, 2), 16);
   const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-  return (yiq >= 128) ? '#0f172a' : '#ffffff';
+  return (yiq >= 128) ? 'var(--color-text-main)' : '#ffffff';
 }
 
 function shadeColor(hex, amount) {
