@@ -20,6 +20,12 @@ THEMES = {
     "space-2026": ["1f680", "1f6f8", "1f319", "2b50", "1fa90"]
 }
 
+def is_bw(config):
+    """Black & white is the default print style unless a topic explicitly
+    opts into color with `"color_mode": "color"`."""
+    return config.get("color_mode", "bw") != "color"
+
+
 def load_clipart_svg(code, width=28, height=28):
     svg_path = EMOJI_DIR / f"{code}.svg"
     if not svg_path.exists():
@@ -34,6 +40,8 @@ def load_clipart_svg(code, width=28, height=28):
         return ""
 
 def get_theme_cliparts(config, count=2):
+    if is_bw(config):
+        return []
     codes = config.get("clipart_codes", [])
     if not codes and "clipart_theme" in config:
         codes = THEMES.get(config["clipart_theme"], [])
@@ -42,6 +50,8 @@ def get_theme_cliparts(config, count=2):
     return [load_clipart_svg(c) for c in codes[:count] if load_clipart_svg(c)]
 
 def get_cover_cliparts(config):
+    if is_bw(config):
+        return []
     codes = config.get("clipart_codes", [])
     if not codes and "clipart_theme" in config:
         codes = THEMES.get(config["clipart_theme"], [])
@@ -49,51 +59,52 @@ def get_cover_cliparts(config):
         return []
     return [load_clipart_svg(c, width=44, height=44) for c in codes if load_clipart_svg(c, width=44, height=44)]
 
-def generate_problems(config):
-    op = str(config.get("operation", "+")).strip()
-    if op in ["×", "*"]:
-        op_type = "*"
-    elif op in ["÷", "/"]:
-        op_type = "/"
-    elif op in ["-", "−"]:
-        op_type = "-"
-    else:
-        op_type = "+"
+OP_SYMBOLS = {"+": "+", "-": "−", "×": "×", "*": "×", "÷": "÷", "/": "÷"}
 
+
+def generate_problems(config):
+    operation = config.get("operation", "+")
     op_min = config.get("operand_min", 0)
     op_max = config.get("operand_max", 10)
-    max_sum = config.get("max_sum", op_max * 2 if op_type == "+" else op_max)
+    max_sum = config.get("max_sum", 10)
     items_per_page = config.get("items_per_page", 12)
     num_versions = config.get("num_versions", 5)
 
     all_possible = []
-    if op_type == "+":
+    if operation == "+":
         for a in range(op_min, op_max + 1):
             for b in range(op_min, op_max + 1):
                 if a + b <= max_sum:
-                    all_possible.append((a, b))
-    elif op_type == "-":
+                    all_possible.append((a, b, a + b))
+    elif operation == "-":
+        # a - b, kept non-negative: a is drawn up to max_sum so results
+        # stay in a comparable range to the other operations.
+        for a in range(op_min, max(op_max, max_sum) + 1):
+            for b in range(op_min, op_max + 1):
+                if b <= a and a <= max_sum:
+                    all_possible.append((a, b, a - b))
+    elif operation in ("×", "*"):
+        max_product = config.get("max_product", max_sum)
         for a in range(op_min, op_max + 1):
-            for b in range(op_min, a + 1):  # b <= a to avoid negative answers
-                if a <= max_sum:
-                    all_possible.append((a, b))
-    elif op_type == "*":
-        for a in range(max(1, op_min), op_max + 1):
-            for b in range(max(1, op_min), op_max + 1):
-                if a * b <= max_sum:
-                    all_possible.append((a, b))
-    elif op_type == "/":
-        for b in range(max(1, op_min), op_max + 1):
-            for ans in range(1, op_max + 1):
-                a = b * ans
-                if a <= max_sum:
-                    all_possible.append((a, b))
+            for b in range(op_min, op_max + 1):
+                if a * b <= max_product:
+                    all_possible.append((a, b, a * b))
+    elif operation in ("÷", "/"):
+        # Build from clean divisions only: a = b * q, b != 0.
+        max_quotient = config.get("max_quotient", op_max)
+        for b in range(max(op_min, 1), op_max + 1):
+            for q in range(op_min, max_quotient + 1):
+                a = b * q
+                if a <= config.get("max_product", op_max * max_quotient):
+                    all_possible.append((a, b, q))
+    else:
+        raise ValueError(f"Unsupported operation: {operation!r} (expected one of + - × ÷)")
 
     if not all_possible:
         raise ValueError(
-            f"Topic config produces zero valid problems "
-            f"(operation='{op}', operand_min={op_min}, operand_max={op_max}, max_sum={max_sum}). "
-            f"Check that max_sum is reachable within the operand range."
+            f"Topic config produces zero valid problems for operation {operation!r} "
+            f"(operand_min={op_min}, operand_max={op_max}, max_sum={max_sum}). "
+            f"Check that the range/max settings are reachable for this operation."
         )
 
     versions = []
@@ -148,48 +159,43 @@ def generate_dots_worksheet_html(version, problems, config, is_answer_key=False)
     footer = config.get("footer", f"Created by {author} · For classroom or home use")
     theme = config.get("theme", {})
     primary_color = theme.get("primary_color", "#4C4592")
+    if is_bw(config):
+        primary_color = "#1A1A1A"
     dot_colors = theme.get("dot_colors", ["#F5A623", "#E53935"])
     card_border = theme.get("card_border", "#C4C0E5")
+    if is_bw(config):
+        dot_colors = ["#1A1A1A", "#1A1A1A"]
+        card_border = "#333333"
     
     page_title = f"{title} — Answer Key" if is_answer_key else title
 
-    op_symbol = str(config.get("operation", "+")).strip()
-    if op_symbol in ["*", "×"]:
-        display_op = "×"
-    elif op_symbol in ["/", "÷"]:
-        display_op = "÷"
-    elif op_symbol in ["-", "−"]:
-        display_op = "−"
-    else:
-        display_op = "+"
-
+    op_symbol = OP_SYMBOLS.get(config.get("operation", "+"), "+")
     grid_items = []
-    for idx, (a, b) in enumerate(problems, 1):
-        if display_op == "−":
-            ans_val = a - b
-        elif display_op == "×":
-            ans_val = a * b
-        elif display_op == "÷":
-            ans_val = a // b if b != 0 else 0
-        else:
-            ans_val = a + b
-
+    for idx, prob in enumerate(problems, 1):
+        a = prob[0]
+        b = prob[1]
+        result = prob[2] if len(prob) > 2 else (
+            a + b if op_symbol == "+" else
+            a - b if op_symbol == "−" else
+            a * b if op_symbol == "×" else
+            a // b if (op_symbol == "÷" and b != 0) else 0
+        )
         left_dots = render_dots_svg(a, dot_colors[0], config, is_right=False)
         right_dots = render_dots_svg(b, dot_colors[1], config, is_right=True)
         
         if is_answer_key:
-            eq_text = f'{a} {display_op} {b} = <span class="answer-val">{ans_val}</span>'
+            eq_text = f'{a} {op_symbol} {b} = <span class="answer-val">{result}</span>'
             dots_markup = ""
             card_class = "card answer-card"
         else:
-            eq_text = f'{a} {display_op} {b} = <span class="blank-line">___</span>'
+            eq_text = f'{a} {op_symbol} {b} = <span class="blank-line">___</span>'
             card_class = "card"
             
             if a > 0 and b > 0:
                 dots_markup = f'''
                 <div class="manipulatives-row">
                     {left_dots}
-                    <div class="plus-sign">{display_op}</div>
+                    <div class="plus-sign">{op_symbol}</div>
                     {right_dots}
                 </div>
                 '''
@@ -197,20 +203,20 @@ def generate_dots_worksheet_html(version, problems, config, is_answer_key=False)
                 dots_markup = f'''
                 <div class="manipulatives-row">
                     {left_dots}
-                    <div class="plus-sign">{display_op}</div>
+                    <div class="plus-sign">{op_symbol}</div>
                 </div>
                 '''
             elif a == 0 and b > 0:
                 dots_markup = f'''
                 <div class="manipulatives-row">
-                    <div class="plus-sign">{display_op}</div>
+                    <div class="plus-sign">{op_symbol}</div>
                     {right_dots}
                 </div>
                 '''
             else:
                 dots_markup = f'''
                 <div class="manipulatives-row">
-                    <div class="plus-sign">{display_op}</div>
+                    <div class="plus-sign">{op_symbol}</div>
                 </div>
                 '''
 
@@ -423,10 +429,17 @@ def generate_classic_worksheet_html(version, problems, config, is_answer_key=Fal
     footer = config.get("footer", f"Created by {author} · For classroom or home use")
     theme = config.get("theme", {})
     primary_color = theme.get("primary_color", "#1E293B")
+    if is_bw(config):
+        primary_color = "#1A1A1A"
     card_border = theme.get("card_border", "#CBD5E1")
     answer_bg = theme.get("answer_key_bg", "#EBF7ED")
     answer_border = theme.get("answer_key_border", "#A3E0B2")
     answer_text = theme.get("answer_key_text", "#2E7D32")
+    if is_bw(config):
+        card_border = "#333333"
+        answer_bg = "#F2F2F2"
+        answer_border = "#999999"
+        answer_text = "#1A1A1A"
     missing_part = config.get("missing_part", "answer")
 
     page_title = f"{title} — Answer Key" if is_answer_key else title
@@ -435,42 +448,33 @@ def generate_classic_worksheet_html(version, problems, config, is_answer_key=Fal
     accent_left = clipart_accents[0] if len(clipart_accents) > 0 else ""
     accent_right = clipart_accents[1] if len(clipart_accents) > 1 else accent_left
 
-    op_symbol = str(config.get("operation", "+")).strip()
-    if op_symbol in ["*", "×"]:
-        display_op = "×"
-    elif op_symbol in ["/", "÷"]:
-        display_op = "÷"
-    elif op_symbol in ["-", "−"]:
-        display_op = "−"
-    else:
-        display_op = "+"
-
+    op_symbol = OP_SYMBOLS.get(config.get("operation", "+"), "+")
     grid_items = []
-    for idx, (a, b) in enumerate(problems, 1):
-        if display_op == "−":
-            ans_val = a - b
-        elif display_op == "×":
-            ans_val = a * b
-        elif display_op == "÷":
-            ans_val = a // b if b != 0 else 0
-        else:
-            ans_val = a + b
+    for idx, prob in enumerate(problems, 1):
+        a = prob[0]
+        b = prob[1]
+        result = prob[2] if len(prob) > 2 else (
+            a + b if op_symbol == "+" else
+            a - b if op_symbol == "−" else
+            a * b if op_symbol == "×" else
+            a // b if (op_symbol == "÷" and b != 0) else 0
+        )
 
         if is_answer_key:
             if missing_part == "first":
-                eq_html = f'<span class="ans-box">{a}</span> {display_op} {b} = {ans_val}'
+                eq_html = f'<span class="ans-box">{a}</span> {op_symbol} {b} = {result}'
             elif missing_part == "second":
-                eq_html = f'{a} {display_op} <span class="ans-box">{b}</span> = {ans_val}'
+                eq_html = f'{a} {op_symbol} <span class="ans-box">{b}</span> = {result}'
             else:
-                eq_html = f'{a} {display_op} {b} = <span class="ans-box">{ans_val}</span>'
+                eq_html = f'{a} {op_symbol} {b} = <span class="ans-box">{result}</span>'
             card_class = "classic-card answer-card"
         else:
             if missing_part == "first":
-                eq_html = f'<div class="blank-box"></div> {display_op} {b} = {ans_val}'
+                eq_html = f'<div class="blank-box"></div> {op_symbol} {b} = {result}'
             elif missing_part == "second":
-                eq_html = f'{a} {display_op} <div class="blank-box"></div> = {ans_val}'
+                eq_html = f'{a} {op_symbol} <div class="blank-box"></div> = {result}'
             else:
-                eq_html = f'{a} {display_op} {b} = <div class="blank-box"></div>'
+                eq_html = f'{a} {op_symbol} {b} = <div class="blank-box"></div>'
             card_class = "classic-card"
 
         grid_items.append(f'''
@@ -781,7 +785,11 @@ def generate_cover_html(config):
     subtitle = config.get("subtitle", "")
     theme = config.get("theme", {})
     primary_color = theme.get("primary_color", "#1E293B")
+    if is_bw(config):
+        primary_color = "#1A1A1A"
     card_border = theme.get("card_border", "#CBD5E1")
+    if is_bw(config):
+        card_border = "#333333"
     pill_text = config.get("cover", {}).get("pill_text", "Addition within 10 • Grade 1 Math Practice")
 
     cover_cliparts = get_cover_cliparts(config)
@@ -790,6 +798,8 @@ def generate_cover_html(config):
         icons_row = f'<div class="cover-cliparts-row">{cliparts_html}</div>'
     else:
         cover_dots = config.get("cover", {}).get("dots", ["#F5B000", "#E53935", "#E53935", "#E59400"])
+        if is_bw(config):
+            cover_dots = ["#1A1A1A", "#4D4D4D", "#808080", "#B3B3B3"]
         dots_html = "".join([f'<div class="cover-dot" style="background-color: {c};"></div>' for c in cover_dots])
         icons_row = f'<div class="dots-row">{dots_html}</div>'
 
@@ -897,12 +907,11 @@ def generate_cover_html(config):
 
 def generate_listing_md(config):
     listing = config.get("tpt_listing", {})
-    work_title = config.get("title", "Untitled Worksheet")
-    title = listing.get("title", f"{work_title} Worksheets Bundle")
+    title = listing.get("title", f"{config['title']} Worksheets Bundle")
     bullets = "\n".join([f"- {b}" for b in listing.get("bullet_points", [])])
     keywords = ", ".join(listing.get("keywords", []))
 
-    return f'''# TPT Listing Draft: {work_title}
+    return f'''# TPT Listing Draft: {config['title']}
 
 ## Product Title
 `{title}`
@@ -1031,7 +1040,7 @@ def main():
     with open(config_path, "r", encoding="utf-8") as f:
         config = json.load(f)
 
-    required_keys = ["operation", "operand_min", "operand_max", "max_sum"]
+    required_keys = ["title", "operation", "operand_min", "operand_max", "max_sum"]
     missing = [k for k in required_keys if k not in config]
     if missing:
         print(f"Error: topic config is missing required key(s): {', '.join(missing)}")
@@ -1041,7 +1050,7 @@ def main():
     output_dir = Path("output") / topic_id
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"🚀 Starting TPT Generator Pipeline for: {config.get('title', 'Untitled Worksheet')}")
+    print(f"🚀 Starting TPT Generator Pipeline for: {config['title']}")
 
     # 1. Generate Math Problems
     versions_data = generate_problems(config)
