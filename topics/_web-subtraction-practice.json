@@ -1,0 +1,8 @@
+{
+  "title": "Subtraction Practice",
+  "operation": "-",
+  "operand_min": 1,
+  "operand_max": 10,
+  "max_sum": 10,
+  "id": "subtraction-practice"
+}

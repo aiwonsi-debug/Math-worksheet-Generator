@@ -76,6 +76,7 @@ import { generateWorksheet } from './utils/generatorEngine';
 import { clipartCategories } from './utils/clipartLibrary';
 import CanvasEditor from './components/CanvasEditor';
 import CoverGeneratorModal from './components/CoverGeneratorModal';
+import PythonGeneratorModal from './components/PythonGeneratorModal';
 const TPTListingHelper = React.lazy(() => import('./components/TPTListingHelper'));
 const TrendPlanner = React.lazy(() => import('./components/TrendPlanner'));
 import "./index.css";
@@ -114,6 +115,7 @@ function App() {
   const [isExporting, setIsExporting] = useState(false);
   
   const [isCoverModalOpen, setIsCoverModalOpen] = useState(false);
+  const [isPythonModalOpen, setIsPythonModalOpen] = useState(false);
   const [coverPageImages, setCoverPageImages] = useState([]);
   const [coverDataUrl, setCoverDataUrl] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
@@ -1105,17 +1107,13 @@ function App() {
           <button className="btn" style={{ width: '100%', marginTop: '0.5rem', background: '#f59e0b', color: 'white', border: 'none' }} onClick={handleBatchGenerate}>
             <Copy size={18} /> Generate 5 Variations (Batch)
           </button>
-          <button 
-            className="btn" 
-            style={{ width: '100%', marginTop: '0.5rem', background: '#8b5cf6', color: 'white', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: 600 }} 
-            onClick={() => {
-              const cmd = "python generator.py topics/addition-missing-first-classic.json";
-              navigator.clipboard.writeText(cmd);
-              alert(`Copied Python CLI Command to clipboard:\n\n${cmd}\n\nPaste and run this in your terminal to generate the full TPT bundle!`);
-            }}
-            title="Copy Python generator CLI command"
+          <button
+            className="btn"
+            style={{ width: '100%', marginTop: '0.5rem', background: '#8b5cf6', color: 'white', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: 600 }}
+            onClick={() => setIsPythonModalOpen(true)}
+            title="Open Python TPT Generator CLI & Runner"
           >
-            <Terminal size={18} /> Run Python TPT Generator (CLI)
+            <Terminal size={18} /> Run Python TPT Generator
           </button>
 
           <div style={{ borderTop: '1px solid #e2e8f0', marginTop: '1rem', paddingTop: '1rem', display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -1481,6 +1479,11 @@ function App() {
         onClose={() => setIsCoverModalOpen(false)} 
         pageImages={coverPageImages} 
         onApplyCover={setCoverDataUrl}
+      />
+      <PythonGeneratorModal
+        isOpen={isPythonModalOpen}
+        onClose={() => setIsPythonModalOpen(false)}
+        currentConfig={{ topic, operator, minVal, maxVal, problemCount, copyrightText, missingPart }}
       />
     </div>
   );

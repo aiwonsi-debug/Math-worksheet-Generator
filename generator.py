@@ -50,17 +50,51 @@ def get_cover_cliparts(config):
     return [load_clipart_svg(c, width=44, height=44) for c in codes if load_clipart_svg(c, width=44, height=44)]
 
 def generate_problems(config):
+    op = str(config.get("operation", "+")).strip()
+    if op in ["×", "*"]:
+        op_type = "*"
+    elif op in ["÷", "/"]:
+        op_type = "/"
+    elif op in ["-", "−"]:
+        op_type = "-"
+    else:
+        op_type = "+"
+
     op_min = config.get("operand_min", 0)
     op_max = config.get("operand_max", 10)
-    max_sum = config.get("max_sum", 10)
+    max_sum = config.get("max_sum", op_max * 2 if op_type == "+" else op_max)
     items_per_page = config.get("items_per_page", 12)
     num_versions = config.get("num_versions", 5)
 
     all_possible = []
-    for a in range(op_min, op_max + 1):
-        for b in range(op_min, op_max + 1):
-            if a + b <= max_sum:
-                all_possible.append((a, b))
+    if op_type == "+":
+        for a in range(op_min, op_max + 1):
+            for b in range(op_min, op_max + 1):
+                if a + b <= max_sum:
+                    all_possible.append((a, b))
+    elif op_type == "-":
+        for a in range(op_min, op_max + 1):
+            for b in range(op_min, a + 1):  # b <= a to avoid negative answers
+                if a <= max_sum:
+                    all_possible.append((a, b))
+    elif op_type == "*":
+        for a in range(max(1, op_min), op_max + 1):
+            for b in range(max(1, op_min), op_max + 1):
+                if a * b <= max_sum:
+                    all_possible.append((a, b))
+    elif op_type == "/":
+        for b in range(max(1, op_min), op_max + 1):
+            for ans in range(1, op_max + 1):
+                a = b * ans
+                if a <= max_sum:
+                    all_possible.append((a, b))
+
+    if not all_possible:
+        raise ValueError(
+            f"Topic config produces zero valid problems "
+            f"(operation='{op}', operand_min={op_min}, operand_max={op_max}, max_sum={max_sum}). "
+            f"Check that max_sum is reachable within the operand range."
+        )
 
     versions = []
     for v in range(1, num_versions + 1):
@@ -108,8 +142,8 @@ def render_dots_svg(count, color, config=None, is_right=False):
     return f'<div class="dots-group">{"".join(dots_html)}</div>'
 
 def generate_dots_worksheet_html(version, problems, config, is_answer_key=False):
-    title = config["title"]
-    subtitle = config["subtitle"]
+    title = config.get("title", "Untitled Worksheet")
+    subtitle = config.get("subtitle", "")
     author = config.get("author", "Attapol.k")
     footer = config.get("footer", f"Created by {author} · For classroom or home use")
     theme = config.get("theme", {})
@@ -119,25 +153,43 @@ def generate_dots_worksheet_html(version, problems, config, is_answer_key=False)
     
     page_title = f"{title} — Answer Key" if is_answer_key else title
 
+    op_symbol = str(config.get("operation", "+")).strip()
+    if op_symbol in ["*", "×"]:
+        display_op = "×"
+    elif op_symbol in ["/", "÷"]:
+        display_op = "÷"
+    elif op_symbol in ["-", "−"]:
+        display_op = "−"
+    else:
+        display_op = "+"
+
     grid_items = []
     for idx, (a, b) in enumerate(problems, 1):
-        sum_val = a + b
+        if display_op == "−":
+            ans_val = a - b
+        elif display_op == "×":
+            ans_val = a * b
+        elif display_op == "÷":
+            ans_val = a // b if b != 0 else 0
+        else:
+            ans_val = a + b
+
         left_dots = render_dots_svg(a, dot_colors[0], config, is_right=False)
         right_dots = render_dots_svg(b, dot_colors[1], config, is_right=True)
         
         if is_answer_key:
-            eq_text = f'{a} + {b} = <span class="answer-val">{sum_val}</span>'
+            eq_text = f'{a} {display_op} {b} = <span class="answer-val">{ans_val}</span>'
             dots_markup = ""
             card_class = "card answer-card"
         else:
-            eq_text = f'{a} + {b} = <span class="blank-line">___</span>'
+            eq_text = f'{a} {display_op} {b} = <span class="blank-line">___</span>'
             card_class = "card"
             
             if a > 0 and b > 0:
                 dots_markup = f'''
                 <div class="manipulatives-row">
                     {left_dots}
-                    <div class="plus-sign">+</div>
+                    <div class="plus-sign">{display_op}</div>
                     {right_dots}
                 </div>
                 '''
@@ -145,20 +197,20 @@ def generate_dots_worksheet_html(version, problems, config, is_answer_key=False)
                 dots_markup = f'''
                 <div class="manipulatives-row">
                     {left_dots}
-                    <div class="plus-sign">+</div>
+                    <div class="plus-sign">{display_op}</div>
                 </div>
                 '''
             elif a == 0 and b > 0:
                 dots_markup = f'''
                 <div class="manipulatives-row">
-                    <div class="plus-sign">+</div>
+                    <div class="plus-sign">{display_op}</div>
                     {right_dots}
                 </div>
                 '''
             else:
                 dots_markup = f'''
                 <div class="manipulatives-row">
-                    <div class="plus-sign">+</div>
+                    <div class="plus-sign">{display_op}</div>
                 </div>
                 '''
 
@@ -365,8 +417,8 @@ def generate_dots_worksheet_html(version, problems, config, is_answer_key=False)
     return html_content
 
 def generate_classic_worksheet_html(version, problems, config, is_answer_key=False):
-    title = config["title"]
-    subtitle = config["subtitle"]
+    title = config.get("title", "Untitled Worksheet")
+    subtitle = config.get("subtitle", "")
     author = config.get("author", "Attapol.k")
     footer = config.get("footer", f"Created by {author} · For classroom or home use")
     theme = config.get("theme", {})
@@ -383,25 +435,42 @@ def generate_classic_worksheet_html(version, problems, config, is_answer_key=Fal
     accent_left = clipart_accents[0] if len(clipart_accents) > 0 else ""
     accent_right = clipart_accents[1] if len(clipart_accents) > 1 else accent_left
 
+    op_symbol = str(config.get("operation", "+")).strip()
+    if op_symbol in ["*", "×"]:
+        display_op = "×"
+    elif op_symbol in ["/", "÷"]:
+        display_op = "÷"
+    elif op_symbol in ["-", "−"]:
+        display_op = "−"
+    else:
+        display_op = "+"
+
     grid_items = []
     for idx, (a, b) in enumerate(problems, 1):
-        sum_val = a + b
+        if display_op == "−":
+            ans_val = a - b
+        elif display_op == "×":
+            ans_val = a * b
+        elif display_op == "÷":
+            ans_val = a // b if b != 0 else 0
+        else:
+            ans_val = a + b
 
         if is_answer_key:
             if missing_part == "first":
-                eq_html = f'<span class="ans-box">{a}</span> + {b} = {sum_val}'
+                eq_html = f'<span class="ans-box">{a}</span> {display_op} {b} = {ans_val}'
             elif missing_part == "second":
-                eq_html = f'{a} + <span class="ans-box">{b}</span> = {sum_val}'
+                eq_html = f'{a} {display_op} <span class="ans-box">{b}</span> = {ans_val}'
             else:
-                eq_html = f'{a} + {b} = <span class="ans-box">{sum_val}</span>'
+                eq_html = f'{a} {display_op} {b} = <span class="ans-box">{ans_val}</span>'
             card_class = "classic-card answer-card"
         else:
             if missing_part == "first":
-                eq_html = f'<div class="blank-box"></div> + {b} = {sum_val}'
+                eq_html = f'<div class="blank-box"></div> {display_op} {b} = {ans_val}'
             elif missing_part == "second":
-                eq_html = f'{a} + <div class="blank-box"></div> = {sum_val}'
+                eq_html = f'{a} {display_op} <div class="blank-box"></div> = {ans_val}'
             else:
-                eq_html = f'{a} + {b} = <div class="blank-box"></div>'
+                eq_html = f'{a} {display_op} {b} = <div class="blank-box"></div>'
             card_class = "classic-card"
 
         grid_items.append(f'''
@@ -708,8 +777,8 @@ def generate_tou_html(config):
     return html_content
 
 def generate_cover_html(config):
-    title = config["title"]
-    subtitle = config["subtitle"]
+    title = config.get("title", "Untitled Worksheet")
+    subtitle = config.get("subtitle", "")
     theme = config.get("theme", {})
     primary_color = theme.get("primary_color", "#1E293B")
     card_border = theme.get("card_border", "#CBD5E1")
@@ -828,11 +897,12 @@ def generate_cover_html(config):
 
 def generate_listing_md(config):
     listing = config.get("tpt_listing", {})
-    title = listing.get("title", f"{config['title']} Worksheets Bundle")
+    work_title = config.get("title", "Untitled Worksheet")
+    title = listing.get("title", f"{work_title} Worksheets Bundle")
     bullets = "\n".join([f"- {b}" for b in listing.get("bullet_points", [])])
     keywords = ", ".join(listing.get("keywords", []))
 
-    return f'''# TPT Listing Draft: {config['title']}
+    return f'''# TPT Listing Draft: {work_title}
 
 ## Product Title
 `{title}`
@@ -961,11 +1031,17 @@ def main():
     with open(config_path, "r", encoding="utf-8") as f:
         config = json.load(f)
 
+    required_keys = ["operation", "operand_min", "operand_max", "max_sum"]
+    missing = [k for k in required_keys if k not in config]
+    if missing:
+        print(f"Error: topic config is missing required key(s): {', '.join(missing)}")
+        sys.exit(1)
+
     topic_id = config.get("id", config_path.stem)
     output_dir = Path("output") / topic_id
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"🚀 Starting TPT Generator Pipeline for: {config['title']}")
+    print(f"🚀 Starting TPT Generator Pipeline for: {config.get('title', 'Untitled Worksheet')}")
 
     # 1. Generate Math Problems
     versions_data = generate_problems(config)

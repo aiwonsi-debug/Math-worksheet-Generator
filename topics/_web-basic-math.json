@@ -1,0 +1,12 @@
+{
+  "id": "basic-math",
+  "title": "Basic Math Worksheet",
+  "author": "Attapol.k",
+  "footer": "© 2026 Attapol.k. For personal or single-classroom use only. Redistribution or resale is prohibited.",
+  "operation": "+",
+  "operand_min": 1,
+  "operand_max": 10,
+  "max_sum": 20,
+  "items_per_page": 10,
+  "num_versions": 5
+}
