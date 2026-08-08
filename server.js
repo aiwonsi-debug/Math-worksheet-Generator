@@ -11,7 +11,7 @@
 import express from "express";
 import cors from "cors";
 import { spawn } from "child_process";
-import { mkdirSync, writeFileSync, existsSync } from "fs";
+import { mkdirSync, writeFileSync, existsSync, readdirSync, readFileSync } from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -102,7 +102,86 @@ app.post("/api/generate", (req, res) => {
   });
 });
 
+app.get("/api/topics", (_req, res) => {
+  try {
+    if (!existsSync(TOPICS_DIR)) return res.json({ ok: true, topics: [] });
+    const files = readdirSync(TOPICS_DIR).filter(f => f.endsWith('.json') && !f.startsWith('_'));
+    const topics = files.map(file => {
+      try {
+        const content = JSON.parse(readFileSync(path.join(TOPICS_DIR, file), 'utf-8'));
+        return {
+          id: file,
+          path: `topics/${file}`,
+          title: content.title || file,
+          grade: content.grade || "Elementary",
+          operation: content.operation || "+",
+          description: content.subtitle || content.tpt_listing?.description || ""
+        };
+      } catch {
+        return null;
+      }
+    }).filter(Boolean);
+    res.json({ ok: true, topics });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+app.post("/api/batch-generate", (req, res) => {
+  const pythonCmd = process.platform === "win32" ? "python" : "python3";
+  const args = ["generator.py", "batch"];
+  
+  const py = spawn(pythonCmd, args, { cwd: __dirname });
+  let stdout = "";
+  let stderr = "";
+
+  py.stdout.on("data", (d) => (stdout += d.toString()));
+  py.stderr.on("data", (d) => (stderr += d.toString()));
+
+  py.on("error", (err) => {
+    res.status(500).json({
+      ok: false,
+      error: `Failed to start Python batch process (${pythonCmd}): ${err.message}`,
+    });
+  });
+
+  py.on("close", (code) => {
+    if (code !== 0) {
+      return res.status(500).json({
+        ok: false,
+        error: "Batch generation process exited with error.",
+        stdout,
+        stderr,
+      });
+    }
+
+    // Discover generated ZIP files
+    let zipFiles = [];
+    if (existsSync(OUTPUT_DIR)) {
+      const dirs = readdirSync(OUTPUT_DIR);
+      for (const d of dirs) {
+        const topicDir = path.join(OUTPUT_DIR, d);
+        const zipName = `${d}-tpt-bundle.zip`;
+        if (existsSync(path.join(topicDir, zipName))) {
+          zipFiles.push({
+            topicId: d,
+            zipUrl: `/output/${d}/${zipName}`
+          });
+        }
+      }
+    }
+
+    res.json({
+      ok: true,
+      stdout,
+      zipFiles,
+      count: zipFiles.length
+    });
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`TPT generator backend running at http://localhost:${PORT}`);
   console.log(`Waiting for requests from the app at http://localhost:5173 ...`);
 });
+

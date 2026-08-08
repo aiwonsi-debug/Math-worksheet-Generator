@@ -1,0 +1,44 @@
+{
+  "id": "double-digit-subtraction-no-regrouping",
+  "title": "2-Digit Subtraction (No Regrouping)",
+  "subtitle": "Grade 1 & 2 Math Practice",
+  "author": "Attapol.k",
+  "footer": "Created by Attapol.k · For classroom or home use",
+  "grade": "Grade 1 - Grade 2",
+  "operation": "-",
+  "operand_min": 10,
+  "operand_max": 49,
+  "max_sum": 99,
+  "items_per_page": 12,
+  "num_versions": 5,
+  "theme": {
+    "primary_color": "#E11D48",
+    "secondary_color": "#4B5563",
+    "font_family": "'Mali', sans-serif",
+    "card_border": "#FECDD3",
+    "answer_key_bg": "#FFF1F2",
+    "answer_key_border": "#FB7185",
+    "answer_key_text": "#9F1239"
+  },
+  "cover": {
+    "pill_text": "2-Digit Subtraction • No Regrouping • Base 10 Fluency"
+  },
+  "tpt_listing": {
+    "title": "2-Digit Subtraction Without Regrouping Worksheets - Grade 1-2 Math Practice",
+    "bullet_points": [
+      "5 unique randomized worksheet versions focusing on 2-digit subtraction without regrouping",
+      "5 detailed answer keys for seamless checking",
+      "Clean 3x4 grid for easy reading and work area",
+      "Includes merged PDF bundle + TPT cover thumbnail image"
+    ],
+    "description": "Clear and structured double-digit subtraction worksheets without borrowing/regrouping. Perfect for Grade 1 and 2 students building place value subtraction fluency.",
+    "keywords": [
+      "2-Digit Subtraction",
+      "Double Digit Subtraction",
+      "Without Regrouping",
+      "Grade 1 Math",
+      "Grade 2 Math",
+      "Place Value Subtraction"
+    ]
+  }
+}

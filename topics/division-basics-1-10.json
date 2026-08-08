@@ -1,0 +1,46 @@
+{
+  "id": "division-basics-1-10",
+  "title": "Division Basics (1 to 10)",
+  "subtitle": "Grade 3-5 Math Practice",
+  "author": "Attapol.k",
+  "footer": "Created by Attapol.k · For classroom or home use",
+  "grade": "Grade 3 - Grade 5",
+  "operation": "÷",
+  "operand_min": 1,
+  "operand_max": 10,
+  "max_quotient": 10,
+  "items_per_page": 12,
+  "num_versions": 5,
+  "theme": {
+    "primary_color": "#7C3AED",
+    "secondary_color": "#4B5563",
+    "font_family": "'Mali', sans-serif",
+    "dot_colors": ["#8B5CF6", "#5B21B6"],
+    "card_border": "#DDD6FE",
+    "answer_key_bg": "#F5F3FF",
+    "answer_key_border": "#A78BFA",
+    "answer_key_text": "#5B21B6"
+  },
+  "cover": {
+    "dots": ["#8B5CF6", "#7C3AED", "#5B21B6", "#A78BFA"],
+    "pill_text": "Division Facts 1-10 • Fact Families • Grade 3-5 Practice"
+  },
+  "tpt_listing": {
+    "title": "Division Facts 1-10 Worksheets & Answer Keys - Grade 3-5 Math Fluency",
+    "bullet_points": [
+      "5 unique randomized worksheet versions focusing on basic division facts 1-10",
+      "5 comprehensive answer keys highlighted for easy grading",
+      "Clean math grid formatting for speed practice and homework",
+      "Includes merged complete PDF bundle + square TPT product thumbnail"
+    ],
+    "description": "Reinforce basic division facts with clean, print-ready worksheets for 3rd, 4th, and 5th grade math classrooms. Ideal for fact family practice!",
+    "keywords": [
+      "Division Facts 1-10",
+      "Basic Division",
+      "Grade 3 Division",
+      "Grade 4 Math",
+      "Grade 5 Math",
+      "Math Fact Families"
+    ]
+  }
+}

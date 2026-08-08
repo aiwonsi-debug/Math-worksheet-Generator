@@ -5,7 +5,14 @@ import random
 import zipfile
 import asyncio
 from pathlib import Path
-from pypdf import PdfWriter
+try:
+    from pypdf import PdfWriter
+except ImportError:
+    try:
+        from PyPDF2 import PdfWriter
+    except ImportError:
+        from PyPDF2 import PdfFileMerger as PdfWriter
+
 
 # Force UTF-8 stdout on Windows
 if sys.platform == "win32":
@@ -304,7 +311,7 @@ def generate_dots_worksheet_html(version, problems, config, is_answer_key=False)
         }}
 
         .card {{
-            border: 2px dashed {card_border};
+            border: 2px solid {card_border};
             border-radius: 16px;
             padding: 12px 10px 8px 10px;
             display: flex;
@@ -318,7 +325,7 @@ def generate_dots_worksheet_html(version, problems, config, is_answer_key=False)
 
         .answer-card {{
             background-color: #EBF7ED;
-            border: 2px dashed #A3E0B2;
+            border: 2px solid #A3E0B2;
             height: 175px;
             justify-content: center;
             gap: 8px;
@@ -574,7 +581,7 @@ def generate_classic_worksheet_html(version, problems, config, is_answer_key=Fal
         }}
 
         .classic-card {{
-            border: 2.5px dashed {card_border};
+            border: 2.5px solid {card_border};
             border-radius: 14px;
             padding: 16px 12px;
             display: flex;
@@ -588,7 +595,7 @@ def generate_classic_worksheet_html(version, problems, config, is_answer_key=Fal
 
         .answer-card {{
             background-color: {answer_bg};
-            border: 2.5px dashed {answer_border};
+            border: 2.5px solid {answer_border};
         }}
 
         .prob-num-circle {{
@@ -831,7 +838,7 @@ def generate_cover_html(config):
         .cover-box {{
             width: 100%;
             height: 100%;
-            border: 4px dashed {card_border};
+            border: 4px solid {card_border};
             border-radius: 36px;
             display: flex;
             flex-direction: column;
@@ -932,7 +939,26 @@ def generate_listing_md(config):
 - **Subject**: Elementary Math / Fact Fluency / Number Sense
 '''
 
-async def render_pdf_and_cover_async(output_dir, config, versions_data):
+async def render_single_page_pdf(browser, html_content, html_path, pdf_path, margin, is_screenshot=False, viewport=None):
+    page = await browser.new_page()
+    try:
+        html_path.write_text(html_content, encoding="utf-8")
+        if viewport:
+            await page.set_viewport_size(viewport)
+        await page.goto(html_path.resolve().as_uri(), wait_until="networkidle")
+        if is_screenshot:
+            await page.screenshot(path=str(pdf_path))
+        else:
+            await page.pdf(
+                path=str(pdf_path),
+                format="Letter",
+                print_background=True,
+                margin=margin
+            )
+    finally:
+        await page.close()
+
+async def render_topic_async(output_dir, config, versions_data, browser=None):
     from playwright.async_api import async_playwright
 
     ws_dir = output_dir / "worksheets"
@@ -940,70 +966,59 @@ async def render_pdf_and_cover_async(output_dir, config, versions_data):
     ws_dir.mkdir(parents=True, exist_ok=True)
     ak_dir.mkdir(parents=True, exist_ok=True)
 
+    ws_tasks = []
     ws_pdf_paths = []
     ak_pdf_paths = []
 
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
-        page = await browser.new_page()
+    own_browser = False
+    p_instance = None
+    if browser is None:
+        p_instance = await async_playwright().start()
+        browser = await p_instance.chromium.launch(headless=True)
+        own_browser = True
 
-        # 1. Render Worksheets and Answer Keys
+    try:
+        tasks = []
+        pdf_margin = {"top": "12mm", "bottom": "12mm", "left": "12mm", "right": "12mm"}
+        tou_margin = {"top": "15mm", "bottom": "15mm", "left": "20mm", "right": "20mm"}
+
+        # 1. Prepare Worksheets & Answer Keys tasks
         for version, problems in versions_data:
-            # Worksheet
             ws_html = generate_worksheet_html(version, problems, config, is_answer_key=False)
             ws_html_path = ws_dir / f"worksheet_v{version}.html"
             ws_pdf_path = ws_dir / f"worksheet_v{version}.pdf"
-            ws_html_path.write_text(ws_html, encoding="utf-8")
-
-            await page.goto(ws_html_path.resolve().as_uri(), wait_until="networkidle")
-            await page.pdf(
-                path=str(ws_pdf_path),
-                format="Letter",
-                print_background=True,
-                margin={"top": "12mm", "bottom": "12mm", "left": "12mm", "right": "12mm"}
-            )
             ws_pdf_paths.append(ws_pdf_path)
+            tasks.append(render_single_page_pdf(browser, ws_html, ws_html_path, ws_pdf_path, pdf_margin))
 
-            # Answer Key
             ak_html = generate_worksheet_html(version, problems, config, is_answer_key=True)
             ak_html_path = ak_dir / f"answer_key_v{version}.html"
             ak_pdf_path = ak_dir / f"answer_key_v{version}.pdf"
-            ak_html_path.write_text(ak_html, encoding="utf-8")
-
-            await page.goto(ak_html_path.resolve().as_uri(), wait_until="networkidle")
-            await page.pdf(
-                path=str(ak_pdf_path),
-                format="Letter",
-                print_background=True,
-                margin={"top": "12mm", "bottom": "12mm", "left": "12mm", "right": "12mm"}
-            )
             ak_pdf_paths.append(ak_pdf_path)
+            tasks.append(render_single_page_pdf(browser, ak_html, ak_html_path, ak_pdf_path, pdf_margin))
 
-        # 2. Render Terms of Use PDF Page
+        # 2. Terms of Use Task
         tou_html = generate_tou_html(config)
         tou_html_path = output_dir / "tou.html"
         tou_pdf_path = output_dir / "tou.pdf"
-        tou_html_path.write_text(tou_html, encoding="utf-8")
+        tasks.append(render_single_page_pdf(browser, tou_html, tou_html_path, tou_pdf_path, tou_margin))
 
-        await page.goto(tou_html_path.resolve().as_uri(), wait_until="networkidle")
-        await page.pdf(
-            path=str(tou_pdf_path),
-            format="Letter",
-            print_background=True,
-            margin={"top": "15mm", "bottom": "15mm", "left": "20mm", "right": "20mm"}
-        )
-
-        # 3. Render Square Cover Image
+        # 3. Square Cover Task
         cover_html = generate_cover_html(config)
         cover_html_path = output_dir / "cover.html"
         cover_png_path = output_dir / "cover.png"
-        cover_html_path.write_text(cover_html, encoding="utf-8")
+        tasks.append(render_single_page_pdf(
+            browser, cover_html, cover_html_path, cover_png_path, None,
+            is_screenshot=True, viewport={"width": 1200, "height": 1200}
+        ))
 
-        await page.set_viewport_size({"width": 1200, "height": 1200})
-        await page.goto(cover_html_path.resolve().as_uri(), wait_until="networkidle")
-        await page.screenshot(path=str(cover_png_path))
+        # Render all pages in parallel
+        await asyncio.gather(*tasks)
 
-        await browser.close()
+    finally:
+        if own_browser:
+            await browser.close()
+            if p_instance:
+                await p_instance.stop()
 
     return ws_pdf_paths, ak_pdf_paths, tou_pdf_path, cover_png_path
 
@@ -1027,38 +1042,34 @@ def build_zip_package(topic_id, output_dir, complete_pdf, cover_png, listing_md_
             z.write(ak, arcname=f"answer_keys/{ak.name}")
     return zip_path
 
-def main():
-    if len(sys.argv) < 2:
-        print("Usage: python generator.py <path-to-topic.json>")
-        sys.exit(1)
-
-    config_path = Path(sys.argv[1])
+async def process_topic_config_async(config_path, browser=None):
+    config_path = Path(config_path)
     if not config_path.exists():
         print(f"Error: Topic config file not found: {config_path}")
-        sys.exit(1)
+        return None
 
     with open(config_path, "r", encoding="utf-8") as f:
         config = json.load(f)
 
-    required_keys = ["title", "operation", "operand_min", "operand_max", "max_sum"]
+    required_keys = ["title", "operation", "operand_min", "operand_max"]
     missing = [k for k in required_keys if k not in config]
     if missing:
-        print(f"Error: topic config is missing required key(s): {', '.join(missing)}")
-        sys.exit(1)
+        print(f"Error: topic config {config_path.name} missing key(s): {', '.join(missing)}")
+        return None
 
     topic_id = config.get("id", config_path.stem)
     output_dir = Path("output") / topic_id
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"🚀 Starting TPT Generator Pipeline for: {config['title']}")
+    print(f"🚀 Processing: {config['title']} ({topic_id})")
 
     # 1. Generate Math Problems
     versions_data = generate_problems(config)
 
     # 2. Render PDFs and Cover PNG via Playwright
-    ws_pdfs, ak_pdfs, tou_pdf, cover_png = asyncio.run(render_pdf_and_cover_async(output_dir, config, versions_data))
+    ws_pdfs, ak_pdfs, tou_pdf, cover_png = await render_topic_async(output_dir, config, versions_data, browser=browser)
 
-    # 3. Merge PDFs (Append TOU PDF page to all bundles)
+    # 3. Merge PDFs
     ws_bundle = output_dir / f"{topic_id}-worksheets.pdf"
     ak_bundle = output_dir / f"{topic_id}-answer-keys.pdf"
     complete_bundle = output_dir / f"{topic_id}-complete.pdf"
@@ -1075,13 +1086,68 @@ def main():
     # 5. Build ZIP Package
     zip_path = build_zip_package(topic_id, output_dir, complete_bundle, cover_png, listing_path)
 
-    print("\n✅ TPT Generator Pipeline Completed Successfully!")
-    print(f"  ├── Worksheets PDF Bundle (+TOU): {ws_bundle}")
-    print(f"  ├── Answer Keys PDF Bundle (+TOU): {ak_bundle}")
-    print(f"  ├── Complete Combined PDF (+TOU): {complete_bundle}")
-    print(f"  ├── Square Cover PNG: {cover_png}")
-    print(f"  ├── TPT Listing Copy: {listing_path}")
-    print(f"  └── Ready-to-Upload ZIP: {zip_path}")
+    print(f"  └── Finished {topic_id} -> ZIP: {zip_path}")
+    return {
+        "topic_id": topic_id,
+        "title": config["title"],
+        "zip_path": zip_path,
+        "complete_pdf": complete_bundle,
+        "output_dir": output_dir
+    }
+
+def process_topic_config(config_path, browser=None):
+    return asyncio.run(process_topic_config_async(config_path, browser=browser))
+
+async def batch_process_async(config_paths):
+    from playwright.async_api import async_playwright
+    import time
+
+    start_time = time.time()
+    results = []
+
+    print(f"\n⚡ Starting Fast Batch Generation for {len(config_paths)} topics...")
+    
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=True)
+        for path in config_paths:
+            res = await process_topic_config_async(path, browser=browser)
+            if res:
+                results.append(res)
+        await browser.close()
+
+    elapsed = time.time() - start_time
+    print(f"\n==================================================")
+    print(f"✅ Fast Batch Generation Complete!")
+    print(f"  ├── Total topics processed: {len(results)}")
+    print(f"  ├── Elapsed time: {elapsed:.2f}s")
+    print(f"  └── Outputs saved to: ./output/")
+    print(f"==================================================\n")
+    return results
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: python generator.py <path-to-topic.json | batch>")
+        sys.exit(1)
+
+    arg = sys.argv[1].lower()
+    
+    if arg in ("batch", "all", "--batch", "--all"):
+        topics_dir = Path("topics")
+        # Exclude internal temp topics starting with underscore
+        topic_paths = [p for p in topics_dir.glob("*.json") if not p.name.startswith("_")]
+        if not topic_paths:
+            print("No topic JSON files found in topics/")
+            sys.exit(1)
+        asyncio.run(batch_process_async(topic_paths))
+    elif len(sys.argv) > 2:
+        # Multiple topic paths passed
+        topic_paths = [Path(p) for p in sys.argv[1:] if Path(p).exists()]
+        asyncio.run(batch_process_async(topic_paths))
+    else:
+        config_path = Path(sys.argv[1])
+        process_topic_config(config_path)
+
 
 if __name__ == "__main__":
     main()
+

@@ -1,0 +1,46 @@
+{
+  "id": "missing-addends-within-20",
+  "title": "Missing Addends Within 20",
+  "subtitle": "Grade 1 & 2 Math Practice",
+  "author": "Attapol.k",
+  "footer": "Created by Attapol.k · For classroom or home use",
+  "grade": "Grade 1 - Grade 2",
+  "style": "classic_boxes",
+  "missing_part": "first",
+  "operation": "+",
+  "operand_min": 1,
+  "operand_max": 20,
+  "max_sum": 20,
+  "items_per_page": 12,
+  "num_versions": 5,
+  "theme": {
+    "primary_color": "#0891B2",
+    "secondary_color": "#4B5563",
+    "font_family": "'Mali', sans-serif",
+    "card_border": "#A5F3FC",
+    "answer_key_bg": "#ECFEFF",
+    "answer_key_border": "#22D3EE",
+    "answer_key_text": "#155E75"
+  },
+  "cover": {
+    "pill_text": "Missing Addends Within 20 • Fill-in-the-Blank • Early Algebra"
+  },
+  "tpt_listing": {
+    "title": "Missing Addends Within 20 Worksheets - Grade 1-2 Algebraic Thinking",
+    "bullet_points": [
+      "5 unique randomized worksheet versions with missing numbers in box format",
+      "5 full answer key pages for stress-free grading",
+      "Develops early algebraic thinking and part-part-whole understanding",
+      "Printable high-resolution PDFs + merged complete bundle"
+    ],
+    "description": "Engaging missing addend practice sheets for Grade 1 and 2 students! Perfect for building understanding of equations and inverse operations within 20.",
+    "keywords": [
+      "Missing Addends",
+      "Addition Within 20",
+      "Algebraic Thinking",
+      "Grade 1 Math",
+      "Grade 2 Math",
+      "Fill in the Blank Math"
+    ]
+  }
+}

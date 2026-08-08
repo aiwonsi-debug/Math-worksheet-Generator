@@ -1,0 +1,46 @@
+{
+  "id": "subtraction-within-10",
+  "title": "Subtraction Within 10",
+  "subtitle": "Kindergarten & Grade 1 Math Practice",
+  "author": "Attapol.k",
+  "footer": "Created by Attapol.k · For classroom or home use",
+  "grade": "Kindergarten - Grade 1",
+  "operation": "-",
+  "operand_min": 0,
+  "operand_max": 10,
+  "max_sum": 10,
+  "items_per_page": 12,
+  "num_versions": 5,
+  "theme": {
+    "primary_color": "#DC2626",
+    "secondary_color": "#4B5563",
+    "font_family": "'Mali', sans-serif",
+    "dot_colors": ["#EF4444", "#991B1B"],
+    "card_border": "#FCA5A5",
+    "answer_key_bg": "#FEF2F2",
+    "answer_key_border": "#F87171",
+    "answer_key_text": "#991B1B"
+  },
+  "cover": {
+    "dots": ["#EF4444", "#DC2626", "#B91C1C", "#F87171"],
+    "pill_text": "Subtraction within 10 • Early Math Skills • Answer Keys Included"
+  },
+  "tpt_listing": {
+    "title": "Subtraction Within 10 Printable Worksheets - Kindergarten & Grade 1 Math",
+    "bullet_points": [
+      "5 unique randomized worksheet versions + 5 matching answer keys",
+      "Kid-friendly 3x4 grid layout with clear subtraction problems",
+      "Visual counting dots to assist early learners",
+      "Print-ready PDFs + complete merged bundle + TPT cover image"
+    ],
+    "description": "Master early subtraction with these engaging Subtraction Within 10 worksheets! Perfect for morning work, math centers, or homework for Kindergarten and 1st Grade.",
+    "keywords": [
+      "Subtraction within 10",
+      "Kindergarten Math",
+      "Grade 1 Subtraction",
+      "Math Fact Fluency",
+      "Early Numeracy",
+      "Printable Math Worksheets"
+    ]
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "id": "double-digit-addition-no-regrouping",
+  "title": "2-Digit Addition (No Regrouping)",
+  "subtitle": "Grade 1 & 2 Math Practice",
+  "author": "Attapol.k",
+  "footer": "Created by Attapol.k · For classroom or home use",
+  "grade": "Grade 1 - Grade 2",
+  "operation": "+",
+  "operand_min": 10,
+  "operand_max": 49,
+  "max_sum": 99,
+  "items_per_page": 12,
+  "num_versions": 5,
+  "theme": {
+    "primary_color": "#0284C7",
+    "secondary_color": "#4B5563",
+    "font_family": "'Mali', sans-serif",
+    "card_border": "#BAE6FD",
+    "answer_key_bg": "#F0F9FF",
+    "answer_key_border": "#38BDF8",
+    "answer_key_text": "#0369A1"
+  },
+  "cover": {
+    "pill_text": "2-Digit Addition • No Regrouping • Place Value Practice"
+  },
+  "tpt_listing": {
+    "title": "2-Digit Addition Without Regrouping Worksheets & Answer Keys - Grade 1-2 Math",
+    "bullet_points": [
+      "5 unique randomized worksheet versions focusing on 2-digit addition without regrouping",
+      "5 complete answer key pages for quick grading",
+      "Reinforces place value (ones and tens columns)",
+      "Includes merged bundle PDF and TPT square cover image"
+    ],
+    "description": "Solidify two-digit addition skills with these no-regrouping practice worksheets. Great for introductory double-digit addition units in 1st and 2nd grade!",
+    "keywords": [
+      "2-Digit Addition",
+      "Double Digit Addition",
+      "No Regrouping",
+      "Grade 1 Math",
+      "Grade 2 Math",
+      "Place Value Practice"
+    ]
+  }
+}

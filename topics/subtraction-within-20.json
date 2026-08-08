@@ -1,0 +1,45 @@
+{
+  "id": "subtraction-within-20",
+  "title": "Subtraction Within 20",
+  "subtitle": "Grade 1 & 2 Math Practice",
+  "author": "Attapol.k",
+  "footer": "Created by Attapol.k · For classroom or home use",
+  "grade": "Grade 1 - Grade 2",
+  "operation": "-",
+  "operand_min": 0,
+  "operand_max": 20,
+  "max_sum": 20,
+  "items_per_page": 12,
+  "num_versions": 5,
+  "theme": {
+    "primary_color": "#D97706",
+    "secondary_color": "#4B5563",
+    "font_family": "'Mali', sans-serif",
+    "dot_colors": ["#F59E0B", "#B45309"],
+    "card_border": "#FDE68A",
+    "answer_key_bg": "#FFFBEB",
+    "answer_key_border": "#FBBF24",
+    "answer_key_text": "#92400E"
+  },
+  "cover": {
+    "dots": ["#F59E0B", "#D97706", "#B45309", "#FBBF24"],
+    "pill_text": "Subtraction within 20 • Mental Math • Fact Fluency"
+  },
+  "tpt_listing": {
+    "title": "Subtraction Within 20 Worksheets & Answer Keys - Grade 1-2 Math Practice",
+    "bullet_points": [
+      "5 unique randomized worksheet versions with 5 matching answer keys",
+      "Focuses on subtraction fact fluency for numbers up to 20",
+      "Clean boxed visual layout for stress-free student focus",
+      "Includes complete merged PDF bundle and ready-to-use cover"
+    ],
+    "description": "Essential subtraction fluency worksheets for Grade 1 and 2! Designed to help students build speed and confidence solving subtraction problems up to 20.",
+    "keywords": [
+      "Subtraction within 20",
+      "Grade 1 Subtraction",
+      "Grade 2 Math",
+      "Mental Math Fluency",
+      "Math Worksheets PDF"
+    ]
+  }
+}

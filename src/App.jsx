@@ -110,9 +110,15 @@ function App() {
   
   const [showGrid, setShowGrid] = useState(false);
   const [showAnswers, setShowAnswers] = useState(false);
-  const [showBorder, setShowBorder] = useState(true);
+  const [showBorder, setShowBorder] = useState(false);
+  const [frameMode, setFrameMode] = useState('table');
+  const [borderStyle, setBorderStyle] = useState('solid');
   const [includeAnswerKey, setIncludeAnswerKey] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [layoutCols, setLayoutCols] = useState('auto');
+  const [layoutRows1, setLayoutRows1] = useState('auto');
+  const [layoutRows2, setLayoutRows2] = useState('auto');
+  const [questionScale, setQuestionScale] = useState(1);
   
   const [isCoverModalOpen, setIsCoverModalOpen] = useState(false);
   const [isPythonModalOpen, setIsPythonModalOpen] = useState(false);
@@ -243,7 +249,7 @@ function App() {
     }
   };
 
-  const getPositionedProblems = (rawProblems, activeTopic, activeOrientation, targetStartPage) => {
+  const getPositionedProblems = (rawProblems, activeTopic, activeOrientation, targetStartPage, layoutOverrides = {}) => {
     let cols = 2;
     let itemsPerPage = 10;
     let startX = 60;
@@ -275,11 +281,50 @@ function App() {
     } else if (activeTopic === 'ten_frame_comparison') {
       cols = 1; itemsPerPage = 7; startX = 50; startY = 220; itemHeight = 100; defaultSpacingY = 120; maxAllowedSpacing = 140;
     } else if (activeTopic === 'word_problem' || activeTopic === 'decodable_word_problem') {
-      cols = 1; itemsPerPage = 3; startX = 70; startY = 220; itemHeight = 250; defaultSpacingY = 265; maxAllowedSpacing = 275;
+      cols = 1; itemsPerPage = 3; startX = 70; startY = 220; itemHeight = 220; defaultSpacingY = 265; maxAllowedSpacing = 275;
     } else if (activeTopic === 'fact_family') {
       cols = 1; itemsPerPage = 3; startX = 70; spacingX = 350; startY = 220; itemHeight = 180; defaultSpacingY = 260; maxAllowedSpacing = 270;
     } else if (activeTopic === 'missing_addend') {
       cols = 2; itemsPerPage = 12; startX = 60; spacingX = 360; itemHeight = 75; defaultSpacingY = 120; maxAllowedSpacing = 220;
+    }
+
+    const scale = layoutOverrides.questionScale || 1;
+    itemHeight *= scale;
+    // maxAllowedSpacing doesn't necessarily need to scale, but maybe spacingY will adapt via availHeight.
+
+    if (layoutOverrides.layoutCols && layoutOverrides.layoutCols !== 'auto') {
+      cols = Number(layoutOverrides.layoutCols);
+      if (cols === 1) {
+        startX = 220;
+        spacingX = 0;
+      } else if (cols === 2) {
+        startX = 60;
+        spacingX = 360;
+      }
+    }
+    
+    let rowsPerCol = Array(cols).fill(Math.ceil(itemsPerPage / cols));
+    
+    if (layoutOverrides.layoutRows1 && layoutOverrides.layoutRows1 !== 'auto') {
+       rowsPerCol[0] = Number(layoutOverrides.layoutRows1);
+    }
+    if (cols > 1 && layoutOverrides.layoutRows2 && layoutOverrides.layoutRows2 !== 'auto') {
+       rowsPerCol[1] = Number(layoutOverrides.layoutRows2);
+    }
+
+    let slots = [];
+    const maxRows = Math.max(...rowsPerCol);
+    for (let r = 0; r < maxRows; r++) {
+      for (let c = 0; c < cols; c++) {
+        if (r < rowsPerCol[c]) {
+          slots.push({ col: c, row: r });
+        }
+      }
+    }
+    
+    // If the user specified row overrides, use the slot count as itemsPerPage
+    if (layoutOverrides.layoutRows1 !== 'auto' || layoutOverrides.layoutRows2 !== 'auto') {
+      itemsPerPage = slots.length || itemsPerPage;
     }
 
     const problemsByPageOffset = {};
@@ -296,7 +341,17 @@ function App() {
       const targetPage = targetStartPage + pageOffset;
       const pageItems = problemsByPageOffset[offsetStr];
       const countOnPage = pageItems.length;
-      const rowsOnPage = Math.ceil(countOnPage / cols);
+      
+      let maxRowUsed = 0;
+      if (slots.length > 0) {
+        for (let i = 0; i < countOnPage; i++) {
+           const r = slots[i % slots.length].row;
+           if (r > maxRowUsed) maxRowUsed = r;
+        }
+      } else {
+        maxRowUsed = Math.ceil(countOnPage / cols) - 1;
+      }
+      const rowsOnPage = maxRowUsed + 1;
 
       const availHeight = (targetMaxY - itemHeight) - startY;
       let spacingY = defaultSpacingY;
@@ -311,8 +366,8 @@ function App() {
       }
 
       pageItems.forEach(({ prob, indexOnPage }) => {
-        const col = indexOnPage % cols;
-        const row = Math.floor(indexOnPage / cols);
+        const col = slots.length > 0 ? slots[indexOnPage % slots.length].col : indexOnPage % cols;
+        const row = slots.length > 0 ? slots[indexOnPage % slots.length].row : Math.floor(indexOnPage / cols);
         const x = startX + (col * spacingX);
         const y = actualStartY + (row * spacingY);
         problemsWithPositions.push({ ...prob, pageIndex: targetPage, x, y });
@@ -350,7 +405,7 @@ function App() {
       setCurrentPage(0);
     }
 
-    const { problemsWithPositions, itemsPerPage } = getPositionedProblems(rawProblems, activeTopic, activeOrientation, targetStartPage);
+    const { problemsWithPositions, itemsPerPage } = getPositionedProblems(rawProblems, activeTopic, activeOrientation, targetStartPage, { layoutCols, layoutRows1, layoutRows2, questionScale });
     const total = Math.ceil(pCount / itemsPerPage) || 1;
     setTotalPages(prev => Math.max(prev, targetStartPage + total));
 
@@ -443,7 +498,7 @@ function App() {
     const config = { topic, operator, min: minVal, max: maxVal, allowCarryBorrow, orientation, missingPart, sequenceLength };
     
     // Determine itemsPerPage for pagesPerVariation calculation
-    const sample = getPositionedProblems([], topic, orientation, 0);
+    const sample = getPositionedProblems([], topic, orientation, 0, { layoutCols, layoutRows1, layoutRows2, questionScale });
     const itemsPerPage = sample.itemsPerPage;
     
     const pagesPerVariation = Math.ceil(problemCount / itemsPerPage) || 1;
@@ -486,7 +541,7 @@ function App() {
       const rawProblems = generateWorksheet(problemCount, config);
       const varStartPage = targetStartPage + (v * pagesPerVariation);
       
-      const { problemsWithPositions } = getPositionedProblems(rawProblems, topic, orientation, varStartPage);
+      const { problemsWithPositions } = getPositionedProblems(rawProblems, topic, orientation, varStartPage, { layoutCols, layoutRows1, layoutRows2, questionScale });
       allNewProblems.push(...problemsWithPositions);
       
       for(let p = 0; p < pagesPerVariation; p++) {
@@ -1096,9 +1151,96 @@ function App() {
             <input type="text" className="form-input" value={copyrightText} onChange={(e) => setCopyrightText(e.target.value)} placeholder="© 2026 Attapol.k" />
           </div>
 
-          <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <input type="checkbox" id="showBorder" checked={showBorder} onChange={(e) => setShowBorder(e.target.checked)} style={{ cursor: 'pointer' }} />
-            <label htmlFor="showBorder" className="form-label" style={{ margin: 0, cursor: 'pointer' }}>Decorative Page Border</label>
+          <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '12px', background: '#f1f5f9', borderRadius: '6px' }}>
+            <label className="form-label" style={{ margin: 0, fontWeight: 600 }}>Grid Layout Configuration</label>
+            
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <label className="form-label" style={{ margin: 0, fontSize: '0.85rem' }}>Columns:</label>
+              <select value={layoutCols} onChange={(e) => setLayoutCols(e.target.value)} className="form-input" style={{ width: '120px', padding: '2px 8px', fontSize: '0.85rem' }}>
+                <option value="auto">Auto (Default)</option>
+                <option value="1">1 Column</option>
+                <option value="2">2 Columns</option>
+              </select>
+            </div>
+
+            {layoutCols === '2' ? (
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <label className="form-label" style={{ margin: 0, fontSize: '0.85rem' }}>Col 1 Rows:</label>
+                  <select value={layoutRows1} onChange={(e) => setLayoutRows1(e.target.value)} className="form-input" style={{ width: '120px', padding: '2px 8px', fontSize: '0.85rem' }}>
+                    <option value="auto">Auto (Default)</option>
+                    {[...Array(15)].map((_, i) => (
+                      <option key={i+1} value={i+1}>{i+1} Rows</option>
+                    ))}
+                  </select>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <label className="form-label" style={{ margin: 0, fontSize: '0.85rem' }}>Col 2 Rows:</label>
+                  <select value={layoutRows2} onChange={(e) => setLayoutRows2(e.target.value)} className="form-input" style={{ width: '120px', padding: '2px 8px', fontSize: '0.85rem' }}>
+                    <option value="auto">Auto (Default)</option>
+                    {[...Array(15)].map((_, i) => (
+                      <option key={i+1} value={i+1}>{i+1} Rows</option>
+                    ))}
+                  </select>
+                </div>
+              </>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <label className="form-label" style={{ margin: 0, fontSize: '0.85rem' }}>Rows:</label>
+                <select value={layoutRows1} onChange={(e) => setLayoutRows1(e.target.value)} className="form-input" style={{ width: '120px', padding: '2px 8px', fontSize: '0.85rem' }}>
+                  <option value="auto">Auto (Default)</option>
+                  {[...Array(15)].map((_, i) => (
+                    <option key={i+1} value={i+1}>{i+1} Rows</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #cbd5e1', paddingTop: '8px', marginTop: '4px' }}>
+              <label className="form-label" style={{ margin: 0, fontSize: '0.85rem' }}>Question Scale:</label>
+              <select value={questionScale} onChange={(e) => setQuestionScale(Number(e.target.value))} className="form-input" style={{ width: '120px', padding: '2px 8px', fontSize: '0.85rem' }}>
+                <option value={0.75}>75% (Small)</option>
+                <option value={0.85}>85%</option>
+                <option value={1}>100% (Normal)</option>
+                <option value={1.15}>115%</option>
+                <option value={1.25}>125% (Large)</option>
+                <option value={1.4}>140% (X-Large)</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <label className="form-label" style={{ margin: 0, fontWeight: 600, fontSize: '0.85rem' }}>Question Frame Style:</label>
+              <select 
+                value={frameMode} 
+                onChange={(e) => setFrameMode(e.target.value)}
+                className="form-input" 
+                style={{ width: 'auto', padding: '2px 8px', fontSize: '0.85rem' }}
+              >
+                <option value="table">📊 Excel Table Grid</option>
+                <option value="cards">🔲 Box Cards</option>
+                <option value="none">🚫 No Frames</option>
+              </select>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <label className="form-label" style={{ margin: 0, fontSize: '0.85rem' }}>Line Style:</label>
+              <select 
+                value={borderStyle} 
+                onChange={(e) => setBorderStyle(e.target.value)}
+                className="form-input" 
+                style={{ width: 'auto', padding: '2px 8px', fontSize: '0.85rem' }}
+              >
+                <option value="solid">Solid Line</option>
+                <option value="dashed">Dashed Line</option>
+              </select>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '2px' }}>
+              <input type="checkbox" id="showBorder" checked={showBorder} onChange={(e) => setShowBorder(e.target.checked)} style={{ cursor: 'pointer' }} />
+              <label htmlFor="showBorder" className="form-label" style={{ margin: 0, cursor: 'pointer' }}>Decorative Page Border</label>
+            </div>
           </div>
 
           <button className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }} onClick={handleGenerate}>
@@ -1397,8 +1539,9 @@ function App() {
             <div style={{ transform: `scale(${zoom})`, transformOrigin: 'top center', transition: 'transform 0.15s ease' }}>
               <CanvasEditor 
                 problems={pageProblems} customTexts={pageTexts} customImages={pageImages} showGrid={showGrid} showAnswers={showAnswers} showBorder={showBorder}
+                frameMode={frameMode} borderStyle={borderStyle}
                 stageRef={stageRef} onDragProblem={handleProblemDragEnd} onDragText={handleTextDragEnd} onChangeText={handleTextChange} onDragImage={handleImageDragEnd} onChangeImage={handleImageChange}
-                selectedIds={selectedIds} setSelectedIds={setSelectedIds} copyrightText={copyrightText}
+                selectedIds={selectedIds} setSelectedIds={setSelectedIds} copyrightText={copyrightText} questionScale={questionScale}
               />
             </div>
           </div>

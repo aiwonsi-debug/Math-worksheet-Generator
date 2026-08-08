@@ -98,7 +98,7 @@ export const ResizableImage = ({ imageObj, _isSelected, onSelect, _onChange, onD
   );
 };
 
-const ProblemBlock = ({ problem, index, showAnswers, onDragEnd, onSelect, nodeRef }) => {
+const ProblemBlock = ({ problem, index, showAnswers, onDragEnd, onSelect, nodeRef, showQuestionFrames = true, borderStyle = 'solid', scale = 1 }) => {
   const { id, operands, operator, type, answer, options, x, y } = problem;
   const [isHovered, setIsHovered] = useState(false);
 
@@ -109,15 +109,21 @@ const ProblemBlock = ({ problem, index, showAnswers, onDragEnd, onSelect, nodeRe
     onMouseEnter: (e) => { setIsHovered(true); e.target.getStage().container().style.cursor = 'move'; },
     onMouseLeave: (e) => { setIsHovered(false); e.target.getStage().container().style.cursor = 'default'; },
     opacity: isHovered ? 0.7 : 1,
+    scaleX: scale,
+    scaleY: scale,
   };
 
   const fontSize = 32;
   const problemNumber = index + 1;
+  const dashProp = borderStyle === 'dashed' ? [6, 4] : undefined;
   
   if (type === 'basic_math') {
     if (options.orientation === 'vertical') {
       return (
         <Group {...commonProps}>
+          {showQuestionFrames && (
+            <Rect x={-15} y={-10} width={120} height={125} stroke="#0f172a" strokeWidth={2} cornerRadius={10} fill="transparent" dash={dashProp} />
+          )}
           <Text text={operands[0].toString()} fontSize={fontSize} fontFamily="Comic Neue" fontStyle="bold" align="right" width={80} y={0} />
           <Text text={operator} fontSize={fontSize} fontFamily="Comic Neue" fontStyle="bold" x={10} y={40} />
           <Text text={operands[1].toString()} fontSize={fontSize} fontFamily="Comic Neue" fontStyle="bold" align="right" width={80} y={40} />
@@ -127,24 +133,27 @@ const ProblemBlock = ({ problem, index, showAnswers, onDragEnd, onSelect, nodeRe
       );
     } else {
       const drawBox = (val, posX) => (
-        <Group x={posX} y={-17}>
+        <Group x={posX} y={-7}>
           <Rect width={75} height={75} stroke="black" strokeWidth={2} cornerRadius={10} />
           {showAnswers && <Text text={val.toString()} fontSize={fontSize} fontFamily="Comic Neue" fill="#ef4444" fontStyle="bold" y={21} width={75} align="center" />}
         </Group>
       );
-      const drawText = (val, posX, isMissing) => isMissing ? drawBox(val, posX) : <Text text={val.toString()} fontSize={fontSize} fontFamily="Comic Neue" x={posX} y={4} width={75} align="center" />;
+      const drawText = (val, posX, isMissing) => isMissing ? drawBox(val, posX) : <Text text={val.toString()} fontSize={fontSize} fontFamily="Comic Neue" x={posX} y={14} width={75} align="center" />;
       return (
         <Group {...commonProps}>
-          <Circle x={15} y={20} radius={18} stroke="black" strokeWidth={1.5} />
-          <Text text={problemNumber.toString()} fontSize={20} fontFamily="Comic Neue" x={-5} y={10} width={40} align="center" />
+          {showQuestionFrames && (
+            <Rect x={-10} y={-5} width={340} height={70} stroke="#0f172a" strokeWidth={2} cornerRadius={10} fill="transparent" dash={dashProp} />
+          )}
+          <Circle x={15} y={30} radius={18} stroke="black" strokeWidth={1.5} />
+          <Text text={problemNumber.toString()} fontSize={20} fontFamily="Comic Neue" x={-5} y={20} width={40} align="center" />
           
           {drawText(operands[0], 45, options.missingPart === 'first')}
-          <Text text={operator} fontSize={fontSize} fontFamily="Comic Neue" x={125} y={4} width={20} align="center" />
+          <Text text={operator} fontSize={fontSize} fontFamily="Comic Neue" x={125} y={14} width={20} align="center" />
           {drawText(operands[1], 145, options.missingPart === 'second')}
-          <Text text="=" fontSize={fontSize} fontFamily="Comic Neue" x={225} y={4} width={20} align="center" />
+          <Text text="=" fontSize={fontSize} fontFamily="Comic Neue" x={225} y={14} width={20} align="center" />
           {drawText(answer, 245, options.missingPart === 'answer')}
           
-          <Rect x={0} y={-20} width={320} height={80} fill="transparent" />
+          <Rect x={0} y={-10} width={320} height={80} fill="transparent" />
         </Group>
       );
     }
@@ -156,24 +165,27 @@ const ProblemBlock = ({ problem, index, showAnswers, onDragEnd, onSelect, nodeRe
     
     const drawLine = (val, posX) => (
       <Group x={posX}>
-        <Line points={[10, 40, 65, 40]} stroke="black" strokeWidth={3} />
-        {showAnswers && <Text text={val.toString()} fontSize={fontSize} fontFamily="Comic Neue" fill="#ef4444" fontStyle="bold" y={4} width={75} align="center" />}
+        <Line points={[10, 50, 65, 50]} stroke="black" strokeWidth={3} />
+        {showAnswers && <Text text={val.toString()} fontSize={fontSize} fontFamily="Comic Neue" fill="#ef4444" fontStyle="bold" y={14} width={75} align="center" />}
       </Group>
     );
-    const drawText = (val, posX, isMissing) => isMissing ? drawLine(val, posX) : <Text text={val.toString()} fontSize={fontSize} fontFamily="Comic Neue" x={posX} y={4} width={75} align="center" />;
+    const drawText = (val, posX, isMissing) => isMissing ? drawLine(val, posX) : <Text text={val.toString()} fontSize={fontSize} fontFamily="Comic Neue" x={posX} y={14} width={75} align="center" />;
     
     return (
       <Group {...commonProps}>
-        <Circle x={15} y={20} radius={18} stroke="black" strokeWidth={1.5} />
-        <Text text={problemNumber.toString()} fontSize={20} fontFamily="Comic Neue" x={-5} y={10} width={40} align="center" />
+        {showQuestionFrames && (
+          <Rect x={-10} y={-5} width={340} height={70} stroke="#0f172a" strokeWidth={2} cornerRadius={10} fill="transparent" dash={dashProp} />
+        )}
+        <Circle x={15} y={30} radius={18} stroke="black" strokeWidth={1.5} />
+        <Text text={problemNumber.toString()} fontSize={20} fontFamily="Comic Neue" x={-5} y={20} width={40} align="center" />
         
         {drawText(operands[0], 45, isMissingFirst)}
-        <Text text={operator} fontSize={fontSize} fontFamily="Comic Neue" x={125} y={4} width={20} align="center" />
+        <Text text={operator} fontSize={fontSize} fontFamily="Comic Neue" x={125} y={14} width={20} align="center" />
         {drawText(operands[1], 145, isMissingSecond)}
-        <Text text="=" fontSize={fontSize} fontFamily="Comic Neue" x={225} y={4} width={20} align="center" />
-        <Text text={options.sum.toString()} fontSize={fontSize} fontFamily="Comic Neue" x={245} y={4} width={75} align="center" />
+        <Text text="=" fontSize={fontSize} fontFamily="Comic Neue" x={225} y={14} width={20} align="center" />
+        <Text text={options.sum.toString()} fontSize={fontSize} fontFamily="Comic Neue" x={245} y={14} width={75} align="center" />
         
-        <Rect x={0} y={-20} width={320} height={80} fill="transparent" />
+        <Rect x={0} y={-10} width={320} height={80} fill="transparent" />
       </Group>
     );
   }
@@ -187,13 +199,13 @@ const ProblemBlock = ({ problem, index, showAnswers, onDragEnd, onSelect, nodeRe
     
     return (
       <Group {...commonProps}>
-        <Rect x={-15} y={-25} width={sequenceWidth} height={90} stroke="#475569" strokeWidth={2} cornerRadius={12} />
+        <Rect x={-15} y={-25} width={sequenceWidth} height={90} stroke="#475569" strokeWidth={2} cornerRadius={12} dash={dashProp} />
         {operands.map((num, i) => {
           const isMissing = options.missingIndices.includes(i);
           const boxX = i * (boxWidth + spacing);
           return (
             <Group x={boxX} key={i}>
-              <Rect width={55} height={55} y={-8} stroke="#0f172a" strokeWidth={2} cornerRadius={8} dash={isMissing ? [4, 4] : undefined} />
+              <Rect width={55} height={55} y={-8} stroke="#0f172a" strokeWidth={2} cornerRadius={8} dash={isMissing && borderStyle === 'dashed' ? [4, 4] : undefined} />
               {(!isMissing || showAnswers) && (
                 <Text text={num.toString()} fontSize={32} fontFamily="Comic Neue" fontStyle="bold" fill={isMissing && showAnswers ? '#ef4444' : '#0f172a'} width={55} y={5} align="center" />
               )}
@@ -215,6 +227,9 @@ const ProblemBlock = ({ problem, index, showAnswers, onDragEnd, onSelect, nodeRe
 
     return (
       <Group {...commonProps}>
+        {showQuestionFrames && (
+          <Rect x={-10} y={-10} width={240 + lineWidth} height={95} stroke="#0f172a" strokeWidth={2} cornerRadius={10} fill="transparent" dash={dashProp} />
+        )}
         {/* Equation */}
         <Text text={`${op1} + ${op2} =`} fontSize={32} fontFamily="Comic Neue" x={0} y={15} />
         <Group x={140} y={0}>
@@ -252,6 +267,9 @@ const ProblemBlock = ({ problem, index, showAnswers, onDragEnd, onSelect, nodeRe
     
     return (
       <Group {...commonProps}>
+        {showQuestionFrames && (
+          <Rect x={-10} y={-10} width={270} height={framesCount * 120 + 85} stroke="#0f172a" strokeWidth={2} cornerRadius={12} fill="transparent" dash={dashProp} />
+        )}
         {Array.from({ length: framesCount }).map((_, frameIdx) => {
           const dotsInThisFrame = Math.min(10, Math.max(0, val - frameIdx * 10));
           return (
@@ -316,6 +334,9 @@ const ProblemBlock = ({ problem, index, showAnswers, onDragEnd, onSelect, nodeRe
 
     return (
       <Group {...commonProps}>
+        {showQuestionFrames && (
+          <Rect x={-10} y={-10} width={680} height={105} stroke="#0f172a" strokeWidth={2} cornerRadius={12} fill="transparent" dash={dashProp} />
+        )}
         {drawTenFrame(leftVal, 0, 0)}
         
         <Line points={[220, 70, 280, 70]} stroke="black" strokeWidth={2} />
@@ -337,6 +358,9 @@ const ProblemBlock = ({ problem, index, showAnswers, onDragEnd, onSelect, nodeRe
   if (type === 'comparison') {
     return (
       <Group {...commonProps}>
+        {showQuestionFrames && (
+          <Rect x={-10} y={-10} width={170} height={60} stroke="#0f172a" strokeWidth={2} cornerRadius={10} fill="transparent" dash={dashProp} />
+        )}
         <Text text={operands[0].toString()} fontSize={fontSize} fontFamily="Comic Neue" fontStyle="bold" x={0} y={5} width={40} align="center" />
         <Circle x={75} y={20} radius={25} stroke="black" strokeWidth={2} />
         {showAnswers && <Text text={answer} fontSize={32} fontFamily="Comic Neue" fill="#ef4444" fontStyle="bold" x={55} y={1} width={40} align="center" />}
@@ -361,6 +385,9 @@ const ProblemBlock = ({ problem, index, showAnswers, onDragEnd, onSelect, nodeRe
 
     return (
       <Group {...commonProps}>
+        {showQuestionFrames && (
+          <Rect x={10} y={-10} width={210} height={215} stroke="#0f172a" strokeWidth={2} cornerRadius={12} fill="transparent" dash={dashProp} />
+        )}
         {/* Lines */}
         <Line points={[100, 50, 60, 90]} stroke="black" strokeWidth={2} />
         <Line points={[100, 50, 140, 90]} stroke="black" strokeWidth={2} />
@@ -396,21 +423,23 @@ const ProblemBlock = ({ problem, index, showAnswers, onDragEnd, onSelect, nodeRe
   if (type === 'word_problem' || type === 'decodable_word_problem') {
     return (
       <Group {...commonProps}>
+        {showQuestionFrames && (
+          <Rect x={-10} y={-10} width={670} height={220} stroke="#0f172a" strokeWidth={2} cornerRadius={12} fill="transparent" dash={dashProp} />
+        )}
         <Circle x={15} y={15} radius={18} stroke="black" strokeWidth={1.5} />
         <Text text={problemNumber.toString()} fontSize={20} fontFamily="Comic Neue" x={-5} y={5} width={40} align="center" />
 
-        {/* Dash work space container */}
+        {/* Work space container box */}
         <Rect 
           x={45} 
-          y={75} 
+          y={65} 
           width={600} 
-          height={140} 
+          height={115} 
           stroke="#94a3b8" 
-          strokeWidth={1} 
-          dash={[5, 5]} 
+          strokeWidth={1.5} 
+          dash={dashProp} 
           cornerRadius={6}
         />
-
 
         {/* Answer line */}
         <Text 
@@ -418,7 +447,7 @@ const ProblemBlock = ({ problem, index, showAnswers, onDragEnd, onSelect, nodeRe
           fontSize={20} 
           fontFamily="Comic Neue" 
           x={45} 
-          y={235} 
+          y={200} 
         />
         {showAnswers && (
           <Text 
@@ -428,10 +457,10 @@ const ProblemBlock = ({ problem, index, showAnswers, onDragEnd, onSelect, nodeRe
             fontStyle="bold" 
             fill="#ef4444" 
             x={130} 
-            y={232} 
+            y={197} 
           />
         )}
-        <Rect x={0} y={-10} width={660} height={280} fill="transparent" />
+        <Rect x={0} y={-10} width={660} height={230} fill="transparent" />
       </Group>
     );
   }
@@ -440,6 +469,9 @@ const ProblemBlock = ({ problem, index, showAnswers, onDragEnd, onSelect, nodeRe
     const [a, b, c] = operands; // a, b parts, c whole
     return (
       <Group {...commonProps}>
+        {showQuestionFrames && (
+          <Rect x={-10} y={-10} width={440} height={190} stroke="#0f172a" strokeWidth={2} cornerRadius={12} fill="transparent" dash={dashProp} />
+        )}
         {/* Draw Triad Triangle */}
         <Line points={[100, 10, 30, 130, 170, 130, 100, 10]} stroke="black" strokeWidth={3} closed fill="#f8fafc" />
         
@@ -517,10 +549,148 @@ const ProblemBlock = ({ problem, index, showAnswers, onDragEnd, onSelect, nodeRe
   return null;
 };
 
+const renderExcelTableGrid = (problems, dashProp, scale = 1) => {
+  if (!problems || problems.length === 0) return null;
+
+  const uniqueX = [...new Set(problems.map(p => Math.round(p.x)))].sort((a, b) => a - b);
+  const uniqueY = [...new Set(problems.map(p => Math.round(p.y)))].sort((a, b) => a - b);
+
+  if (uniqueX.length === 0 || uniqueY.length === 0) return null;
+
+  const sampleType = problems[0]?.type;
+  const sampleOrientation = problems[0]?.options?.orientation;
+
+  let cellWidth = 340 * scale;
+  let cellHeight = 100 * scale;
+
+  if (sampleType === 'basic_math') {
+    if (sampleOrientation === 'vertical') { cellWidth = 210 * scale; cellHeight = 125 * scale; }
+    else { cellWidth = 340 * scale; cellHeight = 85 * scale; }
+  } else if (sampleType === 'missing_addend') {
+    cellWidth = 340 * scale; cellHeight = 85 * scale;
+  } else if (sampleType === 'comparison') {
+    cellWidth = 280 * scale; cellHeight = 70 * scale;
+  } else if (sampleType === 'number_bond') {
+    cellWidth = 220 * scale; cellHeight = 230 * scale;
+  } else if (sampleType === 'ten_frame') {
+    cellWidth = 320 * scale; cellHeight = 240 * scale;
+  } else if (sampleType === 'ten_frame_comparison') {
+    cellWidth = 690 * scale; cellHeight = 110 * scale;
+  } else if (sampleType === 'word_problem' || sampleType === 'decodable_word_problem') {
+    cellWidth = 670 * scale; cellHeight = 230 * scale;
+  } else if (sampleType === 'missing_number') {
+    cellWidth = 670 * scale; cellHeight = 95 * scale;
+  } else if (sampleType === 'number_line') {
+    cellWidth = 650 * scale; cellHeight = 95 * scale;
+  } else if (sampleType === 'fact_family') {
+    cellWidth = 440 * scale; cellHeight = 190 * scale;
+  }
+
+  const paddingX = 12;
+  const paddingY = 25;
+
+  const tableLeft = uniqueX[0] - paddingX;
+  const lastX = uniqueX[uniqueX.length - 1];
+  const tableRight = lastX + cellWidth + paddingX;
+
+  const tableTop = uniqueY[0] - paddingY;
+  const lastY = uniqueY[uniqueY.length - 1];
+  const tableBottom = lastY + cellHeight + paddingY;
+
+  const distinctX = uniqueX.filter((x, idx, arr) => idx === 0 || x - arr[idx - 1] > 15);
+  const distinctY = uniqueY.filter((y, idx, arr) => idx === 0 || y - arr[idx - 1] > 15);
+
+  const colDividers = [];
+  if (distinctX.length > 1) {
+    for (let i = 0; i < distinctX.length - 1; i++) {
+      colDividers.push((distinctX[i] + cellWidth + distinctX[i + 1]) / 2);
+    }
+  }
+
+  const rowDividers = [];
+  if (distinctY.length > 1) {
+    for (let i = 0; i < distinctY.length - 1; i++) {
+      rowDividers.push((distinctY[i] + cellHeight + distinctY[i + 1]) / 2);
+    }
+  }
+
+  const cols = distinctX.length;
+  const rows = distinctY.length;
+
+  const occupied = new Set();
+  problems.forEach(p => {
+    let c = distinctX.findIndex(dx => Math.abs(dx - p.x) < 20);
+    let r = distinctY.findIndex(dy => Math.abs(dy - p.y) < 20);
+    if (c !== -1 && r !== -1) occupied.add(`${c},${r}`);
+  });
+
+  const isOcc = (c, r) => occupied.has(`${c},${r}`);
+  const linesToDraw = [];
+
+  // Horizontal lines
+  for (let r = 0; r <= rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const occ1 = isOcc(c, r - 1);
+      const occ2 = isOcc(c, r);
+      if (occ1 || occ2) {
+        const isOuter = occ1 !== occ2;
+        const yPos = r === 0 ? tableTop : r === rows ? tableBottom : rowDividers[r - 1];
+        const xStart = c === 0 ? tableLeft : colDividers[c - 1];
+        const xEnd = c === cols - 1 ? tableRight : colDividers[c];
+        linesToDraw.push({
+          key: `hline_${r}_${c}`,
+          points: [xStart, yPos, xEnd, yPos],
+          strokeWidth: isOuter ? 2.5 : 1.5,
+          isOuter
+        });
+      }
+    }
+  }
+
+  // Vertical lines
+  for (let c = 0; c <= cols; c++) {
+    for (let r = 0; r < rows; r++) {
+      const occ1 = isOcc(c - 1, r);
+      const occ2 = isOcc(c, r);
+      if (occ1 || occ2) {
+        const isOuter = occ1 !== occ2;
+        const xPos = c === 0 ? tableLeft : c === cols ? tableRight : colDividers[c - 1];
+        const yStart = r === 0 ? tableTop : rowDividers[r - 1];
+        const yEnd = r === rows - 1 ? tableBottom : rowDividers[r];
+        linesToDraw.push({
+          key: `vline_${c}_${r}`,
+          points: [xPos, yStart, xPos, yEnd],
+          strokeWidth: isOuter ? 2.5 : 1.5,
+          isOuter
+        });
+      }
+    }
+  }
+
+  // Draw inner lines first, then outer lines so outer lines are on top
+  linesToDraw.sort((a, b) => (a.isOuter === b.isOuter ? 0 : a.isOuter ? 1 : -1));
+
+  return (
+    <Group name="bgRect">
+      {linesToDraw.map((line) => (
+        <Line 
+          key={line.key} 
+          points={line.points} 
+          stroke="#0f172a" 
+          strokeWidth={line.strokeWidth} 
+          dash={dashProp} 
+          lineCap="square"
+        />
+      ))}
+    </Group>
+  );
+};
+
 const CanvasEditor = ({ 
-  problems, customTexts, customImages, showGrid, showAnswers, showBorder, stageRef, 
+  problems, customTexts, customImages, showGrid, showAnswers, showBorder, 
+  frameMode = 'table', borderStyle = 'solid', stageRef, 
   onDragProblem, onDragText, onChangeText, onDragImage, onChangeImage, 
-  selectedIds, setSelectedIds, copyrightText
+  selectedIds, setSelectedIds, copyrightText, questionScale = 1
 }) => {
   const paperWidth = 794;
   const paperHeight = 1123;
@@ -647,7 +817,8 @@ const CanvasEditor = ({
           {showBorder && (
             <Rect 
               x={30} y={110} width={paperWidth - 60} height={paperHeight - 170} 
-              stroke="#0f172a" strokeWidth={3} cornerRadius={20} dash={[15, 10]} 
+              stroke="#0f172a" strokeWidth={3} cornerRadius={20} 
+              dash={borderStyle === 'dashed' ? [15, 10] : undefined} 
               name="bgRect" 
             />
           )}
@@ -666,12 +837,16 @@ const CanvasEditor = ({
             />
           ))}
 
+          {frameMode === 'table' && renderExcelTableGrid(problems, borderStyle === 'dashed' ? [6, 4] : undefined, questionScale)}
+
           {problems.map((prob, i) => (
             <ProblemBlock 
               key={prob.id} problem={prob} index={i} showAnswers={showAnswers}
+              showQuestionFrames={frameMode === 'cards'} borderStyle={borderStyle}
               onSelect={(e) => handleItemSelect(prob.id, e)}
               onDragEnd={onDragProblem} 
               nodeRef={(node) => nodesMap.current[prob.id] = node}
+              scale={questionScale}
             />
           ))}
 

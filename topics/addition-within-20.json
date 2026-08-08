@@ -1,0 +1,48 @@
+{
+  "id": "addition-within-20",
+  "title": "Addition Within 20",
+  "subtitle": "Grade 1 Math Practice",
+  "author": "Attapol.k",
+  "footer": "Created by Attapol.k · For classroom or home use",
+  "grade": "Grade 1",
+  "operation": "+",
+  "operand_min": 0,
+  "operand_max": 20,
+  "max_sum": 20,
+  "items_per_page": 12,
+  "num_versions": 5,
+  "theme": {
+    "primary_color": "#2563EB",
+    "secondary_color": "#4B5563",
+    "font_family": "'Mali', sans-serif",
+    "dot_colors": ["#3B82F6", "#1D4ED8"],
+    "card_border": "#93C5FD",
+    "answer_key_bg": "#EFF6FF",
+    "answer_key_border": "#60A5FA",
+    "answer_key_text": "#1E40AF"
+  },
+  "cover": {
+    "dots": ["#3B82F6", "#1D4ED8", "#2563EB", "#60A5FA"],
+    "pill_text": "Addition within 20 • Fact Fluency • Visual Manipulatives"
+  },
+  "tpt_listing": {
+    "title": "Addition Within 20 Worksheets & Answer Keys - Grade 1 Math Fluency",
+    "bullet_points": [
+      "5 unique randomized worksheet versions with 5 matching answer keys",
+      "Visual dot counting manipulatives to build number sense up to 20",
+      "Clean 3x4 grid layout with 12 problems per page",
+      "Print-ready high-resolution PDFs + merged complete bundle PDF",
+      "Includes square preview cover image for instant TPT listing upload"
+    ],
+    "description": "Help Grade 1 students build mental math fluency and number sense with addition facts up to 20! Features clear 3x4 visual layouts, dot manipulatives, and matching answer keys.",
+    "keywords": [
+      "Addition within 20",
+      "Grade 1 Math",
+      "Kindergarten Addition",
+      "Visual Math Worksheets",
+      "Fact Fluency",
+      "Dot Manipulatives",
+      "Elementary Worksheet Bundle"
+    ]
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "id": "multiplication-tables-1-10",
+  "title": "Multiplication Facts 1-10",
+  "subtitle": "Grade 2-4 Math Practice",
+  "author": "Attapol.k",
+  "footer": "Created by Attapol.k · For classroom or home use",
+  "grade": "Grade 2 - Grade 4",
+  "operation": "×",
+  "operand_min": 1,
+  "operand_max": 10,
+  "max_product": 100,
+  "items_per_page": 12,
+  "num_versions": 5,
+  "theme": {
+    "primary_color": "#059669",
+    "secondary_color": "#4B5563",
+    "font_family": "'Mali', sans-serif",
+    "dot_colors": ["#10B981", "#047857"],
+    "card_border": "#A7F3D0",
+    "answer_key_bg": "#ECFDF5",
+    "answer_key_border": "#34D399",
+    "answer_key_text": "#065F46"
+  },
+  "cover": {
+    "dots": ["#10B981", "#059669", "#047857", "#34D399"],
+    "pill_text": "Multiplication Tables 1-10 • Times Tables Fluency • Answer Keys Included"
+  },
+  "tpt_listing": {
+    "title": "Multiplication Tables 1-10 Worksheets & Answer Keys - Grade 2-4 Math",
+    "bullet_points": [
+      "5 unique randomized worksheet versions covering multiplication facts 1 to 10",
+      "5 full page answer keys for instant teacher or self-checking",
+      "Grid layout optimized for speed drills and daily practice",
+      "Includes merged PDF bundle + square TPT thumbnail image"
+    ],
+    "description": "Boost multiplication fact recall with these printable 1-10 times table practice sheets! Designed for elementary students mastering foundational multiplication.",
+    "keywords": [
+      "Multiplication Tables",
+      "Times Tables 1-10",
+      "Grade 3 Multiplication",
+      "Grade 4 Math",
+      "Fact Drills",
+      "Elementary Math Worksheets"
+    ]
+  }
+}

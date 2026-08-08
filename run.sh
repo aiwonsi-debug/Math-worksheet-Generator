@@ -52,5 +52,8 @@ open_browser() {
 
 open_browser &
 
-echo "Starting Vite development server..."
+echo "Starting local TPT generator backend server (http://localhost:5050)..."
+node server.js &
+
+echo "Starting Vite development server (http://localhost:5173)..."
 npm run dev -- --host 0.0.0.0 --port 5173

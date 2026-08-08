@@ -12,21 +12,80 @@ import Refresh from '@tabler/icons-react/dist/esm/icons/IconRefresh.mjs';
 
 const TOPIC_PRESETS = [
   {
+    id: 'addition-within-10.json',
+    label: '🔥 Addition Within 10 (Visual Dots)',
+    path: 'topics/addition-within-10.json',
+    badge: 'Grade K-1',
+    description: 'Kindergarten & Grade 1 Math Practice with visual dot manipulatives'
+  },
+  {
+    id: 'addition-within-20.json',
+    label: '🔥 Addition Within 20 (Fact Fluency)',
+    path: 'topics/addition-within-20.json',
+    badge: 'Grade 1',
+    description: 'Grade 1 Math Practice building mental math fluency up to 20'
+  },
+  {
+    id: 'subtraction-within-10.json',
+    label: '🔥 Subtraction Within 10 (Early Math)',
+    path: 'topics/subtraction-within-10.json',
+    badge: 'Grade K-1',
+    description: 'Early subtraction practice with 3x4 visual layouts & answer keys'
+  },
+  {
+    id: 'subtraction-within-20.json',
+    label: '🔥 Subtraction Within 20 (Fact Fluency)',
+    path: 'topics/subtraction-within-20.json',
+    badge: 'Grade 1-2',
+    description: 'Grade 1 & 2 subtraction fact fluency worksheets & answer keys'
+  },
+  {
+    id: 'multiplication-tables-1-10.json',
+    label: '🔥 Multiplication Tables 1-10 (Times Tables)',
+    path: 'topics/multiplication-tables-1-10.json',
+    badge: 'Grade 2-4',
+    description: 'Elementary times table drills (facts 1-10) with complete answer keys'
+  },
+  {
+    id: 'division-basics-1-10.json',
+    label: '🔥 Division Basics 1-10 (Fact Families)',
+    path: 'topics/division-basics-1-10.json',
+    badge: 'Grade 3-5',
+    description: 'Basic division practice & fact family drills with highlighted answers'
+  },
+  {
+    id: 'missing-addends-within-20.json',
+    label: '🔥 Missing Addends Within 20 (Algebraic Boxes)',
+    path: 'topics/missing-addends-within-20.json',
+    badge: 'Grade 1-2',
+    description: 'Fill-in-the-blank missing addends developing early algebraic thinking'
+  },
+  {
+    id: 'double-digit-addition-no-regrouping.json',
+    label: '🔥 2-Digit Addition (No Regrouping)',
+    path: 'topics/double-digit-addition-no-regrouping.json',
+    badge: 'Grade 1-2',
+    description: 'Place value two-digit addition practice without carrying'
+  },
+  {
+    id: 'double-digit-subtraction-no-regrouping.json',
+    label: '🔥 2-Digit Subtraction (No Regrouping)',
+    path: 'topics/double-digit-subtraction-no-regrouping.json',
+    badge: 'Grade 1-2',
+    description: 'Place value two-digit subtraction practice without borrowing'
+  },
+  {
     id: 'addition-missing-first-classic.json',
     label: 'Addition Missing First (Classic Boxes)',
     path: 'topics/addition-missing-first-classic.json',
+    badge: 'Grade 1',
     description: 'Grade 1 Math Practice with missing addends & classic box style'
-  },
-  {
-    id: 'addition-within-10.json',
-    label: 'Addition Within 10 (Dot Manipulatives)',
-    path: 'topics/addition-within-10.json',
-    description: 'Grade 1 Math Practice with visual dot counting manipulatives'
   },
   {
     id: 'live-editor',
     label: '✨ Live Active Editor Config (Custom JSON)',
     path: 'topics/custom-live-topic.json',
+    badge: 'Custom',
     description: 'Generates JSON based on your current math & layout settings in the editor'
   }
 ];
@@ -40,7 +99,9 @@ export default function PythonGeneratorModal({ isOpen, onClose, currentConfig = 
   const [isServerRunning, setIsServerRunning] = useState(false);
   const [isCheckingServer, setIsCheckingServer] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isBatchGenerating, setIsBatchGenerating] = useState(false);
   const [generationResult, setGenerationResult] = useState(null);
+  const [batchResult, setBatchResult] = useState(null);
   const [generationError, setGenerationError] = useState(null);
 
   const checkServerStatus = async () => {
@@ -178,6 +239,32 @@ export default function PythonGeneratorModal({ isOpen, onClose, currentConfig = 
       setIsGenerating(false);
     }
   };
+
+  const handleRunBatchGenerator = async () => {
+    setIsBatchGenerating(true);
+    setGenerationError(null);
+    setBatchResult(null);
+
+    try {
+      const res = await fetch('http://localhost:5050/api/batch-generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.ok) {
+        setGenerationError(data.error || 'Batch generator process failed.');
+      } else {
+        setBatchResult(data);
+      }
+    } catch {
+      setGenerationError(`Couldn't connect to server at http://localhost:5050. Please make sure "npm run server" is running.`);
+      setIsServerRunning(false);
+    } finally {
+      setIsBatchGenerating(false);
+    }
+  };
+
 
   return (
     <div style={{
@@ -385,9 +472,10 @@ export default function PythonGeneratorModal({ isOpen, onClose, currentConfig = 
               </span>
             </div>
             
+            {/* Single topic runner */}
             <button
               onClick={handleRunGenerator}
-              disabled={isGenerating || !isServerRunning}
+              disabled={isGenerating || isBatchGenerating || !isServerRunning}
               style={{
                 width: '100%',
                 padding: '12px',
@@ -397,17 +485,44 @@ export default function PythonGeneratorModal({ isOpen, onClose, currentConfig = 
                 border: 'none',
                 fontWeight: 700,
                 fontSize: '0.95rem',
-                cursor: (isGenerating || !isServerRunning) ? 'not-allowed' : 'pointer',
+                cursor: (isGenerating || isBatchGenerating || !isServerRunning) ? 'not-allowed' : 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px',
                 boxShadow: isServerRunning ? '0 4px 12px rgba(124, 58, 237, 0.25)' : 'none',
-                transition: 'all 0.2s'
+                transition: 'all 0.2s',
+                marginBottom: '10px'
               }}
             >
               <PlayerPlay size={20} />
-              {isGenerating ? 'Generating TPT Bundle Pipeline...' : isServerRunning ? 'Run Python Generator Pipeline' : 'Start Server First (npm run server)'}
+              {isGenerating ? 'Generating TPT Bundle Pipeline...' : isServerRunning ? `Run Selected Topic (${selectedPreset.label})` : 'Start Server First (npm run server)'}
+            </button>
+
+            {/* Fast Batch Runner */}
+            <button
+              onClick={handleRunBatchGenerator}
+              disabled={isGenerating || isBatchGenerating || !isServerRunning}
+              style={{
+                width: '100%',
+                padding: '12px',
+                borderRadius: '8px',
+                background: isServerRunning ? 'linear-gradient(135deg, #059669 0%, #0d9488 100%)' : '#94a3b8',
+                color: '#ffffff',
+                border: 'none',
+                fontWeight: 700,
+                fontSize: '0.95rem',
+                cursor: (isGenerating || isBatchGenerating || !isServerRunning) ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                boxShadow: isServerRunning ? '0 4px 12px rgba(13, 148, 136, 0.3)' : 'none',
+                transition: 'all 0.2s'
+              }}
+            >
+              <Package size={20} />
+              {isBatchGenerating ? '⚡ Running Fast Parallel Batch (All Best Sellers)...' : '⚡ Run Fast Batch (All Best-Selling Topics)'}
             </button>
 
             {generationError && (
@@ -418,7 +533,7 @@ export default function PythonGeneratorModal({ isOpen, onClose, currentConfig = 
 
             {generationResult && (
               <div style={{ marginTop: '12px', padding: '12px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', color: '#166534', fontSize: '0.85rem' }}>
-                <div style={{ fontWeight: 700, marginBottom: '6px' }}>✅ Bundle Generated Successfully!</div>
+                <div style={{ fontWeight: 700, marginBottom: '6px' }}>✅ Single Bundle Generated Successfully!</div>
                 <div style={{ marginBottom: '8px', fontSize: '0.8rem' }}>Output folder: <code>{generationResult.outputDir}</code></div>
                 <button
                   onClick={() => window.open(`http://localhost:5050${generationResult.zipUrl}`, '_blank')}
@@ -440,6 +555,27 @@ export default function PythonGeneratorModal({ isOpen, onClose, currentConfig = 
                 </button>
               </div>
             )}
+
+            {batchResult && (
+              <div style={{ marginTop: '12px', padding: '14px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', color: '#166534', fontSize: '0.85rem' }}>
+                <div style={{ fontWeight: 700, fontSize: '0.95rem', marginBottom: '6px' }}>⚡ Batch Generation Completed! ({batchResult.count} Bundles Ready)</div>
+                <div style={{ fontSize: '0.8rem', color: '#15803d', marginBottom: '10px' }}>All best-selling math topic ZIP packages are ready in <code>output/</code></div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '180px', overflowY: 'auto' }}>
+                  {batchResult.zipFiles.map(z => (
+                    <div key={z.topicId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#ffffff', padding: '6px 10px', borderRadius: '6px', border: '1px solid #dcfce7' }}>
+                      <span style={{ fontWeight: 600, color: '#1e293b' }}>📦 {z.topicId}</span>
+                      <button
+                        onClick={() => window.open(`http://localhost:5050${z.zipUrl}`, '_blank')}
+                        style={{ background: '#16a34a', color: 'white', border: 'none', borderRadius: '4px', padding: '4px 8px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                      >
+                        <Download size={12} /> Download ZIP
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
           </div>
 
           {/* Terminal Command Output */}
