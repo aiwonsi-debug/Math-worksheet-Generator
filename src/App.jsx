@@ -28,7 +28,6 @@ import AlignEndHorizontal from '@tabler/icons-react/dist/esm/icons/IconLayoutAli
 import AlignHorizontalSpaceBetween from '@tabler/icons-react/dist/esm/icons/IconLayoutDistributeHorizontal.mjs';
 import AlignVerticalSpaceBetween from '@tabler/icons-react/dist/esm/icons/IconLayoutDistributeVertical.mjs';
 import Undo from '@tabler/icons-react/dist/esm/icons/IconArrowBackUp.mjs';
-import Terminal from '@tabler/icons-react/dist/esm/icons/IconTerminal.mjs';
 import Redo from '@tabler/icons-react/dist/esm/icons/IconArrowForwardUp.mjs';
 import Sticker from '@tabler/icons-react/dist/esm/icons/IconSticker.mjs';
 import Search from '@tabler/icons-react/dist/esm/icons/IconSearch.mjs';
@@ -1314,14 +1313,6 @@ function App() {
             title="Generate complete 10 progressive pages directly on canvas"
           >
             <IconStar size={18} /> 👑 Generate 10-Page Master Unit
-          </button>
-          <button
-            className="btn"
-            style={{ width: '100%', marginTop: '0.5rem', background: '#8b5cf6', color: 'white', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: 600 }}
-            onClick={() => setIsPythonModalOpen(true)}
-            title="Open Python TPT Generator CLI & Runner"
-          >
-            <Terminal size={18} /> Run Python TPT Generator
           </button>
 
           <div style={{ borderTop: '1px solid #e2e8f0', marginTop: '1rem', paddingTop: '1rem', display: 'flex', flexDirection: 'column', gap: '10px' }}>
