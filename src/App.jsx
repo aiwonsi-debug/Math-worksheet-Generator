@@ -611,6 +611,64 @@ function App() {
     setCurrentPage(targetStartPage);
   };
 
+  const handleGenerate10PageUnit = () => {
+    const totalNewPages = 10;
+    setTotalPages(totalNewPages);
+    setCurrentPage(0);
+
+    const pageConfigs = [
+      { pageIdx: 0, topic: 'basic_math', operator: '+', min: 1, max: 10, orientation: 'horizontal', missingPart: 'answer', problemCount: 10, title: 'Picture Addition (Counting Objects)' },
+      { pageIdx: 1, topic: 'ten_frame', min: 1, max: 10, problemCount: 4, title: 'Ten-Frame Addition (Visual Sense)' },
+      { pageIdx: 2, topic: 'number_line', min: 1, max: 10, problemCount: 8, title: 'Number Line Addition (0 to 10)' },
+      { pageIdx: 3, topic: 'basic_math', operator: '+', min: 1, max: 10, orientation: 'horizontal', missingPart: 'answer', problemCount: 10, title: 'Domino & Dot Addition' },
+      { pageIdx: 4, topic: 'number_bond', min: 1, max: 10, problemCount: 9, title: 'Number Bonds (Composing 10)' },
+      { pageIdx: 5, topic: 'basic_math', operator: '+', min: 1, max: 10, orientation: 'horizontal', missingPart: 'answer', problemCount: 12, title: 'Classic Horizontal Addition Drills' },
+      { pageIdx: 6, topic: 'basic_math', operator: '+', min: 1, max: 10, orientation: 'vertical', problemCount: 15, title: 'Vertical Stacked Addition Math' },
+      { pageIdx: 7, topic: 'missing_addend', min: 1, max: 10, problemCount: 12, title: 'Missing Addend Box Fill' },
+      { pageIdx: 8, topic: 'word_problem', min: 1, max: 10, problemCount: 3, title: 'Addition Story Word Problems' },
+      { pageIdx: 9, topic: 'decodable_word_problem', min: 1, max: 10, problemCount: 3, title: 'Read & Solve Math Fact Review' },
+    ];
+
+    let allNewProblems = [];
+    let allNewTexts = [];
+
+    pageConfigs.forEach(cfg => {
+      const rawProblems = generateWorksheet(cfg.problemCount, cfg);
+      const { problemsWithPositions } = getPositionedProblems(rawProblems, cfg.topic, cfg.orientation || 'horizontal', cfg.pageIdx, { layoutCols, layoutRows1, layoutRows2, questionScale });
+      allNewProblems.push(...problemsWithPositions);
+
+      const nameId = `header_name_date_${cfg.pageIdx}`;
+      const titleId = `header_title_${cfg.pageIdx}`;
+      allNewTexts.push({ id: nameId, pageIndex: cfg.pageIdx, text: HEADER_NAME_DATE_TEXT, x: 50, y: 50, width: 1400, fontSize: 20, fontFamily: 'Comic Neue', isBold: false, isItalic: false, isUnderline: false, align: 'left', fill: '#0f172a' });
+      allNewTexts.push({ id: titleId, pageIndex: cfg.pageIdx, text: cfg.title, x: 220, y: 150, fontSize: 36, fontFamily: 'Comic Neue', isBold: true, isItalic: false, isUnderline: false, align: 'left', fill: '#000000' });
+
+      problemsWithPositions.forEach(prob => {
+        if (prob.type === 'word_problem' || prob.type === 'decodable_word_problem') {
+          const id = `text_wp_${prob.id}`;
+          allNewTexts.push({
+            id,
+            pageIndex: prob.pageIndex,
+            text: prob.options.question,
+            x: prob.x + 45,
+            y: prob.y + 5,
+            width: 600,
+            fontSize: 18,
+            fontFamily: 'Comic Neue',
+            isBold: false,
+            isItalic: false,
+            isUnderline: false,
+            align: 'left',
+            fill: '#0f172a'
+          });
+        }
+      });
+    });
+
+    setProblems(allNewProblems);
+    setCustomTexts(allNewTexts);
+    setSelectedIds([]);
+  };
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { handleGenerate(); }, []);
 
@@ -1248,6 +1306,14 @@ function App() {
           </button>
           <button className="btn" style={{ width: '100%', marginTop: '0.5rem', background: '#f59e0b', color: 'white', border: 'none' }} onClick={handleBatchGenerate}>
             <Copy size={18} /> Generate 5 Variations (Batch)
+          </button>
+          <button
+            className="btn"
+            style={{ width: '100%', marginTop: '0.5rem', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: 'white', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: 700, boxShadow: '0 2px 8px rgba(16,185,129,0.25)' }}
+            onClick={handleGenerate10PageUnit}
+            title="Generate complete 10 progressive pages directly on canvas"
+          >
+            <IconStar size={18} /> 👑 Generate 10-Page Master Unit
           </button>
           <button
             className="btn"

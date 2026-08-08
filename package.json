@@ -11,7 +11,8 @@
     "start": "vite",
     "start:debian": "./run.sh",
     "setup:debian": "./setup-debian.sh",
-    "server": "node server.js"
+    "server": "node server.js",
+    "generate:unit": "python generator.py topics/addition-within-10-master-unit.json"
   },
   "dependencies": {
     "@tabler/icons-react": "^3.44.0",

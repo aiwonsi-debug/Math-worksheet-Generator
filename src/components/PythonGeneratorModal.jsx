@@ -12,6 +12,13 @@ import Refresh from '@tabler/icons-react/dist/esm/icons/IconRefresh.mjs';
 
 const TOPIC_PRESETS = [
   {
+    id: 'addition-within-10-master-unit.json',
+    label: '👑 Addition Within 10 — Best-Selling 10-Page Master Unit',
+    path: 'topics/addition-within-10-master-unit.json',
+    badge: '★ Best Seller (Grade K-1)',
+    description: '10 progressive pages: Pictures, Ten Frames, Number Lines, Dominoes, Bonds, Drills, Vertical Math, Missing Addends, Word Problems & Color Review'
+  },
+  {
     id: 'addition-within-10.json',
     label: '🔥 Addition Within 10 (Visual Dots)',
     path: 'topics/addition-within-10.json',

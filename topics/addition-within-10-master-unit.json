@@ -1,0 +1,56 @@
+{
+  "id": "addition-within-10-master-unit",
+  "title": "Addition Within 10 — Master 10-Page Unit",
+  "subtitle": "Comprehensive Grade K-1 Math Workbook Unit",
+  "author": "Attapol.k",
+  "footer": "Created by Attapol.k · For classroom or home use",
+  "grade": "Grade K-1",
+  "operation": "+",
+  "operand_min": 0,
+  "operand_max": 10,
+  "max_sum": 10,
+  "unit_mode": "progressive_10_page",
+  "color_mode": "bw",
+  "theme": {
+    "primary_color": "#1E293B",
+    "secondary_color": "#475569",
+    "font_family": "'Comic Neue', cursive, sans-serif",
+    "card_border": "#CBD5E1",
+    "answer_key_bg": "#EBF7ED",
+    "answer_key_border": "#A3E0B2",
+    "answer_key_text": "#2E7D32"
+  },
+  "cover": {
+    "pill_text": "10-Page Unit • Visual Math • Ten Frames • Number Lines • Word Problems"
+  },
+  "tpt_listing": {
+    "title": "Addition Within 10 Master 10-Page Worksheets & Answer Keys Unit - Grade K-1 Math",
+    "bullet_points": [
+      "10 unique progressive worksheets with 10 matching complete answer keys",
+      "Page 1: Picture Addition with counting visual icons",
+      "Page 2: Ten-Frame Addition for visual number sense",
+      "Page 3: Number Line Addition (0-10) with hop tracks",
+      "Page 4: Domino & Dice Dot Addition",
+      "Page 5: Number Bonds (Composing & Decomposing 10)",
+      "Page 6: Classic Horizontal Addition Drills",
+      "Page 7: Vertical Stacked Addition Math",
+      "Page 8: Missing Addends Fill-in-the-Blank Boxes",
+      "Page 9: Addition Story Word Problems with drawing workspace",
+      "Page 10: Color-by-Number / Math Fact Mastery Challenge",
+      "Print-ready high-resolution PDFs + merged complete 20-page bundle PDF",
+      "Includes square 1200x1200 preview cover PNG for instant TPT upload"
+    ],
+    "description": "The ultimate 10-page progressive Addition Within 10 unit for Kindergarten and Grade 1! Starts with concrete visual counting (pictures, ten frames, dominoes) and progresses step-by-step through number lines, number bonds, drills, vertical math, missing addends, word problems, and a fun color-by-number review. Includes 10 complete answer keys for rapid grading.",
+    "keywords": [
+      "Addition within 10",
+      "Kindergarten Math Worksheets",
+      "Grade 1 Addition Unit",
+      "Ten Frames Addition",
+      "Number Line Addition",
+      "Number Bonds 10",
+      "Math Word Problems Grade 1",
+      "Color by Code Addition",
+      "No-Prep Math Packet"
+    ]
+  }
+}
