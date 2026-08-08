@@ -939,24 +939,31 @@ def generate_listing_md(config):
 - **Subject**: Elementary Math / Fact Fluency / Number Sense
 '''
 
-async def render_single_page_pdf(browser, html_content, html_path, pdf_path, margin, is_screenshot=False, viewport=None):
-    page = await browser.new_page()
-    try:
-        html_path.write_text(html_content, encoding="utf-8")
-        if viewport:
-            await page.set_viewport_size(viewport)
-        await page.goto(html_path.resolve().as_uri(), wait_until="networkidle")
-        if is_screenshot:
-            await page.screenshot(path=str(pdf_path))
-        else:
-            await page.pdf(
-                path=str(pdf_path),
-                format="Letter",
-                print_background=True,
-                margin=margin
-            )
-    finally:
-        await page.close()
+async def render_single_page_pdf(browser, html_content, html_path, pdf_path, margin, is_screenshot=False, viewport=None, semaphore=None):
+    async def _render():
+        page = await browser.new_page()
+        try:
+            html_path.write_text(html_content, encoding="utf-8")
+            if viewport:
+                await page.set_viewport_size(viewport)
+            await page.goto(html_path.resolve().as_uri(), wait_until="networkidle")
+            if is_screenshot:
+                await page.screenshot(path=str(pdf_path))
+            else:
+                await page.pdf(
+                    path=str(pdf_path),
+                    format="Letter",
+                    print_background=True,
+                    margin=margin
+                )
+        finally:
+            await page.close()
+
+    if semaphore:
+        async with semaphore:
+            await _render()
+    else:
+        await _render()
 
 async def render_topic_async(output_dir, config, versions_data, browser=None):
     from playwright.async_api import async_playwright
@@ -981,6 +988,7 @@ async def render_topic_async(output_dir, config, versions_data, browser=None):
         tasks = []
         pdf_margin = {"top": "12mm", "bottom": "12mm", "left": "12mm", "right": "12mm"}
         tou_margin = {"top": "15mm", "bottom": "15mm", "left": "20mm", "right": "20mm"}
+        sem = asyncio.Semaphore(4)
 
         # 1. Prepare Worksheets & Answer Keys tasks
         if config.get("unit_mode") == "progressive_10_page":
@@ -990,32 +998,32 @@ async def render_topic_async(output_dir, config, versions_data, browser=None):
                 ws_html_path = ws_dir / f"worksheet_p{page_num}.html"
                 ws_pdf_path = ws_dir / f"worksheet_p{page_num}.pdf"
                 ws_pdf_paths.append(ws_pdf_path)
-                tasks.append(render_single_page_pdf(browser, ws_html, ws_html_path, ws_pdf_path, pdf_margin))
+                tasks.append(render_single_page_pdf(browser, ws_html, ws_html_path, ws_pdf_path, pdf_margin, semaphore=sem))
 
                 ak_html = generate_progressive_page_html(page_num, config, is_answer_key=True)
                 ak_html_path = ak_dir / f"answer_key_p{page_num}.html"
                 ak_pdf_path = ak_dir / f"answer_key_p{page_num}.pdf"
                 ak_pdf_paths.append(ak_pdf_path)
-                tasks.append(render_single_page_pdf(browser, ak_html, ak_html_path, ak_pdf_path, pdf_margin))
+                tasks.append(render_single_page_pdf(browser, ak_html, ak_html_path, ak_pdf_path, pdf_margin, semaphore=sem))
         else:
             for version, problems in versions_data:
                 ws_html = generate_worksheet_html(version, problems, config, is_answer_key=False)
                 ws_html_path = ws_dir / f"worksheet_v{version}.html"
                 ws_pdf_path = ws_dir / f"worksheet_v{version}.pdf"
                 ws_pdf_paths.append(ws_pdf_path)
-                tasks.append(render_single_page_pdf(browser, ws_html, ws_html_path, ws_pdf_path, pdf_margin))
+                tasks.append(render_single_page_pdf(browser, ws_html, ws_html_path, ws_pdf_path, pdf_margin, semaphore=sem))
 
                 ak_html = generate_worksheet_html(version, problems, config, is_answer_key=True)
                 ak_html_path = ak_dir / f"answer_key_v{version}.html"
                 ak_pdf_path = ak_dir / f"answer_key_v{version}.pdf"
                 ak_pdf_paths.append(ak_pdf_path)
-                tasks.append(render_single_page_pdf(browser, ak_html, ak_html_path, ak_pdf_path, pdf_margin))
+                tasks.append(render_single_page_pdf(browser, ak_html, ak_html_path, ak_pdf_path, pdf_margin, semaphore=sem))
 
         # 2. Terms of Use Task
         tou_html = generate_tou_html(config)
         tou_html_path = output_dir / "tou.html"
         tou_pdf_path = output_dir / "tou.pdf"
-        tasks.append(render_single_page_pdf(browser, tou_html, tou_html_path, tou_pdf_path, tou_margin))
+        tasks.append(render_single_page_pdf(browser, tou_html, tou_html_path, tou_pdf_path, tou_margin, semaphore=sem))
 
         # 3. Square Cover Task
         cover_html = generate_cover_html(config)
@@ -1023,10 +1031,10 @@ async def render_topic_async(output_dir, config, versions_data, browser=None):
         cover_png_path = output_dir / "cover.png"
         tasks.append(render_single_page_pdf(
             browser, cover_html, cover_html_path, cover_png_path, None,
-            is_screenshot=True, viewport={"width": 1200, "height": 1200}
+            is_screenshot=True, viewport={"width": 1200, "height": 1200}, semaphore=sem
         ))
 
-        # Render all pages in parallel
+        # Render all pages with controlled concurrency
         await asyncio.gather(*tasks)
 
     finally:

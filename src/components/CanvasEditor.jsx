@@ -108,7 +108,13 @@ const ProblemBlock = ({ problem, index, showAnswers, onDragEnd, onSelect, nodeRe
     id, ref: nodeRef, x, y, draggable: true, onDragEnd: handleDragEnd, onClick: onSelect, onTap: onSelect,
     onMouseEnter: (e) => { setIsHovered(true); e.target.getStage().container().style.cursor = 'move'; },
     onMouseLeave: (e) => { setIsHovered(false); e.target.getStage().container().style.cursor = 'default'; },
-    opacity: isHovered ? 0.7 : 1,
+    // FIX: opacity dimming on hover made problem blocks (e.g. number bond
+    // circles) look faded/broken in screenshots. A drop-shadow highlight
+    // signals "draggable" without ever making the artwork look wrong.
+    opacity: 1,
+    shadowColor: isHovered ? '#3b82f6' : undefined,
+    shadowBlur: isHovered ? 12 : 0,
+    shadowOpacity: isHovered ? 0.5 : 0,
     scaleX: scale,
     scaleY: scale,
   };

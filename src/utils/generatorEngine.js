@@ -4,6 +4,9 @@
 
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
+// Picks singular or plural form of a noun based on a count (fixes "1 bats fly down")
+const pluralize = (count, singular, plural) => (count === 1 ? singular : plural);
+
 export const generateBasicProblem = (operator, min, max, allowCarryBorrow, orientation = 'vertical', missingPart = 'answer') => {
   let top, bottom, answer;
 
@@ -18,7 +21,12 @@ export const generateBasicProblem = (operator, min, max, allowCarryBorrow, orien
         bottomStr += randomInt(0, maxBottomDigit).toString();
       }
       bottom = parseInt(bottomStr, 10);
-      if (bottom === 0 && max > 9) bottom = randomInt(1, 9);
+      // FIX: the per-digit calculation above can produce a bottom value that,
+      // combined with top, exceeds the configured max (e.g. top=10 could pair
+      // with bottom up to 89). Clamp so top + bottom never exceeds max.
+      const allowedBottom = Math.max(0, max - top);
+      bottom = Math.min(bottom, allowedBottom);
+      if (bottom === 0 && allowedBottom > 0) bottom = randomInt(1, allowedBottom);
     } else {
       const minSum = Math.max(min * 2, 0); // e.g., if min is 1, minSum is 2
       if (max < minSum) max = minSum; // Safety check
@@ -176,22 +184,22 @@ export const generateWordProblem = (min, max) => {
   }
 
   const additionTemplates = [
-    { text: `There are {v1} birds sitting on a fence. {v2} more birds fly over and land on the fence. How many birds are on the fence now?`, answerWord: 'birds' },
-    { text: `Sam has {v1} shiny marbles. Emma gives him {v2} more marbles. How many marbles does Sam have in total?`, answerWord: 'marbles' },
-    { text: `A farmer picked {v1} red apples and {v2} green apples from the orchard. How many apples did the farmer pick altogether?`, answerWord: 'apples' },
-    { text: `There are {v1} frogs splashing in a pond. {v2} more frogs hop in to join them. How many frogs are in the pond now?`, answerWord: 'frogs' }
+    { build: (v1, v2) => `There ${pluralize(v1, 'is', 'are')} ${v1} bird${pluralize(v1, '', 's')} sitting on a fence. ${v2} more bird${pluralize(v2, '', 's')} fly over and land on the fence. How many birds are on the fence now?`, answerWord: 'birds' },
+    { build: (v1, v2) => `Sam has ${v1} shiny marble${pluralize(v1, '', 's')}. Emma gives him ${v2} more marble${pluralize(v2, '', 's')}. How many marbles does Sam have in total?`, answerWord: 'marbles' },
+    { build: (v1, v2) => `A farmer picked ${v1} red apple${pluralize(v1, '', 's')} and ${v2} green apple${pluralize(v2, '', 's')} from the orchard. How many apples did the farmer pick altogether?`, answerWord: 'apples' },
+    { build: (v1, v2) => `There ${pluralize(v1, 'is', 'are')} ${v1} frog${pluralize(v1, '', 's')} splashing in a pond. ${v2} more frog${pluralize(v2, '', 's')} hop in to join them. How many frogs are in the pond now?`, answerWord: 'frogs' }
   ];
 
   const subtractionTemplates = [
-    { text: `There are {v1} sweet cupcakes on a tray. Leo eats {v2} of them. How many cupcakes are left on the tray?`, answerWord: 'cupcakes' },
-    { text: `Jenny ballooned up {v1} colorful balloons, but {v2} of them popped. How many balloons are still inflated?`, answerWord: 'balloons' },
-    { text: `There were {v1} busy bees on a flower. {v2} of them buzzed away. How many bees are remaining on the flower?`, answerWord: 'bees' },
-    { text: `A library table has {v1} books. A student checks out {v2} books. How many books are left on the table?`, answerWord: 'books' }
+    { build: (v1, v2) => `There ${pluralize(v1, 'is', 'are')} ${v1} sweet cupcake${pluralize(v1, '', 's')} on a tray. Leo eats ${v2} of them. How many cupcakes are left on the tray?`, answerWord: 'cupcakes' },
+    { build: (v1, v2) => `Jenny blew up ${v1} colorful balloon${pluralize(v1, '', 's')}, but ${v2} of them popped. How many balloons are still inflated?`, answerWord: 'balloons' },
+    { build: (v1, v2) => `There ${pluralize(v1, 'was', 'were')} ${v1} busy bee${pluralize(v1, '', 's')} on a flower. ${v2} of them buzzed away. How many bees are remaining on the flower?`, answerWord: 'bees' },
+    { build: (v1, v2) => `A library table has ${v1} book${pluralize(v1, '', 's')}. A student checks out ${v2} book${pluralize(v2, '', 's')}. How many books are left on the table?`, answerWord: 'books' }
   ];
 
   const templates = op === '+' ? additionTemplates : subtractionTemplates;
   const template = templates[Math.floor(Math.random() * templates.length)];
-  const question = template.text.replace('{v1}', val1).replace('{v2}', val2);
+  const question = template.build(val1, val2);
 
   return {
     id: Math.random().toString(36).substr(2, 9),
@@ -226,14 +234,14 @@ export const generateDecodableWordProblem = (min, max) => {
   const val2 = randomInt(1, val1);
   
   const templates = [
-    { text: `A cat has {v1} red hats. A dog has {v2} red hats. How many hats in all?`, answerWord: 'hats' },
-    { text: `I see {v1} big bugs. You see {v2} big bugs. How many bugs are there?`, answerWord: 'bugs' },
-    { text: `Sam has {v1} pet pigs. Pam has {v2} pet pigs. How many pigs do they have?`, answerWord: 'pigs' },
-    { text: `Ten bats sit. {v1} bats fly up. {v2} bats fly down. How many bats fly?`, answerWord: 'bats' }
+    { build: (v1, v2) => `A cat has ${v1} red hat${pluralize(v1, '', 's')}. A dog has ${v2} red hat${pluralize(v2, '', 's')}. How many hats in all?`, answerWord: 'hats' },
+    { build: (v1, v2) => `I see ${v1} big bug${pluralize(v1, '', 's')}. You see ${v2} big bug${pluralize(v2, '', 's')}. How many bugs are there?`, answerWord: 'bugs' },
+    { build: (v1, v2) => `Sam has ${v1} pet pig${pluralize(v1, '', 's')}. Pam has ${v2} pet pig${pluralize(v2, '', 's')}. How many pigs do they have?`, answerWord: 'pigs' },
+    { build: (v1, v2) => `Ten bats sit. ${v1} bat${pluralize(v1, '', 's')} fly up. ${v2} bat${pluralize(v2, '', 's')} fly down. How many bats fly?`, answerWord: 'bats' }
   ];
 
   const template = templates[Math.floor(Math.random() * templates.length)];
-  const question = template.text.replace('{v1}', val1).replace('{v2}', val2);
+  const question = template.build(val1, val2);
 
   return {
     id: Math.random().toString(36).substr(2, 9),
